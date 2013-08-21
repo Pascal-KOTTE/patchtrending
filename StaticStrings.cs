@@ -1,0 +1,178 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Symantec.CWoC.PatchTrending {
+    class StaticStrings {
+        #region // public static string GlobalComplianceHtml
+        public static string GlobalComplianceHtml = @"<html>
+	<head>
+        <style type=""text/css"">
+        ul { width: 60em; }
+        ul li {  float: left; width: 20em;  }
+        br { clear: left; }
+        div.wrapper {  margin-bottom: 1em;}
+        </style>
+		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
+		<script type=""text/javascript"" src=""javascript/global_0.js""></script>
+		<script type=""text/javascript"" src=""javascript/global_1.js""></script>
+		<script type=""text/javascript"" src=""javascript/global.js""></script>
+		<script type=""text/javascript"">
+			google.load(""visualization"", ""1"", {packages:[""corechart""]});
+			google.setOnLoadCallback(drawChart);
+
+            function loadBulletin() {
+				
+				var bulletin = document.getElementById(""bulletin_name"").value;
+
+				var fileref = document.createElement('script')
+				fileref.setAttribute(""type"",""text/javascript"")
+				fileref.setAttribute(""src"", ""javascript/"" +escapeBulletin(bulletin) + ""_0.js"")
+				
+				try {
+					document.getElementsByTagName(""head"")[0];
+				}
+				catch (err) {
+					alert(""No trending data is available for bulletin "" + bulletin);
+					return;
+				}
+				window.location = ""getbulletin.html?"" + bulletin;
+
+			}
+		
+			function escapeBulletin(b) {
+				var t = b.replace(""-"", ""_"");
+				return t.replace(""."", ""_"");
+			}		</script>
+	</head>
+    <body style=""width:1000"">
+    <h2 style=""text-align: center; width:80%"">Global Compliance view</h2>
+    <hr/>
+    <table style=""width: 80%"">
+        <tr>
+            <td style=""text-align: center""><b>Installed versus Applicable</b></td> 
+            <td style=""text-align: center""><b>Compliance status in %</b></td>
+        </tr>
+        <tr>
+            <td><div id='global_div_1' style='width: 500px; height: 300px;'></div></td>
+            <td><div id='global_div_0' style='width: 500px; height: 300px;'></div></td>
+        </tr>
+    </table>
+    <hr/>
+	Bulletin name: <input type=""text"" id=""bulletin_name""></input><input type=""button"" value=""View graphs"" onclick=""loadBulletin()""/>
+	<hr/>
+    ";
+        #endregion
+
+        #region // public static string GlobalComplianceJavascript
+        public static string GlobalComplianceJavascript = @"
+        function drawChart() {
+	    var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
+	    var options2 = { title: '', vAxis: { minValue : 0 }};
+
+		var d_global_0 = google.visualization.arrayToDataTable(global_0);
+		var g_global_0 = new google.visualization.LineChart(document.getElementById('global_div_0'));
+		g_global_0.draw(d_global_0, options1);
+
+		var d_global_1 = google.visualization.arrayToDataTable(global_1);
+		var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
+		g_global_1.draw(d_global_1, options2);
+        }";
+        #endregion
+
+        #region // SQL query strings
+        public static string sqlGetBulletinsIn = @"
+               -- Get all tracked bulletins
+                select bulletin
+                  from TREND_WindowsCompliance_ByUpdate
+                 where bulletin in ({0})
+                 group by bulletin
+                 order by MIN(_exec_time) desc, Bulletin desc";
+        public static string sqlGetAllBulletins = @"
+               -- Get all tracked bulletins
+                select bulletin
+                  from TREND_WindowsCompliance_ByUpdate
+                 group by bulletin
+                 order by MIN(_exec_time) desc, Bulletin desc";
+        public static string sqlGetTop10Vulnerable = @"
+                select top 10 Bulletin --, SUM(Applicable) - SUM(installed)
+                  from TREND_WindowsCompliance_ByUpdate
+                 where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+                 group by Bulletin
+                 order by SUM(Applicable) - SUM(installed) desc";
+        public static string sqlGetBottom10Compliance = @"
+                select top 10 Bulletin --, CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100
+                  from TREND_WindowsCompliance_ByUpdate
+                 where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+                 group by Bulletin
+                having SUM(Applicable) - SUM(installed) > 100
+                 order by CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100
+                ";
+        public static string sqlGetUpdatesByBulletin = @"
+                 select distinct([UPDATE])
+                   from TREND_WindowsCompliance_ByUpdate
+                  where bulletin = '{0}'
+                 ";
+
+#endregion
+
+        #region // string getbulletinhtml
+        public static string GetBulletinHtml = @" <html>
+	<head>
+		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
+	<script type=""text/javascript"">
+		var bulletin = window.location.search.substring(1).toUpperCase();
+
+		function loadjs(filename){
+			var fileref = document.createElement('script')
+			fileref.setAttribute(""type"",""text/javascript"")
+			fileref.setAttribute(""src"", filename)
+			
+			if (typeof fileref!=""undefined"")
+				document.getElementsByTagName(""head"")[0].appendChild(fileref)
+		}
+		
+		function escapeBulletin(b) {
+			var t = b.replace(""-"", ""_"");
+			return t.replace(""."", ""_"");
+		}
+		 
+		function drawChart() {
+			var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
+			var options2 = { title: '', vAxis: { minValue : 0 }};
+
+			b = escapeBulletin(bulletin);
+
+			var d_0 = google.visualization.arrayToDataTable(window[b + ""_0""]);
+			var g_0 = new google.visualization.LineChart(document.getElementById('div_0'));
+			g_0.draw(d_0, options1);
+
+ 			var d_1 = google.visualization.arrayToDataTable(window[b + ""_1""]);
+			var g_1 = new google.visualization.LineChart(document.getElementById('div_1'));
+			g_1.draw(d_1, options2);
+		}
+
+		loadjs(""javascript/"" + escapeBulletin(bulletin) + ""_0.js"");
+		loadjs(""javascript/"" + escapeBulletin(bulletin) + ""_1.js"");
+
+		google.load(""visualization"", ""1"", {packages:[""corechart""]});
+		google.setOnLoadCallback(drawChart);
+
+	</script>
+	</head>
+    <body>
+    <h1 id=""t_012"" style=""width: 800px; text-align: center""></h1>
+	<h2>Installed versus Applicable</h2>
+	<div id='div_1' style='width: 800px; height: 300px;'></div>
+	<h2>Compliance status in %</h2>
+	<div id='div_0' style='width: 800px; height: 300px;'></div>
+    <script type=""text/javascript"">
+	    var head_link = ""<a href=\"""" + bulletin + "".html\"">"" + bulletin + ""</a>"";
+	    var t = document.getElementById(""t_012"").innerHTML = head_link;
+    </script>
+</body>
+</html>";
+        #endregion
+
+    }
+}
