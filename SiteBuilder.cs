@@ -13,7 +13,7 @@ namespace Symantec.CWoC.PatchTrending {
 
         public static string version = "v0.6.8";
 
-        static void Main(string[] args) {
+        static int Main(string[] args) {
             Timer.Init();
             Counters.Init();
 
@@ -32,60 +32,80 @@ namespace Symantec.CWoC.PatchTrending {
                 Directory.CreateDirectory("javascript");
             }
 
-            EventLog.ReportInfo("Adding top-10-vulnerable page to the index builder.");
-            AddToIndex(ref index, "top10-vulnerable");
-            EventLog.ReportInfo("Adding bottom-10-compliance page to the index builder.");
-            AddToIndex(ref index, "bottom-10-compliance");
-            EventLog.ReportInfo("Generating site pages from the layout...");
+            /* Check that we can run against the database (I.e. prerequisite table does exist) */
+            bool compliance_by_update = false;
+            bool compliance_by_computer = false;
             try {
-                using (StreamReader reader = new StreamReader(filename)) {
-                    while (!reader.EndOfStream) {
-                        filter = new StringBuilder();
-                        line = reader.ReadLine();
-                        d = line.Split(',');
-
-                        pagename = d[0];
-                        Console.WriteLine(pagename.ToUpper());
-                        if (d.Length > 1) {
-                            filter.Append("'" + d[1].Trim() + "'");
-                        }
-                        for (int i = 2; i < d.Length; i++) {
-                            filter.Append(", '" + d[i].Trim() + "'");
-                        }
-                        int j = GeneratePage(pagename, filter.ToString(), StaticStrings.sqlGetBulletinsIn);
-                        if (j > 0)
-                            AddToIndex(ref index, pagename);
-                    }
+                DataTable r = DatabaseAPI.GetTable("select top 1 1 from TREND_WindowsCompliance_ByUpdate");
+                if (r.Rows[0][0].ToString() == "1") {
+                    compliance_by_update = true;
                 }
-                Console.WriteLine("Generating Top 10 bulletins by vulnerable computers page...");
-                GeneratePage("top10-vulnerable", StaticStrings.sqlGetTop10Vulnerable);
-
-                Console.WriteLine("Generating Bottom 10 bulletins by compliance...");
-                GeneratePage("bottom-10-compliance", StaticStrings.sqlGetBottom10Compliance);
-
-                GenerateIndex(ref index);
-                GenerateGlobalPage();
-                Console.WriteLine("Generating updates pages...");
-                GenerateUpdatePages();
-
-            } catch (Exception e) {
-                 Console.WriteLine(e.Message + "\n" + e.StackTrace);
-                 Console.ReadLine();
+                r = DatabaseAPI.GetTable("select top 1 1 from TREND_WindowsCompliance_ByComputer");
+                if (r.Rows[0][0].ToString() == "1") {
+                    compliance_by_computer = true;
+                }
+            } catch {
+                return -910;
             }
 
-            Timer.Stop();
-            string msg = string.Format("SiteBuilder completed in {0} ms, taking {1} ticks to generate {2} pages ({3} " +                "html and {4} javascript) with {5} sql queries executed.", Timer.duration(), Timer.tickCount(), 
-                                            Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
-            Altiris.NS.Logging.EventLog.ReportInfo(msg);
+            if (compliance_by_update) {
+                EventLog.ReportInfo("Adding top-10-vulnerable page to the index builder.");
+                AddToIndex(ref index, "top10-vulnerable");
+                EventLog.ReportInfo("Adding bottom-10-compliance page to the index builder.");
+                AddToIndex(ref index, "bottom-10-compliance");
+                EventLog.ReportInfo("Generating site pages from the layout...");
+                try {
+                    using (StreamReader reader = new StreamReader(filename)) {
+                        while (!reader.EndOfStream) {
+                            filter = new StringBuilder();
+                            line = reader.ReadLine();
+                            d = line.Split(',');
+
+                            pagename = d[0];
+                            Console.WriteLine(pagename.ToUpper());
+                            if (d.Length > 1) {
+                                filter.Append("'" + d[1].Trim() + "'");
+                            }
+                            for (int i = 2; i < d.Length; i++) {
+                                filter.Append(", '" + d[i].Trim() + "'");
+                            }
+                            int j = GeneratePage(pagename, filter.ToString(), StaticStrings.sqlGetBulletinsIn);
+                            if (j > 0)
+                                AddToIndex(ref index, pagename);
+                        }
+                    }
+                    Console.WriteLine("Generating Top 10 bulletins by vulnerable computers page...");
+                    GeneratePage("top10-vulnerable", StaticStrings.sqlGetTop10Vulnerable);
+
+                    Console.WriteLine("Generating Bottom 10 bulletins by compliance...");
+                    GeneratePage("bottom-10-compliance", StaticStrings.sqlGetBottom10Compliance);
+
+                    GenerateIndex(ref index, compliance_by_computer);
+                    GenerateGlobalPage();
+                    Console.WriteLine("Generating updates pages...");
+                    GenerateUpdatePages();
+                } catch (Exception e) {
+                    Console.WriteLine(e.Message + "\n" + e.StackTrace);
+                    Console.ReadLine();
+                }
+
+                Timer.Stop();
+                string msg = string.Format("SiteBuilder completed in {0} ms, taking {1} ticks to generate {2} pages ({3} " + "html and {4} javascript) with {5} sql queries executed.", Timer.duration(), Timer.tickCount(),
+                                                Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
+                Altiris.NS.Logging.EventLog.ReportInfo(msg);
+            }
+
+            return 0;
         }
 
         public static void AddToIndex(ref StringBuilder b, string s) {
             b.Append("<li><a href=\"" + s + ".html\">" + s + "</a></li>");
         }
 
-        public static void GenerateIndex(ref StringBuilder b) {
+        public static void GenerateIndex(ref StringBuilder b, bool byComputer) {
             StringBuilder p = new StringBuilder();
             p.Append(StaticStrings.GlobalComplianceHtml);
+            // Add compliance by computer graphs here
             p.AppendLine("<h2 style=\"text-align: center; width:80%\">Custom compliance views</h2>");
             if (b.Length > 0) {
                 p.AppendLine("<div class=\"wrapper\"><ul>");
