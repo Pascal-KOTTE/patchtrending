@@ -109,7 +109,7 @@ namespace Symantec.CWoC.PatchTrending {
         public static void GenerateIndex(ref StringBuilder b, bool byComputer) {
             StringBuilder p = new StringBuilder();
             p.Append(StaticStrings.GlobalComplianceHtml);
-            GeneratePcComplPage(byComputer);
+            GeneratePcComplPage(byComputer, true);
             if (byComputer) {
                 p.Append(StaticStrings.PcComplHtml);
             }
@@ -276,38 +276,20 @@ namespace Symantec.CWoC.PatchTrending {
             Counters.JsPages += 3;
         }
 
-        public static void GeneratePcComplPage(bool hasData) {
+        public static void GeneratePcComplPage(bool hasData, bool percent) {
             string data = "";
 
             if (!hasData) {
                 data = "var pccompl = []";
             } else {
 
-                string sql = @"
-declare @id as int
-	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
 
-if (@id > 1)
-begin
-	select t1.[Percent], t3.[min], t2.[Computer #], t1.[Computer #], t3.[max]
-
---	, t1.[% of Total], t2.[% of Total]
-	  from TREND_WindowsCompliance_ByComputer t1
-	  join TREND_WindowsCompliance_ByComputer t2
-		on t1.[Percent] = t2.[Percent]
-	  join (
-				select[Percent], MIN(t3.[Computer #]) as min, MAX(t3.[computer #]) as max
-				  from TREND_WindowsCompliance_ByComputer t3
-				group by [Percent]
-			) t3
-	    on t1.[Percent] = t3.[percent]	    
-	 where t1._Exec_id = @id
-	   and t2._Exec_id = @id - 1
-	   and t1.[Percent] > 74
-end
-";
-
-                DataTable t = DatabaseAPI.GetTable(sql);
+                DataTable t;
+                if (percent) {
+                    t = DatabaseAPI.GetTable(StaticStrings.sql_compliancebypc_percent);
+                } else {
+                    t = DatabaseAPI.GetTable(StaticStrings.sql_compliancebypc_count);
+                }
 
                 StringBuilder b = new StringBuilder();
 

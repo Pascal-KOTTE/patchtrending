@@ -127,6 +127,54 @@ namespace Symantec.CWoC.PatchTrending {
                   where bulletin = '{0}'
                  ";
 
+        public static string sql_compliancebypc_count = @"
+declare @id as int
+	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
+
+if (@id > 1)
+begin
+	select t1.[Percent], t3.[min], t2.[Computer #], t1.[Computer #], t3.[max]
+
+--	, t1.[% of Total], t2.[% of Total]
+	  from TREND_WindowsCompliance_ByComputer t1
+	  join TREND_WindowsCompliance_ByComputer t2
+		on t1.[Percent] = t2.[Percent]
+	  join (
+				select[Percent], MIN(t3.[Computer #]) as min, MAX(t3.[computer #]) as max
+				  from TREND_WindowsCompliance_ByComputer t3
+				group by [Percent]
+			) t3
+	    on t1.[Percent] = t3.[percent]	    
+	 where t1._Exec_id = @id
+	   and t2._Exec_id = @id - 1
+	   and t1.[Percent] > 74
+end
+";
+
+        public static string sql_compliancebypc_percent = @"declare @id as int
+	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
+
+if (@id > 1)
+begin
+	select t1.[Percent], t3.[min], t2.[% of Total], t1.[% of Total], t3.[max]
+
+--	, t1.[% of Total], t2.[% of Total]
+	  from TREND_WindowsCompliance_ByComputer t1
+	  join TREND_WindowsCompliance_ByComputer t2
+		on t1.[Percent] = t2.[Percent]
+	  join (
+				select[Percent], MIN(t3.[% of Total]) as min, MAX(t3.[% of Total]) as max
+				  from TREND_WindowsCompliance_ByComputer t3
+				group by [Percent]
+			) t3
+	    on t1.[Percent] = t3.[percent]	    
+	 where t1._Exec_id = @id
+	   and t2._Exec_id = @id - 1
+	   and t1.[Percent] > 74
+end
+";
+
+
 #endregion
 
         #region // string getbulletinhtml
