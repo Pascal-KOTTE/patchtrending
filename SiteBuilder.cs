@@ -40,13 +40,17 @@ namespace Symantec.CWoC.PatchTrending {
                 if (r.Rows[0][0].ToString() == "1") {
                     compliance_by_update = true;
                 }
-                r = DatabaseAPI.GetTable("select top 1 1 from TREND_WindowsCompliance_ByComputer");
+            } catch {
+            }
+
+            try {
+                DataTable r = DatabaseAPI.GetTable("select 1 from TREND_WindowsCompliance_ByComputer t group by t._Exec_id having MAX(_exec_id) > 1");
                 if (r.Rows[0][0].ToString() == "1") {
                     compliance_by_computer = true;
                 }
             } catch {
-                return -910;
             }
+
 
             if (compliance_by_update) {
                 EventLog.ReportInfo("Adding top-10-vulnerable page to the index builder.");
@@ -105,6 +109,11 @@ namespace Symantec.CWoC.PatchTrending {
         public static void GenerateIndex(ref StringBuilder b, bool byComputer) {
             StringBuilder p = new StringBuilder();
             p.Append(StaticStrings.GlobalComplianceHtml);
+            GeneratePcComplPage(byComputer);
+            if (byComputer) {
+                p.Append(StaticStrings.PcComplHtml);
+            }
+            p.Append(StaticStrings.BulletinSearch);
             // Add compliance by computer graphs here
             p.AppendLine("<h2 style=\"text-align: center; width:80%\">Custom compliance views</h2>");
             if (b.Length > 0) {
@@ -267,6 +276,59 @@ namespace Symantec.CWoC.PatchTrending {
             Counters.JsPages += 3;
         }
 
+        public static void GeneratePcComplPage(bool hasData) {
+            string data = "";
+
+            if (!hasData) {
+                data = "var pccompl = []";
+            } else {
+
+                string sql = @"
+declare @id as int
+	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
+
+if (@id > 1)
+begin
+	select t1.[Percent], t3.[min], t2.[Computer #], t1.[Computer #], t3.[max]
+
+--	, t1.[% of Total], t2.[% of Total]
+	  from TREND_WindowsCompliance_ByComputer t1
+	  join TREND_WindowsCompliance_ByComputer t2
+		on t1.[Percent] = t2.[Percent]
+	  join (
+				select[Percent], MIN(t3.[Computer #]) as min, MAX(t3.[computer #]) as max
+				  from TREND_WindowsCompliance_ByComputer t3
+				group by [Percent]
+			) t3
+	    on t1.[Percent] = t3.[percent]	    
+	 where t1._Exec_id = @id
+	   and t2._Exec_id = @id - 1
+	   and t1.[Percent] > 74
+end
+";
+
+                DataTable t = DatabaseAPI.GetTable(sql);
+
+                StringBuilder b = new StringBuilder();
+
+                b.AppendLine("var " + GetJSString("pccompl") + " = [");
+                foreach (DataRow r in t.Rows) {
+                    b.AppendLine("['" + r[0].ToString() + "', "   
+                        + r[1] + ", " 
+                        + r[2] + ", " 
+                        + r[3] + ", "
+                        + r[4] + "],");
+                }
+                // Remove the last comma we inserted
+                b.Remove(b.Length - 3, 1);
+                b.AppendLine("]");
+                data = b.ToString();
+            }
+
+            SaveToFile("javascript\\pccompl.js", data);
+            Counters.JsPages += 1;
+        }
+
         public static void GenerateBulletinHtml(ref StringBuilder divs, ref StringBuilder jsfiles, string pagename){
 
             StringBuilder html = new StringBuilder();
@@ -383,15 +445,6 @@ namespace Symantec.CWoC.PatchTrending {
             b.AppendLine("var " + GetJSString(entry) + "_1 = [");
             b.AppendLine("['Date', 'Installed', 'Applicable', 'Vulnerable'],");
 
-/*
-            if (entry.ToLower() != "global") {
-
-                DateTime d = DateTime.Parse(t.Rows[0][0].ToString());
-                d.AddDays(-1D);
-                b.AppendLine("['" + d.ToString() + "', 0, 0, 0],");
-                // Console.WriteLine("['" + d.ToString() + "', 0, 0, 0],");
-            }
-*/
             foreach (DataRow r in t.Rows) {
                 int vulnerable = Convert.ToInt32(r[2]) - Convert.ToInt32(r[1]);
                 b.AppendLine("['" + r[0].ToString() + "', " + r[1] + ", " + r[2] + ", " + vulnerable.ToString() + "],");

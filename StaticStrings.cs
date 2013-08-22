@@ -16,6 +16,7 @@ namespace Symantec.CWoC.PatchTrending {
 		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
 		<script type=""text/javascript"" src=""javascript/global_0.js""></script>
 		<script type=""text/javascript"" src=""javascript/global_1.js""></script>
+        <script type=""text/javascript"" src=""javascript/pccompl.js""></script>
 		<script type=""text/javascript"" src=""javascript/global.js""></script>
 		<script type=""text/javascript"">
 			google.load(""visualization"", ""1"", {packages:[""corechart""]});
@@ -57,11 +58,18 @@ namespace Symantec.CWoC.PatchTrending {
             <td><div id='global_div_1' style='width: 500px; height: 300px;'></div></td>
             <td><div id='global_div_0' style='width: 500px; height: 300px;'></div></td>
         </tr>
-    </table>
+    </table>";
+
+        public static string PcComplHtml = @"
+    <hr/>
+    <p style=""text-align: center;""><b>Compliance by computer - upper quarter</b></p>
+    <div id='pccompl_div' style='width: 1000px; height: 300px;'></div>";
+
+        public static string BulletinSearch = @"
     <hr/>
 	Bulletin name: <input type=""text"" id=""bulletin_name""></input><input type=""button"" value=""View graphs"" onclick=""loadBulletin()""/>
-	<hr/>
-    ";
+    <hr/>";
+
         #endregion
 
         #region // public static string GlobalComplianceJavascript
@@ -77,6 +85,11 @@ namespace Symantec.CWoC.PatchTrending {
 		var d_global_1 = google.visualization.arrayToDataTable(global_1);
 		var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
 		g_global_1.draw(d_global_1, options2);
+
+		var d_pccompl = google.visualization.arrayToDataTable(pccompl, true);
+		var g_pccompl = new google.visualization.CandlestickChart(document.getElementById('pccompl_div'));
+        g_pccompl.draw(d_pccompl, { legend:'none'} );
+
         }";
         #endregion
 
