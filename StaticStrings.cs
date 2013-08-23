@@ -86,9 +86,16 @@ namespace Symantec.CWoC.PatchTrending {
 		var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
 		g_global_1.draw(d_global_1, options2);
 
-		var d_pccompl = google.visualization.arrayToDataTable(pccompl, true);
+		var d_pccompl = new google.visualization.DataTable();
+        d_pccompl.addColumn('string', 'Compliance in %');
+		d_pccompl.addColumn('number');
+		d_pccompl.addColumn('number');
+		d_pccompl.addColumn('number');
+		d_pccompl.addColumn('number');
+		d_pccompl.addColumn({type:'string', role:'tooltip', 'p': {'html': true}});
+		d_pccompl.addRows(pccompl);
 		var g_pccompl = new google.visualization.CandlestickChart(document.getElementById('pccompl_div'));
-        g_pccompl.draw(d_pccompl, { legend:'none'} );
+        g_pccompl.draw(d_pccompl, { legend:'none', tooltip: {isHtml: true}} );
 
         }";
         #endregion
@@ -133,7 +140,7 @@ declare @id as int
 
 if (@id > 1)
 begin
-	select t1.[Percent], t3.[min], t2.[Computer #], t1.[Computer #], t3.[max]
+	select t1.[Percent], t3.[min], t2.[Computer #], t1.[Computer #], t3.[max], t2.[% of Total]
 
 --	, t1.[% of Total], t2.[% of Total]
 	  from TREND_WindowsCompliance_ByComputer t1
@@ -156,7 +163,7 @@ end
 
 if (@id > 1)
 begin
-	select t1.[Percent], t3.[min], t2.[% of Total], t1.[% of Total], t3.[max]
+	select t1.[Percent], t3.[min], t2.[% of Total], t1.[% of Total], t3.[max], t2.[% of Total]
 
 --	, t1.[% of Total], t2.[% of Total]
 	  from TREND_WindowsCompliance_ByComputer t1

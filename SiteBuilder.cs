@@ -109,7 +109,7 @@ namespace Symantec.CWoC.PatchTrending {
         public static void GenerateIndex(ref StringBuilder b, bool byComputer) {
             StringBuilder p = new StringBuilder();
             p.Append(StaticStrings.GlobalComplianceHtml);
-            GeneratePcComplPage(byComputer, true);
+            GeneratePcComplPages(byComputer, false);
             if (byComputer) {
                 p.Append(StaticStrings.PcComplHtml);
             }
@@ -276,7 +276,7 @@ namespace Symantec.CWoC.PatchTrending {
             Counters.JsPages += 3;
         }
 
-        public static void GeneratePcComplPage(bool hasData, bool percent) {
+        public static void GeneratePcComplPages(bool hasData, bool percent) {
             string data = "";
 
             if (!hasData) {
@@ -299,7 +299,18 @@ namespace Symantec.CWoC.PatchTrending {
                         + r[1] + ", " 
                         + r[2] + ", " 
                         + r[3] + ", "
-                        + r[4] + "],");
+                        + r[4] + ", '"
+                        // Compose tooltip:
+                        + "<div style=\"font-family: Arial; font-size: 14px; text-align: center;\">" + r[0] + "% compliant:</div>"
+                        + "<div style=\"font-family: Arial; font-size: 12px;\">"
+                        
+                        + "<p> <b>" + r[3] + " computers (" + r[5] + "% of total)</b> </p>"
+                        + "<p> Min = " + r[1]
+                        + ", Prev = " + r[2]
+                        // + "<br/>Curr = " + r[3]
+                        + ", Max = " + r[4] 
+                        + " </p></div>'],");
+                         
                 }
                 // Remove the last comma we inserted
                 b.Remove(b.Length - 3, 1);
