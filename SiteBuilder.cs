@@ -109,9 +109,11 @@ namespace Symantec.CWoC.PatchTrending {
         public static void GenerateIndex(ref StringBuilder b, bool byComputer) {
             StringBuilder p = new StringBuilder();
             p.Append(StaticStrings.GlobalComplianceHtml);
-            GeneratePcComplPages(byComputer, false);
+            GeneratePcComplPages(byComputer);
             if (byComputer) {
                 p.Append(StaticStrings.PcComplHtml);
+                // Had summary data for bottom 75% here
+                p.Append(GetPcComplianceSummary());
             }
             p.Append(StaticStrings.BulletinSearch);
             // Add compliance by computer graphs here
@@ -276,50 +278,69 @@ namespace Symantec.CWoC.PatchTrending {
             Counters.JsPages += 3;
         }
 
-        public static void GeneratePcComplPages(bool hasData, bool percent) {
+        public static void GeneratePcComplPages(bool hasData) {
             string data = "";
+            string data_full = "";
 
             if (!hasData) {
                 data = "var pccompl = []";
             } else {
 
-
-                DataTable t;
-                if (percent) {
-                    t = DatabaseAPI.GetTable(StaticStrings.sql_compliancebypc_percent);
-                } else {
-                    t = DatabaseAPI.GetTable(StaticStrings.sql_compliancebypc_count);
-                }
-
+                DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_compliancebypc_count);
                 StringBuilder b = new StringBuilder();
+                StringBuilder c = new StringBuilder();
 
                 b.AppendLine("var " + GetJSString("pccompl") + " = [");
+                c.AppendLine("var " + GetJSString("pccompl_full") + " = [");
+
                 foreach (DataRow r in t.Rows) {
-                    b.AppendLine("['" + r[0].ToString() + "', "   
-                        + r[1] + ", " 
-                        + r[2] + ", " 
-                        + r[3] + ", "
-                        + r[4] + ", '"
-                        // Compose tooltip:
-                        + "<div style=\"font-family: Arial; font-size: 14px; text-align: center;\">" + r[0] + "% compliant:</div>"
-                        + "<div style=\"font-family: Arial; font-size: 12px;\">"
-                        
-                        + "<p> <b>" + r[3] + " computers (" + r[5] + "% of total)</b> </p>"
-                        + "<p> Min = " + r[1]
-                        + ", Prev = " + r[2]
-                        // + "<br/>Curr = " + r[3]
-                        + ", Max = " + r[4] 
-                        + " </p></div>'],");
-                         
+                    if (Convert.ToInt32(r[0]) < 75) {
+                        c.AppendLine("['" + r[0].ToString() + "', "
+                            + r[1] + ", "
+                            + r[2] + ", "
+                            + r[3] + ", "
+                            + r[4] + ", '"
+                            // Compose tooltip:
+                            + "<div style=\"font-family: Arial; font-size: 14px; text-align: center;\">" + r[0] + "% compliant:</div>"
+                            + "<div style=\"font-family: Arial; font-size: 12px;\">"
+
+                            + "<p> <b>" + r[3] + " computers (" + r[5] + "% of total)</b> </p>"
+                            + "<p> Min = " + r[1]
+                            + ", Prev = " + r[2]
+                            // + "<br/>Curr = " + r[3]
+                            + ", Max = " + r[4]
+                            + " </p></div>'],");
+                    } else {
+                        b.AppendLine("['" + r[0].ToString() + "', "
+                            + r[1] + ", "
+                            + r[2] + ", "
+                            + r[3] + ", "
+                            + r[4] + ", '"
+                            // Compose tooltip:
+                            + "<div style=\"font-family: Arial; font-size: 14px; text-align: center;\">" + r[0] + "% compliant:</div>"
+                            + "<div style=\"font-family: Arial; font-size: 12px;\">"
+
+                            + "<p> <b>" + r[3] + " computers (" + r[5] + "% of total)</b> </p>"
+                            + "<p> Min = " + r[1]
+                            + ", Prev = " + r[2]
+                            // + "<br/>Curr = " + r[3]
+                            + ", Max = " + r[4]
+                            + " </p></div>'],");
+                    }
                 }
                 // Remove the last comma we inserted
+                c.Remove(c.Length - 3, 1);
+                c.AppendLine("]");
+
                 b.Remove(b.Length - 3, 1);
                 b.AppendLine("]");
                 data = b.ToString();
+                data_full = c.ToString();
             }
 
             SaveToFile("javascript\\pccompl.js", data);
-            Counters.JsPages += 1;
+            SaveToFile("javascript\\pccompl_full.js", data_full);
+            Counters.JsPages += 2;
         }
 
         public static void GenerateBulletinHtml(ref StringBuilder divs, ref StringBuilder jsfiles, string pagename){
@@ -422,6 +443,15 @@ namespace Symantec.CWoC.PatchTrending {
             }
 
             return d;
+        }
+
+        private static string GetPcComplianceSummary() {
+            string s = "";
+            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_compliancebypc_bottom75percent);
+            if (t.Rows.Count > 0) {
+                s = string.Format("There are <i><b>{0}</b> computers, <b>{1}</b>% of the total</i> reporting compliance level below 75%.", t.Rows[0][0], t.Rows[0][1]);
+            }
+            return s;
         }
 
         private static void SaveToFile(string filepath, string data) {

@@ -12,6 +12,7 @@ namespace Symantec.CWoC.PatchTrending {
         ul li {  float: left; width: 20em;  }
         br { clear: left; }
         div.wrapper {  margin-bottom: 1em;}
+		body { font-family: Arial;};
         </style>
 		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
 		<script type=""text/javascript"" src=""javascript/global_0.js""></script>
@@ -154,7 +155,7 @@ begin
 	    on t1.[Percent] = t3.[percent]	    
 	 where t1._Exec_id = @id
 	   and t2._Exec_id = @id - 1
-	   and t1.[Percent] > 74
+--	   and t1.[Percent] > 74
 end
 ";
 
@@ -177,8 +178,20 @@ begin
 	    on t1.[Percent] = t3.[percent]	    
 	 where t1._Exec_id = @id
 	   and t2._Exec_id = @id - 1
-	   and t1.[Percent] > 74
+--	   and t1.[Percent] > 74
 end
+";
+        public static string sql_compliancebypc_bottom75percent = @"
+/* BOTTOM 75% SUMMARY */
+declare @id as int
+	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
+
+
+select SUM([computer #]), SUM([% of total])
+  from TREND_WindowsCompliance_ByComputer t3
+ where t3._Exec_id = @id
+   and t3.[Percent] < 75
+ group by [_exec_id]
 ";
 
 
