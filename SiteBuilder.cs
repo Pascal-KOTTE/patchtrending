@@ -11,7 +11,7 @@ using Symantec.CWoC.APIWrappers;
 namespace Symantec.CWoC.PatchTrending {
     class SiteGenerator {
 
-        public static string version = "v9";
+        public static string version = "v10";
 
         static int Main(string[] args) {
             Timer.Init();
