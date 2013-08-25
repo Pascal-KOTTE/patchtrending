@@ -5,7 +5,7 @@ using System.Text;
 namespace Symantec.CWoC.PatchTrending {
     class StaticStrings {
         #region // public static string GlobalComplianceHtml
-        public static string GlobalComplianceHtml = @"<html>
+        public static string LandingHtml = @"<html>
 	<head>
         <style type=""text/css"">
         ul { width: 60em; }
@@ -15,6 +15,7 @@ namespace Symantec.CWoC.PatchTrending {
 		body { font-family: Arial;};
         </style>
 		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
+        <script src=""https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js""></script>
 		<script type=""text/javascript"" src=""javascript/global_0.js""></script>
 		<script type=""text/javascript"" src=""javascript/global_1.js""></script>
         <script type=""text/javascript"" src=""javascript/pccompl.js""></script>
@@ -26,26 +27,29 @@ namespace Symantec.CWoC.PatchTrending {
             function loadBulletin() {
 				
 				var bulletin = document.getElementById(""bulletin_name"").value;
-
-				var fileref = document.createElement('script')
-				fileref.setAttribute(""type"",""text/javascript"")
-				fileref.setAttribute(""src"", ""javascript/"" +escapeBulletin(bulletin) + ""_0.js"")
+				var jsUrl = ""javascript/"" + escapeBulletin(bulletin) + ""_0.js"";
 				
-				try {
-					document.getElementsByTagName(""head"")[0];
-				}
-				catch (err) {
-					alert(""No trending data is available for bulletin "" + bulletin);
-					return;
-				}
-				window.location = ""getbulletin.html?"" + bulletin;
-
+				new Ajax.Request(jsUrl, {
+                    method:'get',
+					onSuccess: function(response) {
+    					// Handle the response content...
+						if (response.responseText.length > 0) {
+							results = eval(response.responseText);
+							window.location = ""getbulletin.html?"" + bulletin;
+						}
+					}, 
+					onFailure: function() {
+						alert(""Could not find any data to load for bulletin "" + document.getElementById(""bulletin_name"").value);
+					}
+				});	
 			}
 		
 			function escapeBulletin(b) {
 				var t = b.replace(""-"", ""_"");
-				return t.replace(""."", ""_"");
-			}		</script>
+                t = t.replace(""."", ""_"");
+				return t.toUpperCase();
+            }
+        </script>
 	</head>
     <body style=""width:1000"">
     <h2 style=""text-align: center; width:80%"">Global Compliance view</h2>

@@ -11,7 +11,7 @@ using Symantec.CWoC.APIWrappers;
 namespace Symantec.CWoC.PatchTrending {
     class SiteGenerator {
 
-        public static string version = "v0.6.8";
+        public static string version = "v9";
 
         static int Main(string[] args) {
             Timer.Init();
@@ -108,7 +108,7 @@ namespace Symantec.CWoC.PatchTrending {
 
         public static void GenerateIndex(ref StringBuilder b, bool byComputer) {
             StringBuilder p = new StringBuilder();
-            p.Append(StaticStrings.GlobalComplianceHtml);
+            p.Append(StaticStrings.LandingHtml);
             GeneratePcComplPages(byComputer);
             if (byComputer) {
                 p.Append(StaticStrings.PcComplHtml);
