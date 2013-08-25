@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Symantec.CWoC</RootNamespace>
-    <AssemblyName>SiteBuilder-0.6.8</AssemblyName>
+    <AssemblyName>SiteBuilder-v9</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
