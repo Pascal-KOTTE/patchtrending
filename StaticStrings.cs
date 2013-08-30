@@ -14,42 +14,6 @@ namespace Symantec.CWoC.PatchTrending {
         div.wrapper {  margin-bottom: 1em;}
 		body { font-family: Arial;};
         </style>
-		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
-        <script src=""https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js""></script>
-		<script type=""text/javascript"" src=""javascript/global_0.js""></script>
-		<script type=""text/javascript"" src=""javascript/global_1.js""></script>
-        <script type=""text/javascript"" src=""javascript/pccompl.js""></script>
-		<script type=""text/javascript"" src=""javascript/global.js""></script>
-		<script type=""text/javascript"">
-			google.load(""visualization"", ""1"", {packages:[""corechart""]});
-			google.setOnLoadCallback(drawChart);
-
-            function loadBulletin() {
-				
-				var bulletin = document.getElementById(""bulletin_name"").value;
-				var jsUrl = ""javascript/"" + escapeBulletin(bulletin) + ""_0.js"";
-				
-				new Ajax.Request(jsUrl, {
-                    method:'get',
-					onSuccess: function(response) {
-    					// Handle the response content...
-						if (response.responseText.length > 0) {
-							results = eval(response.responseText);
-							window.location = ""getbulletin.html?"" + bulletin;
-						}
-					}, 
-					onFailure: function() {
-						alert(""Could not find any data to load for bulletin "" + document.getElementById(""bulletin_name"").value);
-					}
-				});	
-			}
-		
-			function escapeBulletin(b) {
-				var t = b.replace(""-"", ""_"");
-                t = t.replace(""."", ""_"");
-				return t.toUpperCase();
-            }
-        </script>
 	</head>
     <body style=""width:1000"">
     <h2 style=""text-align: center; width:80%"">Global Compliance view</h2>
@@ -64,6 +28,47 @@ namespace Symantec.CWoC.PatchTrending {
             <td><div id='global_div_0' style='width: 500px; height: 300px;'></div></td>
         </tr>
     </table>";
+
+        public static string LandingJs = @"
+	<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
+    <script src=""https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js""></script>
+	<script type=""text/javascript"" src=""javascript/global_0.js""></script>
+	<script type=""text/javascript"" src=""javascript/global_1.js""></script>
+    <script type=""text/javascript"" src=""javascript/pccompl.js""></script>
+	<script type=""text/javascript"" src=""javascript/global.js""></script>
+	<script type=""text/javascript"">
+		google.load(""visualization"", ""1"", {packages:[""corechart""]});
+		google.setOnLoadCallback(drawChart);
+
+        function loadBulletin() {
+			
+			var bulletin = document.getElementById(""bulletin_name"").value;
+			var jsUrl = ""javascript/"" + escapeBulletin(bulletin) + ""_0.js"";
+			
+			new Ajax.Request(jsUrl, {
+                method:'get',
+				onSuccess: function(response) {
+					// Handle the response content...
+					if (response.responseText.length > 0) {
+						results = eval(response.responseText);
+						window.location = ""getbulletin.html?"" + bulletin;
+					}
+				}, 
+				onFailure: function() {
+					alert(""Could not find any data to load for bulletin "" + document.getElementById(""bulletin_name"").value);
+				}
+
+			});	
+		}
+	
+		function escapeBulletin(b) {
+			var t = b.replace(""-"", ""_"");
+            t = t.replace(""."", ""_"");
+			return t.toUpperCase();
+        }
+    </script>
+
+";
 
         public static string PcComplHtml = @"
     <hr/>
@@ -131,7 +136,26 @@ namespace Symantec.CWoC.PatchTrending {
                  where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  group by Bulletin
                 having SUM(Applicable) - SUM(installed) > 100
-                 order by CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100
+                 order by CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100";
+        public static string sqlGetTop10MoversUp = @"
+                -- Return the 10 bulletins for which more computers are secured
+                select top 10 t1.Bulletin, t1._Exec_id, (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) as 'Delta'
+                  from TREND_WindowsCompliance_ByUpdate t1
+                  join TREND_WindowsCompliance_ByUpdate t2
+                    on t1._Exec_id -1 = t2._Exec_id and t1.Bulletin = t2.Bulletin and t1.[UPDATE] = t2.[update]
+                 where t1._Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+                 group by t1.Bulletin, t1._Exec_id
+                 order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) desc
+                ";
+        public static string sqlGetTop10MoversDown = @"
+                -- Return the 10 bulletins for which more computers are vulnerable
+                select top 10 t1.Bulletin, t1._Exec_id, (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) as 'Delta'
+                  from TREND_WindowsCompliance_ByUpdate t1
+                  join TREND_WindowsCompliance_ByUpdate t2
+                    on t1._Exec_id -1 = t2._Exec_id and t1.Bulletin = t2.Bulletin and t1.[UPDATE] = t2.[update]
+                 where t1._Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+                 group by t1.Bulletin, t1._Exec_id
+                 order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed))
                 ";
         public static string sqlGetUpdatesByBulletin = @"
                  select distinct([UPDATE])
@@ -169,7 +193,6 @@ end
 if (@id > 1)
 begin
 	select t1.[Percent], t3.[min], t2.[% of Total], t1.[% of Total], t3.[max], t2.[% of Total]
-
 --	, t1.[% of Total], t2.[% of Total]
 	  from TREND_WindowsCompliance_ByComputer t1
 	  join TREND_WindowsCompliance_ByComputer t2
@@ -189,7 +212,6 @@ end
 /* BOTTOM 75% SUMMARY */
 declare @id as int
 	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
-
 
 select SUM([computer #]), SUM([% of total])
   from TREND_WindowsCompliance_ByComputer t3
