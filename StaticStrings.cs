@@ -7,6 +7,7 @@ namespace Symantec.CWoC.PatchTrending {
         #region // public static string GlobalComplianceHtml
         public static string LandingHtml = @"<html>
 	<head>
+        <title>{CWoC} Patch Trending home</title>
         <style type=""text/css"">
         ul { width: 60em; }
         ul li {  float: left; width: 20em;  }
