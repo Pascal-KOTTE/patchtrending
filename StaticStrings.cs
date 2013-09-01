@@ -146,6 +146,7 @@ namespace Symantec.CWoC.PatchTrending {
                     on t1._Exec_id -1 = t2._Exec_id and t1.Bulletin = t2.Bulletin and t1.[UPDATE] = t2.[update]
                  where t1._Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  group by t1.Bulletin, t1._Exec_id
+                having (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) > 0
                  order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) desc
                 ";
         public static string sqlGetTop10MoversDown = @"
@@ -156,6 +157,7 @@ namespace Symantec.CWoC.PatchTrending {
                     on t1._Exec_id -1 = t2._Exec_id and t1.Bulletin = t2.Bulletin and t1.[UPDATE] = t2.[update]
                  where t1._Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  group by t1.Bulletin, t1._Exec_id
+                having (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) < 0
                  order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed))
                 ";
         public static string sqlGetUpdatesByBulletin = @"
