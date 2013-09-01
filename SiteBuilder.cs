@@ -36,16 +36,16 @@ namespace Symantec.CWoC.PatchTrending {
             bool compliance_by_update = false;
             bool compliance_by_computer = false;
             try {
-                DataTable r = DatabaseAPI.GetTable("select top 1 1 from TREND_WindowsCompliance_ByUpdate");
-                if (r.Rows[0][0].ToString() == "1") {
+                string sql = "select top 1 1 from TREND_WindowsCompliance_ByUpdate";
+                if (DatabaseAPI.ExecuteScalar(sql) == 1) {
                     compliance_by_update = true;
                 }
             } catch {
             }
 
             try {
-                DataTable r = DatabaseAPI.GetTable("select 1 from TREND_WindowsCompliance_ByComputer t group by t._Exec_id having MAX(_exec_id) > 1");
-                if (r.Rows[0][0].ToString() == "1") {
+                string sql = "select 1 from TREND_WindowsCompliance_ByComputer t group by t._Exec_id having MAX(_exec_id) > 1";
+                if (DatabaseAPI.ExecuteScalar(sql) == 1) {
                     compliance_by_computer = true;
                 }
             } catch {
@@ -77,19 +77,19 @@ namespace Symantec.CWoC.PatchTrending {
                             for (int i = 2; i < d.Length; i++) {
                                 filter.Append(", '" + d[i].Trim() + "'");
                             }
-                            int j = GeneratePage(pagename, filter.ToString(), StaticStrings.sqlGetBulletinsIn);
+                            int j = GeneratePage(pagename, filter.ToString(), StaticStrings.sql_get_bulletins_in);
                             if (j > 0)
                                 AddToIndex(ref index, pagename);
                         }
                     }
                     Console.WriteLine("Generating Top 10 bulletins by vulnerable computers page...");
-                    GeneratePage("top10-vulnerable", StaticStrings.sqlGetTop10Vulnerable);
+                    GeneratePage("top10-vulnerable", StaticStrings.sql_get_top10_vulnerable);
                     Console.WriteLine("Generating Top 10 movers (++) page...");
-                    GeneratePage("top10-movers-up", StaticStrings.sqlGetTop10MoversUp);
+                    GeneratePage("top10-movers-up", StaticStrings.sql_get_top10movers_up);
                     Console.WriteLine("Generating Top 10 movers (--) page...");
-                    GeneratePage("top10-movers-down", StaticStrings.sqlGetTop10MoversDown);
+                    GeneratePage("top10-movers-down", StaticStrings.sql_get_top10movers_down);
                     Console.WriteLine("Generating Bottom 10 bulletins by compliance...");
-                    GeneratePage("bottom-10-compliance", StaticStrings.sqlGetBottom10Compliance);
+                    GeneratePage("bottom-10-compliance", StaticStrings.sql_get_bottom10_compliance);
 
                     GenerateIndex(ref index, compliance_by_computer);
                     GenerateGlobalPage();
@@ -104,6 +104,8 @@ namespace Symantec.CWoC.PatchTrending {
                 string msg = string.Format("SiteBuilder completed in {0} ms, taking {1} ticks to generate {2} pages ({3} " + "html and {4} javascript) with {5} sql queries executed.", Timer.duration(), Timer.tickCount(),
                                                 Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
                 Altiris.NS.Logging.EventLog.ReportInfo(msg);
+            } else {
+                Console.WriteLine("We cannot execute anything as the prerequisite table TREND_WindowsCompliance_ByUpdate is missing.");
             }
 
             return 0;
@@ -145,13 +147,13 @@ namespace Symantec.CWoC.PatchTrending {
 
         public static void GenerateUpdatePages() {
             EventLog.ReportInfo("Generating update pages for bulletins now...");
-            DataTable t = DatabaseAPI.GetTable(StaticStrings.sqlGetAllBulletins);
+            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_all_bulletins);
 
             string bulletin;
 
             foreach (DataRow r in t.Rows) {
                 bulletin = r[0].ToString();
-                DataTable u = DatabaseAPI.GetTable(string.Format(StaticStrings.sqlGetUpdatesByBulletin, bulletin));
+                DataTable u = DatabaseAPI.GetTable(string.Format(StaticStrings.sql_get_updates_bybulletin, bulletin));
                 Console.WriteLine("Generating all update graphs for bulletin " + bulletin);
                 GeneratePage(u, bulletin, bulletin);
             }
@@ -294,7 +296,7 @@ namespace Symantec.CWoC.PatchTrending {
                 data = "var pccompl = []";
             } else {
 
-                DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_compliancebypc_count);
+                DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_compliance_bypccount);
                 StringBuilder b = new StringBuilder();
                 StringBuilder c = new StringBuilder();
 
@@ -363,11 +365,7 @@ namespace Symantec.CWoC.PatchTrending {
             if (update.Length == 0 || update == string.Empty)
                 return;
 
-            string sql = @"
-                         select Convert(Datetime, _Exec_time, 101) as 'Date', installed as 'Installed', Applicable as 'Applicable'
-                           from TREND_WindowsCompliance_ByUpdate
-                          where [update] = '" + update + @"' and bulletin = '" + bulletin + @"' ";
-
+            string sql = String.Format(FormattedStrings.sql_get_bulletin_data, update, bulletin);
             DataTable t = DatabaseAPI.GetTable(sql);
             stats = GetJSONFromTable(t, update);
 
@@ -377,12 +375,7 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private static void GetBulletinData(ref string compliance, ref string data, string bulletin) {
-            string sql = @"
-                         select Convert(Datetime, max(_Exec_time), 101) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
-                           from TREND_WindowsCompliance_ByUpdate
-                          where Bulletin = '" + bulletin + @"'
-                          group by _Exec_id order by date";
-
+            string sql = String.Format(FormattedStrings.sql_get_bulletin_data, bulletin);
             DataTable t = DatabaseAPI.GetTable(sql);
             data = GetJSONFromTable(t, bulletin);
 
@@ -391,12 +384,7 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private static void GetGlobalData(ref string compliance, ref string data) {
-            string sql = @"
-                         select Convert(Datetime, max(_Exec_time), 101) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
-                           from TREND_WindowsCompliance_ByUpdate
-                          group by _Exec_id order by date";
-
-            DataTable t = DatabaseAPI.GetTable(sql);
+            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_global_compliance_data);
             data = GetJSONFromTable(t, "global");
 
             string[,] _compliance = GetComplianceFromTable(t);
@@ -448,7 +436,7 @@ namespace Symantec.CWoC.PatchTrending {
 
         private static string GetPcComplianceSummary() {
             string s = "";
-            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_compliancebypc_bottom75percent);
+            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_compliance_bypc_bottom75percent);
             if (t.Rows.Count > 0) {
                 s = string.Format("There are <i><b>{0}</b> computers, <b>{1}</b>% of the total</i> reporting compliance level below 75%.", t.Rows[0][0], t.Rows[0][1]);
             }

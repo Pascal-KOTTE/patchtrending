@@ -49,40 +49,53 @@ namespace Symantec.CWoC.APIWrappers
         }
     }
 
-    class DatabaseAPI
-    {
-        public static DataTable GetTable(string sqlStatement)
-        {
+    class DatabaseAPI {
+        public static DataTable GetTable(string sqlStatement) {
+            DataTable t = new DataTable();
+            try {
+                using (DatabaseContext context = DatabaseContext.GetContext()) {
+                    SqlCommand cmdAllResources = context.CreateCommand() as SqlCommand;
+                    cmdAllResources.CommandText = sqlStatement;
 
-            using (DatabaseContext context = DatabaseContext.GetContext()) {
-                return GetTable(sqlStatement, context);
+                    using (SqlDataReader r = cmdAllResources.ExecuteReader()) {
+                        t.Load(r);
+                    }
+                }
+                ++Counters.SqlQueries;
+                return t;
+            } catch {
+                throw new Exception("Failed to execute SQL command...");
             }
         }
 
-        public static DataTable GetTable(string sqlStatement, DatabaseContext context) {
-            Stopwatch chrono = new Stopwatch();
-            chrono.Start();
-
-            Counters.SqlQueries++;
-
-            DataTable t = new DataTable();
+        public static int ExecuteNonQuery(string sqlStatement) {
             try {
-                SqlCommand cmdAllResources = context.CreateCommand() as SqlCommand;
-                cmdAllResources.CommandText = sqlStatement;
+                using (DatabaseContext context = DatabaseContext.GetContext()) {
+                    SqlCommand sql_cmd = context.CreateCommand() as SqlCommand;
+                    sql_cmd.CommandText = sqlStatement;
 
-                using (SqlDataReader r = cmdAllResources.ExecuteReader()) {
-                    t.Load(r);
+                    return sql_cmd.ExecuteNonQuery();
                 }
-            } catch (Exception e) {
-                Altiris.NS.Logging.EventLog.ReportException("Failed to execute SQL query: " + sqlStatement, e);
+            } catch {
+                throw new Exception("Failed to execute non query SQL command...");
             }
 
-            chrono.Stop();
-            string msg = string.Format("SQL query completed in {0} ms, taking {1} ticks. SQL statement is:\n{2}",    
-                chrono.ElapsedMilliseconds.ToString(), chrono.ElapsedTicks.ToString(), sqlStatement);
-            Altiris.NS.Logging.EventLog.ReportProfile(msg);
-            return t;
+        }
 
+        public static int ExecuteScalar(string sqlStatement) {
+            try {
+                using (DatabaseContext context = DatabaseContext.GetContext()) {
+                    SqlCommand cmd = context.CreateCommand() as SqlCommand;
+
+                    cmd.CommandText = sqlStatement;
+                    Object result = cmd.ExecuteScalar();
+
+                    return Convert.ToInt32(result);
+                }
+            } catch (Exception e) {
+                Console.WriteLine("Error: {0}\nException message = {1}\nStack trace = {2}.", e.Message, e.InnerException, e.StackTrace);
+                throw new Exception("Failed to execute scalar SQL command...");
+            }
         }
 
     }

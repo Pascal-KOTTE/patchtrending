@@ -112,33 +112,37 @@ namespace Symantec.CWoC.PatchTrending {
         #endregion
 
         #region // SQL query strings
-        public static string sqlGetBulletinsIn = @"
+        public static string sql_get_bulletins_in = @"
                -- Get all tracked bulletins
                 select bulletin
                   from TREND_WindowsCompliance_ByUpdate
                  where bulletin in ({0})
                  group by bulletin
                  order by MIN(_exec_time) desc, Bulletin desc";
-        public static string sqlGetAllBulletins = @"
+        public static string sql_get_all_bulletins = @"
                -- Get all tracked bulletins
                 select bulletin
                   from TREND_WindowsCompliance_ByUpdate
                  group by bulletin
                  order by MIN(_exec_time) desc, Bulletin desc";
-        public static string sqlGetTop10Vulnerable = @"
+        public static string sql_get_global_compliance_data = @"
+                         select Convert(Datetime, max(_Exec_time), 101) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
+                           from TREND_WindowsCompliance_ByUpdate
+                          group by _Exec_id order by date";
+        public static string sql_get_top10_vulnerable = @"
                 select top 10 Bulletin --, SUM(Applicable) - SUM(installed)
                   from TREND_WindowsCompliance_ByUpdate
                  where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  group by Bulletin
                  order by SUM(Applicable) - SUM(installed) desc";
-        public static string sqlGetBottom10Compliance = @"
+        public static string sql_get_bottom10_compliance = @"
                 select top 10 Bulletin --, CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100
                   from TREND_WindowsCompliance_ByUpdate
                  where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  group by Bulletin
                 having SUM(Applicable) - SUM(installed) > 100
                  order by CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100";
-        public static string sqlGetTop10MoversUp = @"
+        public static string sql_get_top10movers_up = @"
                 -- Return the 10 bulletins for which more computers are secured
                 select top 10 t1.Bulletin, t1._Exec_id, (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) as 'Delta'
                   from TREND_WindowsCompliance_ByUpdate t1
@@ -149,7 +153,7 @@ namespace Symantec.CWoC.PatchTrending {
                 having (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) > 0
                  order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) desc
                 ";
-        public static string sqlGetTop10MoversDown = @"
+        public static string sql_get_top10movers_down = @"
                 -- Return the 10 bulletins for which more computers are vulnerable
                 select top 10 t1.Bulletin, t1._Exec_id, (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) as 'Delta'
                   from TREND_WindowsCompliance_ByUpdate t1
@@ -160,13 +164,13 @@ namespace Symantec.CWoC.PatchTrending {
                 having (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) < 0
                  order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed))
                 ";
-        public static string sqlGetUpdatesByBulletin = @"
+        public static string sql_get_updates_bybulletin = @"
                  select distinct([UPDATE])
                    from TREND_WindowsCompliance_ByUpdate
                   where bulletin = '{0}'
                  ";
 
-        public static string sql_compliancebypc_count = @"
+        public static string sql_get_compliance_bypccount = @"
 declare @id as int
 	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
 
@@ -190,7 +194,7 @@ begin
 end
 ";
 
-        public static string sql_compliancebypc_percent = @"declare @id as int
+        public static string sql_get_compliance_bypcpercent = @"declare @id as int
 	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
 
 if (@id > 1)
@@ -211,7 +215,7 @@ begin
 --	   and t1.[Percent] > 74
 end
 ";
-        public static string sql_compliancebypc_bottom75percent = @"
+        public static string sql_get_compliance_bypc_bottom75percent = @"
 /* BOTTOM 75% SUMMARY */
 declare @id as int
 	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)

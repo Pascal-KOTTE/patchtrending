@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="APIWrapper.cs" />
     <Compile Include="Counters.cs" />
+    <Compile Include="FormattedStrings.cs" />
     <Compile Include="SiteBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaticStrings.cs" />
