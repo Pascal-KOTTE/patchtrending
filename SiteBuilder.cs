@@ -327,7 +327,7 @@ namespace Symantec.CWoC.PatchTrending {
                         + r[1] + ", "
                         + r[2] + ", "
                         + r[3] + ", "
-                        + r[4] + "'],");
+                        + r[4] + "],");
 
                 }
                 // Remove the last comma we inserted
