@@ -11,7 +11,7 @@ using Symantec.CWoC.APIWrappers;
 namespace Symantec.CWoC.PatchTrending {
     class SiteGenerator {
 
-        public static string version = "v10";
+        public static string version = "version 10c";
 
         static int Main(string[] args) {
             Timer.Init();
@@ -121,9 +121,10 @@ namespace Symantec.CWoC.PatchTrending {
             GeneratePcComplPages(byComputer);
             if (byComputer) {
                 p.Append(StaticStrings.PcComplHtml);
-                // Had summary data for bottom 75% here
+                // Add summary data for bottom 75% here
                 p.Append(GetPcComplianceSummary());
             }
+            p.Append(StaticStrings.DailySummary);
             p.Append(StaticStrings.BulletinSearch);
             // Add compliance by computer graphs here
             p.AppendLine("<h2 style=\"text-align: center; width:80%\">Custom compliance views</h2>");

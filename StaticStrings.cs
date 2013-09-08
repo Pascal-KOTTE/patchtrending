@@ -68,13 +68,127 @@ namespace Symantec.CWoC.PatchTrending {
 			return t.toUpperCase();
         }
     </script>
+    <script type=""text/javascript"">
 
+        function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "","");
+        }
+	
+		var msg_a = analyse_compliance();
+		var msg_b = analyse_vulnerability();
+
+		var box = document.getElementById(""daily_summary"");
+		box.innerHTML += ""<hr/><h3>Daily summary</h3>"";
+		box.innerHTML += ""<p>"" + msg_a + ""</p>"";
+		box.innerHTML += ""<p>"" + msg_b + ""</p>"";
+
+		function analyse_compliance () {
+			var length = global_0.length;
+			var low_point = ['', 100];
+			var high_point = ['', 0];
+			var first = global_0[1];
+			var last = global_0[length -1];
+
+			for (var i = 1; i < length; i++) {
+				current = global_0[i];
+				prev = global_0[i - 1];
+				
+				// Track high and low point
+				if (current[1] > high_point[1]) {
+					high_point = current;
+				}
+				if (current[1] < low_point[1]) {
+					low_point = current;
+				}
+			}
+			var delta = last[1] - first[1];
+			var append = """";
+			if (delta > 0) {
+				append = ""+"";
+			}
+			var hist_high = """";
+			var hist_low = """";
+			
+			if (high_point[1] == last[1])
+				hist_high = ""We are at a historical high from the "" + (length -1) + "" records available. "";
+			else
+				hist_high = ""The historical high value of "" + Math.round(high_point[1]*100)/100 + ""% was recorded on "" + high_point[0] + "". "";
+			
+			if 	(low_point[1] == last[1])
+				hist_low = ""We are at a historical low from the "" + (length -1) + "" records available. "";
+			else
+				hist_low = ""The historical low value of "" + Math.round(low_point[1]*100)/100 + ""% was recorded on "" + low_point[0] + "". "";
+			
+			var msg = ""Compliance is at "" + Math.round(last[1]*100)/100 
+					+ ""% ("" + last[0] + ""), ""
+					+ ""from "" + Math.round(first[1]*100)/100 
+					+ ""% ("" + append + """" + Math.round(delta*100)/100
+					+ ""%) on the "" + first[0] + "". "" + hist_high + hist_low
+			;
+			
+			return msg;
+		}
+		
+		function analyse_vulnerability () {
+			var length = global_1.length;
+			var low_point = ['', 0, 0, 999999999];
+			var high_point = ['', 0, 0, 0];
+			var first = global_1[1];
+			var last = global_1[length -1];
+			
+			for (var i = 1; i < length; i++) {
+				current = global_1[i];
+				prev = global_1[i - 1];
+				
+				// Track high and low point
+				if (current[3] > high_point[3]) {
+					high_point = current;
+				}
+				if (current[3] < low_point[3]) {
+					low_point = current;
+				}
+			}
+
+			var delta = last[3] - first[3];
+			var append = """";
+			if (delta > 0) {
+				append = ""+"";
+			}
+
+			var hist_high = """";
+			var hist_low = """";
+			
+			if (high_point[1] == last[1])
+				hist_high = ""We are at a historical high from the "" + (length -1) + "" records available. "";
+			else
+				hist_high = ""The historical high value of "" + numberWithCommas(high_point[3]) + "" vulnerable updates was recorded on "" + high_point[0] + "". "";
+			
+			if 	(low_point[1] == last[1])
+				hist_low = ""We are at a historical low from the "" + (length -1) + "" records available. "";
+			else
+				hist_low = ""The historical low value of "" + numberWithCommas(low_point[3]) + "" vulnerable updates was recorded on "" + low_point[0] + "". "";
+			
+			var msg = ""We currently have "" + numberWithCommas(last[3])
+					+ "" vulnerable updates ("" + last[0] + ""), ""
+					+ ""from "" + numberWithCommas(first[3])
+					+ "" vulnerable updates ("" + append + """" + numberWithCommas(delta)
+					+ "") on the "" + first[0] + "". "" + hist_high + hist_low
+			;
+			
+			return msg;
+			
+		}
+    </script>
 ";
 
         public static string PcComplHtml = @"
     <hr/>
     <p style=""text-align: center;""><b>Compliance by computer - upper quarter</b></p>
     <div id='pccompl_div' style='width: 1000px; height: 300px;'></div>";
+
+        public static string DailySummary = @"
+	<div id=""daily_summary""></div>
+";
 
         public static string BulletinSearch = @"
     <hr/>

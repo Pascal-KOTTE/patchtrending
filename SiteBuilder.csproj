@@ -7,8 +7,8 @@
     <ProjectGuid>{04DE9816-1EE0-4770-B92F-E202BA7B39BC}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Symantec.CWoC</RootNamespace>
-    <AssemblyName>SiteBuilder-v10</AssemblyName>
+    <RootNamespace>Symantec.CWoC.PatchTrending</RootNamespace>
+    <AssemblyName>SiteBuilder-version10c</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
