@@ -366,7 +366,7 @@ namespace Symantec.CWoC.PatchTrending {
             if (update.Length == 0 || update == string.Empty)
                 return;
 
-            string sql = String.Format(FormattedStrings.sql_get_bulletin_data, update, bulletin);
+            string sql = String.Format(FormattedStrings.sql_get_update_data, update, bulletin);
             DataTable t = DatabaseAPI.GetTable(sql);
             stats = GetJSONFromTable(t, update);
 
