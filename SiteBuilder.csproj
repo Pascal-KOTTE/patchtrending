@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Symantec.CWoC.PatchTrending</RootNamespace>
-    <AssemblyName>SiteBuilder-version10c</AssemblyName>
+    <AssemblyName>SiteBuilder-version11</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

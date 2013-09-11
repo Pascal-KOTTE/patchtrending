@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("{CWoC} SiteBuilder")]
-[assembly: AssemblyDescription("Version 10c")]
+[assembly: AssemblyDescription("Version 11")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Symantec.com/Connect")]
 [assembly: AssemblyProduct("SiteBuilder")]
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("10.0.0.0")]
-[assembly: AssemblyFileVersion("10.0.0.0")]
+[assembly: AssemblyVersion("11.0.0.0")]
+[assembly: AssemblyFileVersion("11.0.0.0")]
