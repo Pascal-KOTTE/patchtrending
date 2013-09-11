@@ -11,7 +11,7 @@ using Symantec.CWoC.APIWrappers;
 namespace Symantec.CWoC.PatchTrending {
     class SiteGenerator {
 
-        public static string version = "version 10c";
+        public static string version = "version 11";
 
         static int Main(string[] args) {
             Timer.Init();
@@ -53,15 +53,12 @@ namespace Symantec.CWoC.PatchTrending {
 
 
             if (compliance_by_update) {
-                EventLog.ReportInfo("Adding top-10-vulnerable page to the index builder.");
                 AddToIndex(ref index, "top10-vulnerable");
-                EventLog.ReportInfo("Adding top 10 movers (++) page to the index builder.");
                 AddToIndex(ref index, "top10-movers-up");
-                EventLog.ReportInfo("Adding top 10 movers (--) page to the index builder.");
                 AddToIndex(ref index, "top10-movers-down");
-                EventLog.ReportInfo("Adding bottom-10-compliance page to the index builder.");
                 AddToIndex(ref index, "bottom-10-compliance");
-                EventLog.ReportInfo("Generating site pages from the layout...");
+                AddToIndex(ref index, "inactive-computers");
+                EventLog.ReportInfo("Generating site pages from the layout file...");
                 try {
                     using (StreamReader reader = new StreamReader(filename)) {
                         while (!reader.EndOfStream) {
@@ -82,17 +79,19 @@ namespace Symantec.CWoC.PatchTrending {
                                 AddToIndex(ref index, pagename);
                         }
                     }
-                    Console.WriteLine("Generating Top 10 bulletins by vulnerable computers page...");
+                    EventLog.ReportInfo("Generating Top 10 bulletins by vulnerable computers page...");
                     GeneratePage("top10-vulnerable", StaticStrings.sql_get_top10_vulnerable);
-                    Console.WriteLine("Generating Top 10 movers (++) page...");
+                    EventLog.ReportInfo("Generating Top 10 movers (++) page...");
                     GeneratePage("top10-movers-up", StaticStrings.sql_get_top10movers_up);
-                    Console.WriteLine("Generating Top 10 movers (--) page...");
+                    EventLog.ReportInfo("Generating Top 10 movers (--) page...");
                     GeneratePage("top10-movers-down", StaticStrings.sql_get_top10movers_down);
-                    Console.WriteLine("Generating Bottom 10 bulletins by compliance...");
+                    EventLog.ReportInfo("Generating Bottom 10 bulletins by compliance...");
                     GeneratePage("bottom-10-compliance", StaticStrings.sql_get_bottom10_compliance);
+                    SaveToFile("inactive-computers.html", StaticStrings.GetInactiveComputersHTML);
 
                     GenerateIndex(ref index, compliance_by_computer);
                     GenerateGlobalPage();
+                    GenerateInactiveComputerJs();
                     Console.WriteLine("Generating updates pages...");
                     GenerateUpdatePages();
                 } catch (Exception e) {
@@ -142,7 +141,7 @@ namespace Symantec.CWoC.PatchTrending {
             p.AppendLine("</body></html>");
             SaveToFile("default.html", p.ToString());
             SaveToFile("default.htm", p.ToString());
-            SaveToFile("getbulletin.html", StaticStrings.GetBulletinHtml);
+            SaveToFile("getbulletin.html", StaticStrings.GetBulletinHTML);
             Counters.HtmlPages += 3;
         }
 
@@ -406,14 +405,15 @@ namespace Symantec.CWoC.PatchTrending {
             return b.ToString();
         }
 
+        private static void GenerateInactiveComputerJs() {
+            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_inactive_computer_trend);
+            SaveToFile("Javascript\\inactive_computers.js", GetInactiveComputer_JSONFromTable(t, "inactive_computers"));
+
+            t = DatabaseAPI.GetTable(StaticStrings.sql_get_inactive_computer_percent);
+            SaveToFile("Javascript\\inactive_computers_pc.js", GetInactiveComputer_JSONFromTable(t, "inactive_computers_pc"));
+        }
+
         private static string[,] GetComplianceFromTable(DataTable t) {
-/*            string[,] d = new string[t.Rows.Count + 1, 2];
-
-            d[0, 0] = DateTime.Parse(t.Rows[0][0].ToString()).AddDays(-1D).ToString();
-            d[0, 1] = "0";
-            int i = 1;
-*/
-
             string[,] d = new string[t.Rows.Count, 2];
             int i = 0;
 
@@ -461,6 +461,23 @@ namespace Symantec.CWoC.PatchTrending {
             foreach (DataRow r in t.Rows) {
                 int vulnerable = Convert.ToInt32(r[2]) - Convert.ToInt32(r[1]);
                 b.AppendLine("['" + r[0].ToString() + "', " + r[1] + ", " + r[2] + ", " + vulnerable.ToString() + "],");
+            }
+            // Remove the last comma we inserted
+            b.Remove(b.Length - 3, 1);
+            b.AppendLine("]");
+
+            return b.ToString();
+        }
+
+        private static string GetInactiveComputer_JSONFromTable(DataTable t, string entry) {
+            
+            StringBuilder b = new StringBuilder();
+
+            b.AppendLine("var " + GetJSString(entry) + " = [");
+            b.AppendLine("\t['Date', '7 days', '14 days', '7 days ++', '7 days --'],");
+
+            foreach (DataRow r in t.Rows) {
+                b.AppendLine("\t['" + r[0].ToString() + "', " + r[1] + ", " + r[2] + ", " + r[3] + ", " + r[4] + "],");
             }
             // Remove the last comma we inserted
             b.Remove(b.Length - 3, 1);

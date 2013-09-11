@@ -340,12 +340,21 @@ select SUM([computer #]), SUM([% of total])
    and t3.[Percent] < 75
  group by [_exec_id]
 ";
-
+        public static string sql_get_inactive_computer_trend = @"
+select timestamp, [Inactive computers (7 days)], [Inactive computers (14 days)], [New inactive computers], [New Active Computers]
+  from TREND_ActiveComputerCounts
+ order by _exec_id
+";
+        public static string sql_get_inactive_computer_percent = @"
+select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed machines] as money) * 100 as '7-days inactive (% of managed)', cast([Inactive computers (14 days)] as money) /  cast([Managed machines] as money) * 100 as '14-days inactive (% of managed)', CAST([New inactive computers] as money) / CAST([Managed machines] AS money) * 100 as '++ (% of managed)', CAST([New active computers] as money) / CAST([Managed machines] as money) * 100 as '-- (% of managed)'
+  from TREND_ActiveComputerCounts
+ order by _exec_id
+     ";
 
 #endregion
 
         #region // string getbulletinhtml
-        public static string GetBulletinHtml = @" <html>
+        public static string GetBulletinHTML = @"<html>
 	<head>
 		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
 	<script type=""text/javascript"">
@@ -400,6 +409,58 @@ select SUM([computer #]), SUM([% of total])
     </script>
 </body>
 </html>";
+        #endregion
+
+        #region //string inactivecomputershtml
+        public static string GetInactiveComputersHTML = @"<html>
+  <head>
+    <title>Inactive computer trending</title>
+    <script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
+	<script type=""text/javascript"" src=""javascript/inactive_computers.js""></script>
+	<script type=""text/javascript"" src=""javascript/inactive_computers_pc.js""></script>
+    <script type=""text/javascript"">
+      google.load(""visualization"", ""1"", {packages:[""corechart""]});
+      google.setOnLoadCallback(switch_view);
+	  
+	  var data;
+	  var options;
+
+      function drawChart() {
+        
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        chart.draw(data, options);	
+      }
+	  
+	  var percent = false;
+	  function switch_view() {
+		if (percent) {
+			percent = false;
+			data = google.visualization.arrayToDataTable(inactive_computers_pc);
+	        options = {
+			  title: '(in % of managed machines)', 
+			  colors: ['orange', 'red', 'royalblue', 'forestgreen']
+			};
+			drawChart();
+		} else {
+			percent = true;
+			data = google.visualization.arrayToDataTable(inactive_computers);
+	        options = {
+			  title: '(in computer count)',
+			  colors: ['orange', 'red', 'royalblue', 'forestgreen']
+			};
+			drawChart();
+		}
+	  }
+    </script>
+  </head>
+  <body>
+	<h2>Inactive computers over time</h2>
+    <div id=""chart_div"" style=""width: 900px; height: 500px;""></div>
+	<a href=""javascript:switch_view()"" title=""Click to switch between Computer Count view and % of Managed machines view."">Switch View</a>
+	<p><b><i>Note:</i></b> ""7 days ++"" reports the number of new inactive computers from the previous snapshot. ""7 days --"" reports the count of computers that were inactive in the previous snapshos and are not in the current snapshot (they are back to Active!).</p>
+  </body>
+</html>
+";
         #endregion
 
     }
