@@ -35,6 +35,8 @@ namespace Symantec.CWoC.PatchTrending {
             /* Check that we can run against the database (I.e. prerequisite table does exist) */
             bool compliance_by_update = false;
             bool compliance_by_computer = false;
+            bool inactive_computer_trend = false;
+
             try {
                 string sql = "select top 1 1 from TREND_WindowsCompliance_ByUpdate";
                 if (DatabaseAPI.ExecuteScalar(sql) == 1) {
@@ -51,13 +53,16 @@ namespace Symantec.CWoC.PatchTrending {
             } catch {
             }
 
+            try {
+                string sql = "select top 1 1 from TREND_ActiveComputerCounts";
+                if (DatabaseAPI.ExecuteScalar(sql) == 1) {
+                    inactive_computer_trend = true;
+                }
+            } catch {
+            }
+
 
             if (compliance_by_update) {
-                AddToIndex(ref index, "top10-vulnerable");
-                AddToIndex(ref index, "top10-movers-up");
-                AddToIndex(ref index, "top10-movers-down");
-                AddToIndex(ref index, "bottom-10-compliance");
-                AddToIndex(ref index, "inactive-computers");
                 EventLog.ReportInfo("Generating site pages from the layout file...");
                 try {
                     using (StreamReader reader = new StreamReader(filename)) {
@@ -81,17 +86,29 @@ namespace Symantec.CWoC.PatchTrending {
                     }
                     EventLog.ReportInfo("Generating Top 10 bulletins by vulnerable computers page...");
                     GeneratePage("top10-vulnerable", StaticStrings.sql_get_top10_vulnerable);
+                    AddToIndex(ref index, "top10-vulnerable");
+
                     EventLog.ReportInfo("Generating Top 10 movers (++) page...");
                     GeneratePage("top10-movers-up", StaticStrings.sql_get_top10movers_up);
+                    AddToIndex(ref index, "top10-movers-up");
+
                     EventLog.ReportInfo("Generating Top 10 movers (--) page...");
                     GeneratePage("top10-movers-down", StaticStrings.sql_get_top10movers_down);
+                    AddToIndex(ref index, "top10-movers-down");
+
                     EventLog.ReportInfo("Generating Bottom 10 bulletins by compliance...");
                     GeneratePage("bottom-10-compliance", StaticStrings.sql_get_bottom10_compliance);
-                    SaveToFile("inactive-computers.html", StaticStrings.GetInactiveComputersHTML);
+                    AddToIndex(ref index, "bottom-10-compliance");
+
+                    if (inactive_computer_trend) {
+                        EventLog.ReportInfo("Generating Inactive-computers page...");
+                        SaveToFile("inactive-computers.html", StaticStrings.GetInactiveComputersHTML);
+                        AddToIndex(ref index, "inactive-computers");
+                        GenerateInactiveComputerJs();
+                    }
 
                     GenerateIndex(ref index, compliance_by_computer);
                     GenerateGlobalPage();
-                    GenerateInactiveComputerJs();
                     Console.WriteLine("Generating updates pages...");
                     GenerateUpdatePages();
                 } catch (Exception e) {
