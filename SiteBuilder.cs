@@ -494,7 +494,7 @@ namespace Symantec.CWoC.PatchTrending {
             b.AppendLine("\t['Date', '7 days', '14 days', '7 days ++', '7 days --'],");
 
             foreach (DataRow r in t.Rows) {
-                b.AppendLine("\t['" + r[0].ToString() + "', " + r[1] + ", " + r[2] + ", " + r[3] + ", " + r[4] + "],");
+                b.AppendLine("\t['" + r[0].ToString() + "', " + r[1].ToString().Replace(',', '.') + ", " + r[2].ToString().Replace(',', '.') + ", " + r[3].ToString().Replace(',', '.') + ", " + r[4].ToString().Replace(',', '.') + "],");
             }
             // Remove the last comma we inserted
             b.Remove(b.Length - 3, 1);
