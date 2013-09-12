@@ -213,9 +213,9 @@ namespace Symantec.CWoC.PatchTrending {
 				}
 			}
 
-			var msg = '<b>' + compl_top.toFixed(2) + '%</b> of computers are at <i>95%</i> compliance or above';
-			msg += ', <b>' + compl_mid.toFixed(2) + '%</b> of computers are at <i>90%</i> compliance or above';
-			msg += ' and <b>' + compl_all.toFixed(2) + '%</b> of computers are at <i>75%</i> compliance or above</i>.';
+			var msg = '~<b>' + compl_top.toFixed(2) + '%</b> of computers are at <i>95%</i> compliance or above';
+			msg += ', ~<b>' + compl_mid.toFixed(2) + '%</b> of computers are at <i>90%</i> compliance or above';
+			msg += ' and ~<b>' + compl_all.toFixed(2) + '%</b> of computers are at <i>75%</i> compliance or above</i>.';
 
 			return msg;
 		}
@@ -354,7 +354,7 @@ end
 
 if (@id > 1)
 begin
-	select t1.[Percent], t3.[min], t2.[% of Total], t1.[% of Total], t3.[max], t2.[% of Total]
+	select t1.[Percent], t3.[min], t2.[% of Total], t1.[% of Total], t3.[max], t1.[% of Total]
 --	, t1.[% of Total], t2.[% of Total]
 	  from TREND_WindowsCompliance_ByComputer t1
 	  join TREND_WindowsCompliance_ByComputer t2
