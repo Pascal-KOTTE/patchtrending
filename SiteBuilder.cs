@@ -63,6 +63,29 @@ namespace Symantec.CWoC.PatchTrending {
 
 
             if (compliance_by_update) {
+                EventLog.ReportInfo("Generating Top 10 bulletins by vulnerable computers page...");
+                GeneratePage("top10-vulnerable", StaticStrings.sql_get_top10_vulnerable);
+                AddToIndex(ref index, "top10-vulnerable");
+
+                EventLog.ReportInfo("Generating Top 10 movers (++) page...");
+                GeneratePage("top10-movers-up", StaticStrings.sql_get_top10movers_up);
+                AddToIndex(ref index, "top10-movers-up");
+
+                EventLog.ReportInfo("Generating Top 10 movers (--) page...");
+                GeneratePage("top10-movers-down", StaticStrings.sql_get_top10movers_down);
+                AddToIndex(ref index, "top10-movers-down");
+
+                EventLog.ReportInfo("Generating Bottom 10 bulletins by compliance...");
+                GeneratePage("bottom-10-compliance", StaticStrings.sql_get_bottom10_compliance);
+                AddToIndex(ref index, "bottom-10-compliance");
+
+                if (inactive_computer_trend) {
+                    EventLog.ReportInfo("Generating Inactive-computers page...");
+                    SaveToFile("inactive-computers.html", StaticStrings.GetInactiveComputersHTML);
+                    AddToIndex(ref index, "inactive-computers");
+                    GenerateInactiveComputerJs();
+                }
+
                 EventLog.ReportInfo("Generating site pages from the layout file...");
                 try {
                     using (StreamReader reader = new StreamReader(filename)) {
@@ -83,28 +106,6 @@ namespace Symantec.CWoC.PatchTrending {
                             if (j > 0)
                                 AddToIndex(ref index, pagename);
                         }
-                    }
-                    EventLog.ReportInfo("Generating Top 10 bulletins by vulnerable computers page...");
-                    GeneratePage("top10-vulnerable", StaticStrings.sql_get_top10_vulnerable);
-                    AddToIndex(ref index, "top10-vulnerable");
-
-                    EventLog.ReportInfo("Generating Top 10 movers (++) page...");
-                    GeneratePage("top10-movers-up", StaticStrings.sql_get_top10movers_up);
-                    AddToIndex(ref index, "top10-movers-up");
-
-                    EventLog.ReportInfo("Generating Top 10 movers (--) page...");
-                    GeneratePage("top10-movers-down", StaticStrings.sql_get_top10movers_down);
-                    AddToIndex(ref index, "top10-movers-down");
-
-                    EventLog.ReportInfo("Generating Bottom 10 bulletins by compliance...");
-                    GeneratePage("bottom-10-compliance", StaticStrings.sql_get_bottom10_compliance);
-                    AddToIndex(ref index, "bottom-10-compliance");
-
-                    if (inactive_computer_trend) {
-                        EventLog.ReportInfo("Generating Inactive-computers page...");
-                        SaveToFile("inactive-computers.html", StaticStrings.GetInactiveComputersHTML);
-                        AddToIndex(ref index, "inactive-computers");
-                        GenerateInactiveComputerJs();
                     }
 
                     GenerateIndex(ref index, compliance_by_computer);
@@ -330,7 +331,6 @@ namespace Symantec.CWoC.PatchTrending {
                             // Compose tooltip:
                             + "<div style=\"font-family: Arial; font-size: 14px; text-align: center;\">" + r[0] + "% compliant:</div>"
                             + "<div style=\"font-family: Arial; font-size: 12px;\">"
-
                             + "<p> <b>" + r[3] + " computers (" + r[5] + "% of total)</b> </p>"
                             + "<p> Min = " + r[1]
                             + ", Prev = " + r[2]

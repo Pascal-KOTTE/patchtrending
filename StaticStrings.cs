@@ -42,10 +42,10 @@ namespace Symantec.CWoC.PatchTrending {
 		google.setOnLoadCallback(drawChart);
 
         function loadBulletin() {
-			
+
 			var bulletin = document.getElementById(""bulletin_name"").value;
 			var jsUrl = ""javascript/"" + escapeBulletin(bulletin) + ""_0.js"";
-			
+
 			new Ajax.Request(jsUrl, {
                 method:'get',
 				onSuccess: function(response) {
@@ -61,7 +61,7 @@ namespace Symantec.CWoC.PatchTrending {
 
 			});	
 		}
-	
+
 		function escapeBulletin(b) {
 			var t = b.replace(""-"", ""_"");
             t = t.replace(""."", ""_"");
@@ -73,14 +73,16 @@ namespace Symantec.CWoC.PatchTrending {
         function numberWithCommas(x) {
             return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "","");
         }
-	
+
 		var msg_a = analyse_compliance();
 		var msg_b = analyse_vulnerability();
+		var msg_c = analyse_pccompl();
 
 		var box = document.getElementById(""daily_summary"");
 		box.innerHTML += ""<hr/><h3>Daily summary</h3>"";
 		box.innerHTML += ""<p>"" + msg_a + ""</p>"";
 		box.innerHTML += ""<p>"" + msg_b + ""</p>"";
+		box.innerHTML += ""<p>"" + msg_c + ""</p>"";
 
 		function analyse_compliance () {
 			var length = global_0.length;
@@ -92,7 +94,7 @@ namespace Symantec.CWoC.PatchTrending {
 			for (var i = 1; i < length; i++) {
 				current = global_0[i];
 				prev = global_0[i - 1];
-				
+
 				// Track high and low point
 				if (current[1] > high_point[1]) {
 					high_point = current;
@@ -108,38 +110,38 @@ namespace Symantec.CWoC.PatchTrending {
 			}
 			var hist_high = """";
 			var hist_low = """";
-			
+
 			if (high_point[1] == last[1])
 				hist_high = ""We are at a historical high from the "" + (length -1) + "" records available. "";
 			else
 				hist_high = ""The historical high value of "" + Math.round(high_point[1]*100)/100 + ""% was recorded on "" + high_point[0] + "". "";
-			
+
 			if 	(low_point[1] == last[1])
 				hist_low = ""We are at a historical low from the "" + (length -1) + "" records available. "";
 			else
 				hist_low = ""The historical low value of "" + Math.round(low_point[1]*100)/100 + ""% was recorded on "" + low_point[0] + "". "";
-			
-			var msg = ""Compliance is at "" + Math.round(last[1]*100)/100 
-					+ ""% ("" + last[0] + ""), ""
+
+			var msg = ""Compliance is at <b>"" + Math.round(last[1]*100)/100 
+					+ ""%</b> ("" + last[0] + ""), ""
 					+ ""from "" + Math.round(first[1]*100)/100 
 					+ ""% ("" + append + """" + Math.round(delta*100)/100
 					+ ""%) on the "" + first[0] + "". "" + hist_high + hist_low
 			;
-			
+
 			return msg;
 		}
-		
+
 		function analyse_vulnerability () {
 			var length = global_1.length;
 			var low_point = ['', 0, 0, 999999999];
 			var high_point = ['', 0, 0, 0];
 			var first = global_1[1];
 			var last = global_1[length -1];
-			
+
 			for (var i = 1; i < length; i++) {
 				current = global_1[i];
 				prev = global_1[i - 1];
-				
+
 				// Track high and low point
 				if (current[3] > high_point[3]) {
 					high_point = current;
@@ -157,28 +159,58 @@ namespace Symantec.CWoC.PatchTrending {
 
 			var hist_high = """";
 			var hist_low = """";
-			
+
 			if (high_point[1] == last[1])
 				hist_high = ""We are at a historical high from the "" + (length -1) + "" records available. "";
 			else
 				hist_high = ""The historical high value of "" + numberWithCommas(high_point[3]) + "" vulnerable updates was recorded on "" + high_point[0] + "". "";
-			
+
 			if 	(low_point[1] == last[1])
 				hist_low = ""We are at a historical low from the "" + (length -1) + "" records available. "";
 			else
 				hist_low = ""The historical low value of "" + numberWithCommas(low_point[3]) + "" vulnerable updates was recorded on "" + low_point[0] + "". "";
-			
-			var msg = ""We currently have "" + numberWithCommas(last[3])
-					+ "" vulnerable updates ("" + last[0] + ""), ""
+
+			var msg = ""We currently have <b>"" + numberWithCommas(last[3])
+					+ "" vulnerable updates</b> ("" + last[0] + ""), ""
 					+ ""from "" + numberWithCommas(first[3])
 					+ "" vulnerable updates ("" + append + """" + numberWithCommas(delta)
 					+ "") on the "" + first[0] + "". "" + hist_high + hist_low
 			;
-			
+
 			return msg;
-			
 		}
-    </script>
+
+		function analyse_pccompl () {
+			var length = pccompl.length;
+			var compl_top = 0;
+			var compl_mid = 0;
+
+			if (length == 0)
+				return '';
+
+			for (var i = 1; i < length; i++) {
+				if (parseInt(pccompl[i]) > 89) {
+					var s = pccompl[i][5];
+					var j = s.indexOf('(') + 1;
+					var k = s.indexOf('% of');
+
+					compl_mid += parseFloat(s.substring(j, k))
+				}
+				if (parseInt(pccompl[i]) > 94) {
+					var s = pccompl[i][5];
+					var j = s.indexOf('(') + 1;
+					var k = s.indexOf('% of');
+
+					compl_top += parseFloat(s.substring(j, k))
+				}
+			}		
+
+			var msg = '<b>' + compl_top.toFixed(2) + '%</b> of computers are at <i>95% compliance or above</i>.';
+			msg += '<br/><b>' + compl_mid.toFixed(2) + '%</b> of computers are at <i>90% compliance or above</i>.';
+
+			return msg;
+		}
+		</script>
 ";
 
         public static string PcComplHtml = @"
