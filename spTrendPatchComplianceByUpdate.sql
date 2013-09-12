@@ -1,4 +1,5 @@
 create procedure spTrendPatchComplianceByUpdate
+	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6'
 as
 -- #########################################################################################################
 -- PART I: Make sure underlying infrastructure exists and is ready to use
@@ -68,7 +69,7 @@ insert into PM_TRENDS_TEMP
   exec spPMWindows_ComplianceByUpdate
 			@OperatingSystem = '%',
 			@DistributionStatus = 'Active',
-			@FilterCollection = '01024956-1000-4cdb-b452-7db0cff541b6',
+			@FilterCollection = @collectionguid,
 			@StartDate = '1900-06-29T00:00:00',
 			@EndDate = '2020-06-29T00:00:00',
 			@pCulture = 'en-GB',

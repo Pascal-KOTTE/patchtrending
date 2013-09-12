@@ -1,5 +1,6 @@
 create procedure as spTrendPatchComplianceByComputer
-
+	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6'
+as
 /* 
       COMPLIANCE BY COMPUTER TRENDING
 */
@@ -53,7 +54,7 @@ insert into PM_TRENDS2_TEMP
 exec spPMWindows_ComplianceByComputer
 							@OperatingSystem = '%',
 							@DistributionStatus = 'active',
-							@FilterCollection = '01024956-1000-4cdb-b452-7db0cff541b6',
+							@FilterCollection = @collectionguid,
 							@StartDate = '1990-08-21T00:00:00',
 							@EndDate = '2020-12-31',
 							@pCulture = 'en-gb',
