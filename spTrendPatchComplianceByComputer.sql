@@ -1,5 +1,6 @@
 create procedure as spTrendPatchComplianceByComputer
-	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6'
+	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6',
+	@force as int = 0
 as
 /* 
       COMPLIANCE BY COMPUTER TRENDING
@@ -46,7 +47,7 @@ OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 end
 
 -- PART II: Get data into the trending table if no data was captured in the last 23 hours
-if (select MAX(_exec_time) from TREND_WindowsCompliance_ByComputer) <  dateadd(hour, -23, getdate()) or (select COUNT(*) from TREND_WindowsCompliance_ByComputer) = 0
+if (select MAX(_exec_time) from TREND_WindowsCompliance_ByComputer) <  dateadd(hour, -23, getdate()) or ((select COUNT(*) from TREND_WindowsCompliance_ByComputer) = 0) or (@force = 1)
 begin
 
 -- Get the compliance by update to a "temp" table

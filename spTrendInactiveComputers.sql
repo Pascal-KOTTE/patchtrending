@@ -1,4 +1,5 @@
 create procedure spTrendInactiveComputers
+	@force as int = 0
 as
 if not exists (select 1 from sys.objects where type = 'u' and name = 'TREND_ActiveComputerCounts')
 begin
@@ -31,7 +32,7 @@ begin
 	)
 end
 
-if (select MAX(_exec_time) from TREND_InactiveComputer_Current where _exec_time >  dateadd(hour, -23, getdate())) is null
+if ((select MAX(_exec_time) from TREND_InactiveComputer_Current where _exec_time >  dateadd(hour, -23, getdate())) is null) or (@force = 1)
 begin
 	-- STAGE 1: If we have current data, save it in the _previous table
 	if (select count (*) from TREND_InactiveComputer_Current) > 0

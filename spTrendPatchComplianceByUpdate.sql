@@ -1,5 +1,6 @@
 create procedure spTrendPatchComplianceByUpdate
-	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6'
+	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6',
+	@force as int = 0
 as
 -- #########################################################################################################
 -- PART I: Make sure underlying infrastructure exists and is ready to use
@@ -61,7 +62,7 @@ OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 end
 
 -- PART II: Get data into the trending table if no data was captured in the last 24 hours
-if (select MAX(_exec_time) from TREND_WindowsCompliance_ByUpdate) <  dateadd(hour, -23, getdate()) or (select COUNT(*) from TREND_WindowsCompliance_ByUpdate) = 0
+if (select MAX(_exec_time) from TREND_WindowsCompliance_ByUpdate) <  dateadd(hour, -23, getdate()) or ((select COUNT(*) from TREND_WindowsCompliance_ByUpdate) = 0) or (@force = 1)
 begin
 
 -- Get the compliance by update to a "temp" table
