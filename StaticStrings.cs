@@ -182,6 +182,7 @@ namespace Symantec.CWoC.PatchTrending {
 
 		function analyse_pccompl () {
 			var length = pccompl.length;
+            var compl_all = 0;
 			var compl_top = 0;
 			var compl_mid = 0;
 
@@ -189,6 +190,13 @@ namespace Symantec.CWoC.PatchTrending {
 				return '';
 
 			for (var i = 1; i < length; i++) {
+				if (parseInt(pccompl[i]) > 74) {
+					var s = pccompl[i][5];
+					var j = s.indexOf('(') + 1;
+					var k = s.indexOf('% of');
+
+					compl_all += parseFloat(s.substring(j, k))
+				}
 				if (parseInt(pccompl[i]) > 89) {
 					var s = pccompl[i][5];
 					var j = s.indexOf('(') + 1;
@@ -203,10 +211,11 @@ namespace Symantec.CWoC.PatchTrending {
 
 					compl_top += parseFloat(s.substring(j, k))
 				}
-			}		
+			}
 
-			var msg = '<b>' + compl_top.toFixed(2) + '%</b> of computers are at <i>95% compliance or above</i>.';
-			msg += '<br/><b>' + compl_mid.toFixed(2) + '%</b> of computers are at <i>90% compliance or above</i>.';
+			var msg = '<b>' + compl_top.toFixed(2) + '%</b> of computers are at <i>95%</i> compliance or above';
+			msg += ', <b>' + compl_mid.toFixed(2) + '%</b> of computers are at <i>90%</i> compliance or above';
+			msg += ' and <b>' + compl_all.toFixed(2) + '%</b> of computers are at <i>75%</i> compliance or above</i>.';
 
 			return msg;
 		}
