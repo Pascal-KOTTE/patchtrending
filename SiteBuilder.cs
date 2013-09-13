@@ -82,6 +82,7 @@ namespace Symantec.CWoC.PatchTrending {
                 if (inactive_computer_trend) {
                     EventLog.ReportInfo("Generating Inactive-computers page...");
                     SaveToFile("inactive-computers.html", StaticStrings.GetInactiveComputersHTML);
+                    ++Counters.HtmlPages;
                     AddToIndex(ref index, "inactive-computers");
                     GenerateInactiveComputerJs();
                 }
@@ -108,7 +109,7 @@ namespace Symantec.CWoC.PatchTrending {
                         }
                     }
 
-                    GenerateIndex(ref index, compliance_by_computer);
+                    GenerateIndex(ref index, compliance_by_computer, inactive_computer_trend);
                     GenerateGlobalPage();
                     Console.WriteLine("Generating updates pages...");
                     GenerateUpdatePages();
@@ -132,15 +133,23 @@ namespace Symantec.CWoC.PatchTrending {
             b.Append("<li><a href=\"" + s + ".html\">" + s + "</a></li>");
         }
 
-        public static void GenerateIndex(ref StringBuilder b, bool byComputer) {
+        public static void GenerateIndex(ref StringBuilder b, bool byComputer, bool inactive) {
             StringBuilder p = new StringBuilder();
+            StringBuilder q = new StringBuilder();
+
             p.Append(StaticStrings.LandingHtml);
-            GeneratePcComplPages(byComputer);
-            if (byComputer) {
+            GeneratePcComplPages(byComputer, inactive);
+            if (byComputer == true && inactive ==false) {
                 p.Append(StaticStrings.PcComplHtml);
                 // Add summary data for bottom 75% here
-                p.Append(GetPcComplianceSummary());
+            } else if (byComputer == false && inactive == true) {
+                p.Append(StaticStrings.PcInactiveHtml);
+            } else {
+                p.Append(StaticStrings.PcComplAndInactiveHtml);
             }
+
+            // p.Append(GetPcComplianceSummary());
+
             p.Append(StaticStrings.DailySummary);
             p.Append(StaticStrings.BulletinSearch);
             // Add compliance by computer graphs here
@@ -306,13 +315,17 @@ namespace Symantec.CWoC.PatchTrending {
             Counters.JsPages += 3;
         }
 
-        public static void GeneratePcComplPages(bool hasData) {
+        public static void GeneratePcComplPages(bool hasData, bool smaller) {
             string data = "";
             string data_full = "";
 
             if (!hasData) {
                 data = "var pccompl = []";
             } else {
+
+                int bottom = 74;
+                if (smaller)
+                    bottom = 84;
 
                 DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_compliance_bypccount);
                 StringBuilder b = new StringBuilder();
@@ -322,7 +335,7 @@ namespace Symantec.CWoC.PatchTrending {
                 c.AppendLine("var " + GetJSString("pccompl_full") + " = [");
 
                 foreach (DataRow r in t.Rows) {
-                    if (Convert.ToInt32(r[0]) > 74) {
+                    if (Convert.ToInt32(r[0]) > bottom) {
                         b.AppendLine("['" + r[0].ToString() + "', "
                             + r[1] + ", "
                             + r[2] + ", "
@@ -428,6 +441,7 @@ namespace Symantec.CWoC.PatchTrending {
 
             t = DatabaseAPI.GetTable(StaticStrings.sql_get_inactive_computer_percent);
             SaveToFile("Javascript\\inactive_computers_pc.js", GetInactiveComputer_JSONFromTable(t, "inactive_computers_pc"));
+            ++Counters.JsPages;
         }
 
         private static string[,] GetComplianceFromTable(DataTable t) {
@@ -487,7 +501,12 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private static string GetInactiveComputer_JSONFromTable(DataTable t, string entry) {
-            
+
+            if (t.Rows.Count == 0) {
+                string json = "var " + GetJSString(entry) + " = [];";
+                return json;
+            }
+
             StringBuilder b = new StringBuilder();
 
             b.AppendLine("var " + GetJSString(entry) + " = [");
@@ -498,7 +517,7 @@ namespace Symantec.CWoC.PatchTrending {
             }
             // Remove the last comma we inserted
             b.Remove(b.Length - 3, 1);
-            b.AppendLine("]");
+            b.AppendLine("];");
 
             return b.ToString();
         }

@@ -36,6 +36,8 @@ namespace Symantec.CWoC.PatchTrending {
 	<script type=""text/javascript"" src=""javascript/global_0.js""></script>
 	<script type=""text/javascript"" src=""javascript/global_1.js""></script>
     <script type=""text/javascript"" src=""javascript/pccompl.js""></script>
+    <script type=""text/javascript"" src=""javascript/inactive_computers.js""></script>
+    <script type=""text/javascript"" src=""javascript/inactive_computers_pc.js""></script>
 	<script type=""text/javascript"" src=""javascript/global.js""></script>
 	<script type=""text/javascript"">
 		google.load(""visualization"", ""1"", {packages:[""corechart""]});
@@ -227,6 +229,25 @@ namespace Symantec.CWoC.PatchTrending {
     <p style=""text-align: center;""><b>Compliance by computer - upper quarter</b></p>
     <div id='pccompl_div' style='width: 1000px; height: 300px;'></div>";
 
+        public static string PcComplAndInactiveHtml = @"
+    <hr/>
+    <table style=""width: 80%"">
+        <tr>
+            <td style=""text-align: center""><b>Compliance by Computer (85%+)</b></td> 
+            <td style=""text-align: center""><b>Inactive computers (in % of managed)</b></td>
+        </tr>
+        <tr>
+            <td><div id='pccompl_div' style='width: 500px; height: 300px;'></div></td>
+            <td><div id='inactivepc_div' style='width: 500px; height: 300px;'></div></td>
+        </tr>
+    </table>
+";
+
+        public static string PcInactiveHtml = @"
+    <hr/>
+    <p style=""text-align: center;""><b>Inactive computers (in % of managed)</b></p>
+    <div id='pccompl_div' style='width: 1000px; height: 300px;'></div>";
+
         public static string DailySummary = @"
 	<div id=""daily_summary""></div>
 ";
@@ -260,8 +281,13 @@ namespace Symantec.CWoC.PatchTrending {
 		d_pccompl.addColumn('number');
 		d_pccompl.addColumn({type:'string', role:'tooltip', 'p': {'html': true}});
 		d_pccompl.addRows(pccompl);
-		var g_pccompl = new google.visualization.CandlestickChart(document.getElementById('pccompl_div'));
+
+        var g_pccompl = new google.visualization.CandlestickChart(document.getElementById('pccompl_div'));
         g_pccompl.draw(d_pccompl, { legend:'none', tooltip: {isHtml: true}} );
+
+        var d_inactive = google.visualization.arrayToDataTable(inactive_computers_pc);
+        var g_inactive = new google.visualization.LineChart(document.getElementById('inactivepc_div'));
+        g_inactive.draw(d_inactive, {colors: ['orange', 'red', 'royalblue', 'forestgreen']});	
 
         }";
         #endregion
