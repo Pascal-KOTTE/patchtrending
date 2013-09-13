@@ -411,12 +411,12 @@ select SUM([computer #]), SUM([% of total])
  group by [_exec_id]
 ";
         public static string sql_get_inactive_computer_trend = @"
-select timestamp, [Inactive computers (7 days)], [Inactive computers (14 days)], [New inactive computers], [New Active Computers]
+select timestamp, [Inactive computers (7 days)], [Inactive computers (17 days)], [New inactive computers], [New Active Computers]
   from TREND_ActiveComputerCounts
  order by _exec_id
 ";
         public static string sql_get_inactive_computer_percent = @"
-select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed machines] as money) * 100 as '7-days inactive (% of managed)', cast([Inactive computers (14 days)] as money) /  cast([Managed machines] as money) * 100 as '14-days inactive (% of managed)', CAST([New inactive computers] as money) / CAST([Managed machines] AS money) * 100 as '++ (% of managed)', CAST([New active computers] as money) / CAST([Managed machines] as money) * 100 as '-- (% of managed)'
+select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed machines] as money) * 100 as '7-days inactive (% of managed)', cast([Inactive computers (17 days)] as money) /  cast([Managed machines] as money) * 100 as '17-days inactive (% of managed)', CAST([New inactive computers] as money) / CAST([Managed machines] AS money) * 100 as '++ (% of managed)', CAST([New active computers] as money) / CAST([Managed machines] as money) * 100 as '-- (% of managed)'
   from TREND_ActiveComputerCounts
  order by _exec_id
      ";

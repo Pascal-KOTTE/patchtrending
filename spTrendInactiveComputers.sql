@@ -10,7 +10,7 @@ begin
 		[Inactive computers (7 days)] int not null,
 		[New Inactive computers] int not null,
 		[New Active computers] int not null,
-		[Inactive computers (14 days)] int not null
+		[Inactive computers (17 days)] int not null
 	)
 end
 
@@ -110,7 +110,7 @@ begin
 		declare @execid as int
 			set @execid = (select isnull(max(_exec_id), 0) from TREND_ActiveComputerCounts) + 1
 
-		insert TREND_ActiveComputerCounts (_exec_id, timestamp, [Managed machines], [inactive computers (7 days)], [New Inactive Computers], [New Active Computers], [Inactive Computers (14 days)])
+		insert TREND_ActiveComputerCounts (_exec_id, timestamp, [Managed machines], [inactive computers (7 days)], [New Inactive Computers], [New Active Computers], [Inactive Computers (17 days)])
 		values (@execid, getdate(), @managed, @inactive_1, @added, @removed, @inactive_2)
 	end
 end

@@ -510,7 +510,7 @@ namespace Symantec.CWoC.PatchTrending {
             StringBuilder b = new StringBuilder();
 
             b.AppendLine("var " + GetJSString(entry) + " = [");
-            b.AppendLine("\t['Date', '7 days', '14 days', '7 days ++', '7 days --'],");
+            b.AppendLine("\t['Date', '7 days', '17 days', '7 days ++', '7 days --'],");
 
             foreach (DataRow r in t.Rows) {
                 b.AppendLine("\t['" + r[0].ToString() + "', " + r[1].ToString().Replace(',', '.') + ", " + r[2].ToString().Replace(',', '.') + ", " + r[3].ToString().Replace(',', '.') + ", " + r[4].ToString().Replace(',', '.') + "],");
