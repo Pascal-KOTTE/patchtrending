@@ -135,7 +135,6 @@ namespace Symantec.CWoC.PatchTrending {
 
         public static void GenerateIndex(ref StringBuilder b, bool byComputer, bool inactive) {
             StringBuilder p = new StringBuilder();
-            StringBuilder q = new StringBuilder();
 
             p.Append(StaticStrings.LandingHtml);
             GeneratePcComplPages(byComputer, inactive);
@@ -144,6 +143,7 @@ namespace Symantec.CWoC.PatchTrending {
                 // Add summary data for bottom 75% here
             } else if (byComputer == false && inactive == true) {
                 p.Append(StaticStrings.PcInactiveHtml);
+            } else if (byComputer == false && inactive == false) {
             } else {
                 p.Append(StaticStrings.PcComplAndInactiveHtml);
             }

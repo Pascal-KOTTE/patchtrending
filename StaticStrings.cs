@@ -246,7 +246,7 @@ namespace Symantec.CWoC.PatchTrending {
         public static string PcInactiveHtml = @"
     <hr/>
     <p style=""text-align: center;""><b>Inactive computers (in % of managed)</b></p>
-    <div id='pccompl_div' style='width: 1000px; height: 300px;'></div>";
+    <div id='inactivepc_div' style='width: 1000px; height: 300px;'></div>";
 
         public static string DailySummary = @"
 	<div id=""daily_summary""></div>
@@ -262,33 +262,36 @@ namespace Symantec.CWoC.PatchTrending {
         #region // public static string GlobalComplianceJavascript
         public static string GlobalComplianceJavascript = @"
         function drawChart() {
-	    var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
-	    var options2 = { title: '', vAxis: { minValue : 0 }};
+	        var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
+	        var options2 = { title: '', vAxis: { minValue : 0 }};
 
-		var d_global_0 = google.visualization.arrayToDataTable(global_0);
-		var g_global_0 = new google.visualization.LineChart(document.getElementById('global_div_0'));
-		g_global_0.draw(d_global_0, options1);
+		    var d_global_0 = google.visualization.arrayToDataTable(global_0);
+		    var g_global_0 = new google.visualization.LineChart(document.getElementById('global_div_0'));
+		    g_global_0.draw(d_global_0, options1);
 
-		var d_global_1 = google.visualization.arrayToDataTable(global_1);
-		var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
-		g_global_1.draw(d_global_1, options2);
+		    var d_global_1 = google.visualization.arrayToDataTable(global_1);
+		    var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
+		    g_global_1.draw(d_global_1, options2);
 
-		var d_pccompl = new google.visualization.DataTable();
-        d_pccompl.addColumn('string', 'Compliance in %');
-		d_pccompl.addColumn('number');
-		d_pccompl.addColumn('number');
-		d_pccompl.addColumn('number');
-		d_pccompl.addColumn('number');
-		d_pccompl.addColumn({type:'string', role:'tooltip', 'p': {'html': true}});
-		d_pccompl.addRows(pccompl);
+            if (pccompl.length > 0) {
+		        var d_pccompl = new google.visualization.DataTable();
+                d_pccompl.addColumn('string', 'Compliance in %');
+		        d_pccompl.addColumn('number');
+		        d_pccompl.addColumn('number');
+		        d_pccompl.addColumn('number');
+		        d_pccompl.addColumn('number');
+		        d_pccompl.addColumn({type:'string', role:'tooltip', 'p': {'html': true}});
+		        d_pccompl.addRows(pccompl);
 
-        var g_pccompl = new google.visualization.CandlestickChart(document.getElementById('pccompl_div'));
-        g_pccompl.draw(d_pccompl, { legend:'none', tooltip: {isHtml: true}} );
+                var g_pccompl = new google.visualization.CandlestickChart(document.getElementById('pccompl_div'));
+                g_pccompl.draw(d_pccompl, { legend:'none', tooltip: {isHtml: true}} );
+            }
 
-        var d_inactive = google.visualization.arrayToDataTable(inactive_computers_pc);
-        var g_inactive = new google.visualization.LineChart(document.getElementById('inactivepc_div'));
-        g_inactive.draw(d_inactive, {colors: ['orange', 'red', 'royalblue', 'forestgreen']});	
-
+            if (inactive_computers_pc.length > 0) {
+                var d_inactive = google.visualization.arrayToDataTable(inactive_computers_pc);
+                var g_inactive = new google.visualization.LineChart(document.getElementById('inactivepc_div'));
+                g_inactive.draw(d_inactive, {colors: ['orange', 'red', 'royalblue', 'forestgreen']});	
+            }
         }";
         #endregion
 
