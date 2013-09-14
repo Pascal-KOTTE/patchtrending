@@ -1,9 +1,9 @@
 create procedure spTrendInactiveComputers
 	@force as int = 0
 as
-if not exists (select 1 from sys.objects where type = 'u' and name = 'TREND_ActiveComputerCounts')
+if not exists (select 1 from sys.objects where type = 'u' and name = 'TREND_InactiveComputerCounts')
 begin
-	create table TREND_ActiveComputerCounts (
+	create table TREND_InactiveComputerCounts (
 		[_exec_id] int not null,
 		[timestamp] datetime not null,
 		[Managed machines] int not null,
@@ -110,7 +110,7 @@ begin
 		declare @execid as int
 			set @execid = (select isnull(max(_exec_id), 0) from TREND_ActiveComputerCounts) + 1
 
-		insert TREND_ActiveComputerCounts (_exec_id, timestamp, [Managed machines], [inactive computers (7 days)], [New Inactive Computers], [New Active Computers], [Inactive Computers (17 days)])
+		insert TREND_InactiveComputerCounts (_exec_id, timestamp, [Managed machines], [inactive computers (7 days)], [New Inactive Computers], [New Active Computers], [Inactive Computers (17 days)])
 		values (@execid, getdate(), @managed, @inactive_1, @added, @removed, @inactive_2)
 	end
 	else
@@ -132,4 +132,4 @@ begin
 	end
 end
 
-select * from TREND_ActiveComputerCounts order by _exec_id desc
+select * from TREND_InactiveComputerCounts order by _exec_id desc
