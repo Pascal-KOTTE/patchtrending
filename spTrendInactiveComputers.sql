@@ -108,7 +108,7 @@ begin
 			 where c.IsManaged = 1
 		)
 		declare @execid as int
-			set @execid = (select isnull(max(_exec_id), 0) from TREND_ActiveComputerCounts) + 1
+			set @execid = (select isnull(max(_exec_id), 0) from TREND_InactiveComputerCounts) + 1
 
 		insert TREND_InactiveComputerCounts (_exec_id, timestamp, [Managed machines], [inactive computers (7 days)], [New Inactive Computers], [New Active Computers], [Inactive Computers (17 days)])
 		values (@execid, getdate(), @managed, @inactive_1, @added, @removed, @inactive_2)
