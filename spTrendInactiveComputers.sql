@@ -77,41 +77,58 @@ begin
 					 where c.guid is null
 			)
 
-			declare @managed as int, @inactive_1 as int, @inactive_2 as int
-			set @managed = (select count(distinct(Guid)) from RM_ResourceComputer where IsManaged = 1)
-			set @inactive_1 = (
-				select count(distinct(c.Guid))
-				  from RM_ResourceComputer c
-				 INNER JOIN
-					(
-					select [ResourceGuid]
-					  from dbo.ResourceUpdateSummary
-					 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
-					 group by [ResourceGuid]
-					having max([ModifiedDate]) < GETDATE() - 7
-					 ) as dt 
-					ON c.Guid = dt.ResourceGuid	
-				 where c.IsManaged = 1
-			)
-			set @inactive_2 = (
-				select count(distinct(c.Guid))
-				  from RM_ResourceComputer c
-				 INNER JOIN
-					(
-					select [ResourceGuid]
-					  from dbo.ResourceUpdateSummary
-					 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
-					 group by [ResourceGuid]
-					having max([ModifiedDate]) < GETDATE() - 17
-					 ) as dt 
-					ON c.Guid = dt.ResourceGuid	
-				 where c.IsManaged = 1
-			)
+		declare @managed as int, @inactive_1 as int, @inactive_2 as int
+		set @managed = (select count(distinct(Guid)) from RM_ResourceComputer where IsManaged = 1)
+		set @inactive_1 = (
+			select count(distinct(c.Guid))
+			  from RM_ResourceComputer c
+			 INNER JOIN
+				(
+				select [ResourceGuid]
+				  from dbo.ResourceUpdateSummary
+				 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
+				 group by [ResourceGuid]
+				having max([ModifiedDate]) < GETDATE() - 7
+				 ) as dt 
+				ON c.Guid = dt.ResourceGuid	
+			 where c.IsManaged = 1
+		)
+		set @inactive_2 = (
+			select count(distinct(c.Guid))
+			  from RM_ResourceComputer c
+			 INNER JOIN
+				(
+				select [ResourceGuid]
+				  from dbo.ResourceUpdateSummary
+				 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
+				 group by [ResourceGuid]
+				having max([ModifiedDate]) < GETDATE() - 17
+				 ) as dt 
+				ON c.Guid = dt.ResourceGuid	
+			 where c.IsManaged = 1
+		)
 		declare @execid as int
 			set @execid = (select isnull(max(_exec_id), 0) from TREND_ActiveComputerCounts) + 1
 
 		insert TREND_ActiveComputerCounts (_exec_id, timestamp, [Managed machines], [inactive computers (7 days)], [New Inactive Computers], [New Active Computers], [Inactive Computers (17 days)])
 		values (@execid, getdate(), @managed, @inactive_1, @added, @removed, @inactive_2)
+	end
+	else
+	begin
+		truncate table TREND_InactiveComputer_Current
+		insert TREND_InactiveComputer_Current (guid, _exec_time)
+		select distinct(c.Guid) as 'Guid', getdate()
+		  from RM_ResourceComputer c
+		 INNER JOIN
+			(
+			select [ResourceGuid]
+			  from dbo.ResourceUpdateSummary
+			 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
+			 group by [ResourceGuid]
+			having max([ModifiedDate]) < GETDATE() - 7
+			 ) as dt 
+			ON c.Guid = dt.ResourceGuid	
+		 where c.IsManaged = 1
 	end
 end
 
