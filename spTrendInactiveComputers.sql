@@ -102,7 +102,7 @@ begin
 					  from dbo.ResourceUpdateSummary
 					 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
 					 group by [ResourceGuid]
-					having max([ModifiedDate]) < GETDATE() - 14
+					having max([ModifiedDate]) < GETDATE() - 17
 					 ) as dt 
 					ON c.Guid = dt.ResourceGuid	
 				 where c.IsManaged = 1
