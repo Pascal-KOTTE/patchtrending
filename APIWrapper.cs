@@ -93,7 +93,6 @@ namespace Symantec.CWoC.APIWrappers
                     return Convert.ToInt32(result);
                 }
             } catch (Exception e) {
-                Console.WriteLine("Error: {0}\nException message = {1}\nStack trace = {2}.", e.Message, e.InnerException, e.StackTrace);
                 throw new Exception("Failed to execute scalar SQL command...");
             }
         }

@@ -54,7 +54,7 @@ namespace Symantec.CWoC.PatchTrending {
             }
 
             try {
-                string sql = "select top 1 1 from TREND_ActiveComputerCounts";
+                string sql = "select top 1 1 from TREND_InactiveComputerCounts";
                 if (DatabaseAPI.ExecuteScalar(sql) == 1) {
                     inactive_computer_trend = true;
                 }
