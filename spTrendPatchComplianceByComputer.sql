@@ -6,11 +6,7 @@ as
       COMPLIANCE BY COMPUTER TRENDING
 */
 -- PART I: Make sure underlying infrastructure exists and is ready to use
-if (exists(select 1 from sys.objects where name = 'PM_TRENDS2_TEMP' and type = 'U'))
-begin
-	truncate table PM_TRENDS2_TEMP
-end
-else
+if (not exists(select 1 from sys.objects where name = 'PM_TRENDS2_TEMP' and type = 'U'))
 begin
 CREATE TABLE [dbo].[PM_TRENDS2_TEMP](
 	[_ResourceGuid] [uniqueidentifier] NOT NULL,
@@ -51,6 +47,7 @@ if (select MAX(_exec_time) from TREND_WindowsCompliance_ByComputer) <  dateadd(h
 begin
 
 -- Get the compliance by update to a "temp" table
+truncate table PM_TRENDS2_TEMP
 insert into PM_TRENDS2_TEMP
 exec spPMWindows_ComplianceByComputer
 							@OperatingSystem = '%',
@@ -76,3 +73,7 @@ select (ISNULL(@id + 1, 1)), GETDATE() as '_Exec_time', CAST(compliance as decim
  order by CAST(compliance as decimal)
 
 end
+
+ select *
+   from TREND_WindowsCompliance_ByComputer
+  where _exec_id = (select max(_exec_id from TREND_WindowsCompliance_ByComputer)
