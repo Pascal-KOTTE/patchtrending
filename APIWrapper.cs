@@ -92,7 +92,7 @@ namespace Symantec.CWoC.APIWrappers
 
                     return Convert.ToInt32(result);
                 }
-            } catch (Exception e) {
+            } catch {
                 throw new Exception("Failed to execute scalar SQL command...");
             }
         }
