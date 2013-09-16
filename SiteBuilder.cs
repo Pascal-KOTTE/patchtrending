@@ -81,7 +81,7 @@ namespace Symantec.CWoC.PatchTrending {
 
                 if (inactive_computer_trend) {
                     EventLog.ReportInfo("Generating Inactive-computers page...");
-                    SaveToFile("inactive-computers.html", StaticStrings.GetInactiveComputersHTML);
+                    SaveToFile("inactive-computers.html", StaticStrings.html_GetInactiveComputers_page);
                     ++Counters.HtmlPages;
                     AddToIndex(ref index, "inactive-computers");
                     GenerateInactiveComputerJs();
@@ -89,7 +89,7 @@ namespace Symantec.CWoC.PatchTrending {
 
                 if (compliance_by_computer) {
                     EventLog.ReportInfo("Generating Compliance-by-computer page...");
-                    SaveToFile("compliance-by-computer.html", StaticStrings.computercompliancehtml);
+                    SaveToFile("compliance-by-computer.html", StaticStrings.html_ComputerCompliance_page);
                     ++Counters.HtmlPages;
                     AddToIndex(ref index, "compliance-by-computer");
                 }
@@ -143,22 +143,22 @@ namespace Symantec.CWoC.PatchTrending {
         public static void GenerateIndex(ref StringBuilder b, bool byComputer, bool inactive) {
             StringBuilder p = new StringBuilder();
 
-            p.Append(StaticStrings.LandingHtml);
+            p.Append(StaticStrings.html_Landing);
             GeneratePcComplPages(byComputer, inactive);
             if (byComputer == true && inactive ==false) {
-                p.Append(StaticStrings.PcComplHtml);
+                p.Append(StaticStrings.html_PcCompl_div);
                 // Add summary data for bottom 75% here
             } else if (byComputer == false && inactive == true) {
-                p.Append(StaticStrings.PcInactiveHtml);
+                p.Append(StaticStrings.html_PcInactive_div);
             } else if (byComputer == false && inactive == false) {
             } else {
-                p.Append(StaticStrings.PcComplAndInactiveHtml);
+                p.Append(StaticStrings.html_PcComplAndInactive_div);
             }
 
             // p.Append(GetPcComplianceSummary());
 
-            p.Append(StaticStrings.DailySummary);
-            p.Append(StaticStrings.BulletinSearch);
+            p.Append(StaticStrings.html_DailySummary_div);
+            p.Append(StaticStrings.html_BulletinSearch);
             // Add compliance by computer graphs here
             p.AppendLine("<h2 style=\"text-align: center; width:80%\">Custom compliance views</h2>");
             if (b.Length > 0) {
@@ -175,7 +175,7 @@ namespace Symantec.CWoC.PatchTrending {
             p.AppendLine("</body></html>");
             SaveToFile("default.html", p.ToString());
             SaveToFile("default.htm", p.ToString());
-            SaveToFile("getbulletin.html", StaticStrings.GetBulletinHTML);
+            SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
             Counters.HtmlPages += 3;
         }
 
@@ -313,7 +313,7 @@ namespace Symantec.CWoC.PatchTrending {
 
         public static void GenerateGlobalPage() {
             Counters.HtmlPages++;
-            SaveToFile("javascript\\global.js", StaticStrings.GlobalComplianceJavascript);
+            SaveToFile("javascript\\global.js", StaticStrings.js_GlobalCompliance);
             string globalcompliance = "";
             string globalstats = "";
             GetGlobalData(ref globalcompliance, ref globalstats);

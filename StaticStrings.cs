@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Symantec.CWoC.PatchTrending {
     class StaticStrings {
-        #region // public static string GlobalComplianceHtml
-        public static string LandingHtml = @"<html>
+        #region // string html_Landing
+        public static string html_Landing = @"<html>
 	<head>
         <title>{CWoC} Patch Trending home</title>
         <style type=""text/css"">
@@ -224,12 +224,12 @@ namespace Symantec.CWoC.PatchTrending {
 		</script>
 ";
 
-        public static string PcComplHtml = @"
+        public static string html_PcCompl_div = @"
     <hr/>
     <p style=""text-align: center;""><b>Compliance by computer - upper quarter</b></p>
     <div id='pccompl_div' style='width: 1000px; height: 300px;'></div>";
 
-        public static string PcComplAndInactiveHtml = @"
+        public static string html_PcComplAndInactive_div = @"
     <hr/>
     <table style=""width: 80%"">
         <tr>
@@ -243,24 +243,24 @@ namespace Symantec.CWoC.PatchTrending {
     </table>
 ";
 
-        public static string PcInactiveHtml = @"
+        public static string html_PcInactive_div = @"
     <hr/>
     <p style=""text-align: center;""><b>Inactive computers (in % of managed)</b></p>
     <div id='inactivepc_div' style='width: 1000px; height: 300px;'></div>";
 
-        public static string DailySummary = @"
+        public static string html_DailySummary_div = @"
 	<div id=""daily_summary""></div>
 ";
 
-        public static string BulletinSearch = @"
+        public static string html_BulletinSearch = @"
     <hr/>
 	Bulletin name: <input type=""text"" id=""bulletin_name""></input><input type=""button"" value=""View graphs"" onclick=""loadBulletin()""/>
     <hr/>";
 
         #endregion
 
-        #region // public static string GlobalComplianceJavascript
-        public static string GlobalComplianceJavascript = @"
+        #region // string js_GlobalCompliance
+        public static string js_GlobalCompliance = @"
         function drawChart() {
 	        var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
 	        var options2 = { title: '', vAxis: { minValue : 0 }};
@@ -423,8 +423,8 @@ select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed 
 
 #endregion
 
-        #region // string getbulletinhtml
-        public static string GetBulletinHTML = @"<html>
+        #region // string html_GetBulletin_page
+        public static string html_GetBulletin_page = @"<html>
 	<head>
 		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
 	<script type=""text/javascript"">
@@ -481,8 +481,8 @@ select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed 
 </html>";
         #endregion
 
-        #region //string inactivecomputershtml
-        public static string GetInactiveComputersHTML = @"<html>
+        #region //string html_GetInactiveComputers_page
+        public static string html_GetInactiveComputers_page = @"<html>
   <head>
     <title>Inactive computer trending</title>
     <script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
@@ -533,9 +533,8 @@ select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed 
 ";
         #endregion
 
-        #region string computercompliancehtml
-        public static string computercompliancehtml = @"
-<html>
+        #region string html_ComputerCompliance_page
+        public static string html_ComputerCompliance_page = @"<html>
 	<head>
         <title>Compliance by Computer</title>
         <style type='text/css'>
