@@ -533,5 +533,51 @@ select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed 
 ";
         #endregion
 
+        #region string computercompliancehtml
+        public static string computercompliancehtml = @"
+<html>
+	<head>
+        <title>Compliance by Computer</title>
+        <style type='text/css'>
+        ul { width: 60em; }
+        ul li {  float: left; width: 20em;  }
+        br { clear: left; }
+        div.wrapper {  margin-bottom: 1em;}
+		body { font-family: Arial;};
+        </style>
+	</head>
+	<body style='width:1000'>
+		<h2>Compliance by Computer</h2> 
+		<div id='pccompl_div' style='width: 1000px; height: 400px;'></div>
+		<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+		<script src='https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js'></script>
+		<script type='text/javascript' src='javascript/pccompl_full.js'></script>
+		<script type='text/javascript'>
+			google.load('visualization', '1', {packages:['corechart']});
+			google.setOnLoadCallback(drawChart);
+
+			function drawChart() {
+				var options2 = { title: '', vAxis: { minValue : 0 }};
+
+				if (pccompl_full.length > 0) {
+					var d_pccompl = new google.visualization.DataTable();
+					d_pccompl.addColumn('string', 'Compliance in %');
+					d_pccompl.addColumn('number');
+					d_pccompl.addColumn('number');
+					d_pccompl.addColumn('number');
+					d_pccompl.addColumn('number');
+					d_pccompl.addColumn({type:'string', role:'tooltip', 'p': {'html': true}});
+					d_pccompl.addRows(pccompl_full);
+
+					var g_pccompl = new google.visualization.CandlestickChart(document.getElementById('pccompl_div'));
+					g_pccompl.draw(d_pccompl, { legend:'none', tooltip: {isHtml: true}} );
+				}
+
+			}
+			</script>
+	</body>
+</html>
+";
+        #endregion
     }
 }

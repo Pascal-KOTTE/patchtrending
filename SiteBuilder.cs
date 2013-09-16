@@ -87,6 +87,13 @@ namespace Symantec.CWoC.PatchTrending {
                     GenerateInactiveComputerJs();
                 }
 
+                if (compliance_by_computer) {
+                    EventLog.ReportInfo("Generating Compliance-by-computer page...");
+                    SaveToFile("compliance-by-computer.html", StaticStrings.computercompliancehtml);
+                    ++Counters.HtmlPages;
+                    AddToIndex(ref index, "compliance-by-computer");
+                }
+
                 EventLog.ReportInfo("Generating site pages from the layout file...");
                 try {
                     using (StreamReader reader = new StreamReader(filename)) {
@@ -356,7 +363,16 @@ namespace Symantec.CWoC.PatchTrending {
                         + r[1] + ", "
                         + r[2] + ", "
                         + r[3] + ", "
-                        + r[4] + "],");
+                            + r[4] + ", '"
+                        // Compose tooltip:
+                            + "<div style=\"font-family: Arial; font-size: 14px; text-align: center;\">" + r[0] + "% compliant:</div>"
+                            + "<div style=\"font-family: Arial; font-size: 12px;\">"
+                            + "<p> <b>" + r[3] + " computers (" + r[5] + "% of total)</b> </p>"
+                            + "<p> Min = " + r[1]
+                            + ", Prev = " + r[2]
+                        // + "<br/>Curr = " + r[3]
+                            + ", Max = " + r[4]
+                            + " </p></div>'],");
 
                 }
                 // Remove the last comma we inserted
