@@ -275,7 +275,7 @@ namespace Symantec.CWoC.PatchTrending {
 
             if (pccompl.length > 0) {
 		        var d_pccompl = new google.visualization.DataTable();
-                d_pccompl.addColumn('string', 'Compliance in %');
+                d_pccompl.addColumn('number', 'Compliance in %');
 		        d_pccompl.addColumn('number');
 		        d_pccompl.addColumn('number');
 		        d_pccompl.addColumn('number');
@@ -534,47 +534,72 @@ select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed 
         #endregion
 
         #region string html_ComputerCompliance_page
-        public static string html_ComputerCompliance_page = @"<html>
-	<head>
-        <title>Compliance by Computer</title>
-        <style type='text/css'>
-        ul { width: 60em; }
-        ul li {  float: left; width: 20em;  }
-        br { clear: left; }
-        div.wrapper {  margin-bottom: 1em;}
-		body { font-family: Arial;};
-        </style>
-	</head>
-	<body style='width:1000'>
-		<h2>Compliance by Computer</h2> 
-		<div id='pccompl_div' style='width: 1000px; height: 400px;'></div>
-		<script type='text/javascript' src='https://www.google.com/jsapi'></script>
-		<script src='https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js'></script>
-		<script type='text/javascript' src='javascript/pccompl_full.js'></script>
-		<script type='text/javascript'>
-			google.load('visualization', '1', {packages:['corechart']});
-			google.setOnLoadCallback(drawChart);
+        public static string html_ComputerCompliance_page = @"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+	<title>Compliance by Computer</title>
+	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+	<script type='text/javascript' src='javascript/pccompl_full.js'></script>
+	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
+</head>
+<body>
+	<h2>Compliance by Computer</h2> 
+    <div id='dashboard'>
+        <div id='chart' style='width: 915px; height: 400px;'></div>
+        <div id='control' style='width: 915px; height: 50px;'></div>
+    </div>
+  </body>
+	<script type='text/javascript'>
+		function drawVisualization() {
+			var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
 
-			function drawChart() {
-				var options2 = { title: '', vAxis: { minValue : 0 }};
+			var control = new google.visualization.ControlWrapper({
+					'controlType': 'ChartRangeFilter',
+					'containerId': 'control',
+					'options': {
+					'filterColumnIndex': 0,
+					'ui': {
+						'chartType': 'LineChart',
+						'chartOptions': {
+							'chartArea': {'width': '90%'},
+							'hAxis': {'baselineColor': 'none'}
+						},
+						'chartView': {
+							'columns': [0, 3]
+						},
+						'minRangeSize': 10
+						}
+					},
+					'state': {'range': {'start': 80, 'end': 100}}
+				});
 
-				if (pccompl_full.length > 0) {
-					var d_pccompl = new google.visualization.DataTable();
-					d_pccompl.addColumn('string', 'Compliance in %');
-					d_pccompl.addColumn('number');
-					d_pccompl.addColumn('number');
-					d_pccompl.addColumn('number');
-					d_pccompl.addColumn('number');
-					d_pccompl.addColumn({type:'string', role:'tooltip', 'p': {'html': true}});
-					d_pccompl.addRows(pccompl_full);
+			var chart = new google.visualization.ChartWrapper({
+				'chartType': 'CandlestickChart',
+				'containerId': 'chart',
+				'options': {
+				'chartArea': {'height': '80%', 'width': '90%'},
+				'tooltip': {isHtml: true},
+				'hAxis': {'slantedText': false},
+				'vAxis': {'viewWindow': {'min': 0}},
+				'legend': {'position': 'none'}
+				},
+			});
 
-					var g_pccompl = new google.visualization.CandlestickChart(document.getElementById('pccompl_div'));
-					g_pccompl.draw(d_pccompl, { legend:'none', tooltip: {isHtml: true}} );
-				}
+			var d_pccompl = new google.visualization.DataTable();
+			d_pccompl.addColumn('number', 'Compliance in %');
+			d_pccompl.addColumn('number');
+			d_pccompl.addColumn('number');
+			d_pccompl.addColumn('number');
+			d_pccompl.addColumn('number');
+			d_pccompl.addColumn({type:'string', role:'tooltip', 'p': {'html': true}});
+			d_pccompl.addRows(pccompl_full);
 
-			}
-			</script>
-	</body>
+			dashboard.bind(control, chart);
+			dashboard.draw(d_pccompl);
+		}
+
+		google.setOnLoadCallback(drawVisualization);
+	</script>
 </html>
 ";
         #endregion

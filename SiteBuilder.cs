@@ -343,7 +343,7 @@ namespace Symantec.CWoC.PatchTrending {
 
                 foreach (DataRow r in t.Rows) {
                     if (Convert.ToInt32(r[0]) > bottom) {
-                        b.AppendLine("['" + r[0].ToString() + "', "
+                        b.AppendLine("[" + r[0].ToString() + ", "
                             + r[1] + ", "
                             + r[2] + ", "
                             + r[3] + ", "
@@ -358,8 +358,7 @@ namespace Symantec.CWoC.PatchTrending {
                             + ", Max = " + r[4]
                             + " </p></div>'],");
                     }
-                    // Do not add tooltip to full table?
-                    c.AppendLine("['" + r[0].ToString() + "', "
+                    c.AppendLine("[" + r[0].ToString() + ", "
                         + r[1] + ", "
                         + r[2] + ", "
                         + r[3] + ", "
