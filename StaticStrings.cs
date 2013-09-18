@@ -33,6 +33,7 @@ namespace Symantec.CWoC.PatchTrending {
         public static string LandingJs = @"
 	<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
     <script src=""https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js""></script>
+	<script type=""text/javascript"" src=""javascript/helper.js""></script>
 	<script type=""text/javascript"" src=""javascript/global_0.js""></script>
 	<script type=""text/javascript"" src=""javascript/global_1.js""></script>
     <script type=""text/javascript"" src=""javascript/pccompl.js""></script>
@@ -265,10 +266,12 @@ namespace Symantec.CWoC.PatchTrending {
 	        var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
 	        var options2 = { title: '', vAxis: { minValue : 0 }};
 
+			GLOBAL_0 = formatDateString(GLOBAL_0, 0);
 		    var d_global_0 = google.visualization.arrayToDataTable(GLOBAL_0);
 		    var g_global_0 = new google.visualization.LineChart(document.getElementById('global_div_0'));
 		    g_global_0.draw(d_global_0, options1);
 
+			GLOBAL_1 = formatDateString(GLOBAL_1, 0);
 		    var d_global_1 = google.visualization.arrayToDataTable(GLOBAL_1);
 		    var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
 		    g_global_1.draw(d_global_1, options2);
@@ -288,7 +291,7 @@ namespace Symantec.CWoC.PatchTrending {
             }
 
             if (inactive_computers_pc.length > 0) {
-                var d_inactive = google.visualization.arrayToDataTable(inactive_computers_pc);
+                var d_inactive = google.visualization.arrayToDataTable(formatDateString(inactive_computers_pc, 0));
                 var g_inactive = new google.visualization.LineChart(document.getElementById('inactivepc_div'));
                 g_inactive.draw(d_inactive, {colors: ['orange', 'red', 'royalblue', 'forestgreen']});	
             }
@@ -429,6 +432,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 <head>
 	<title>Bulletin detailed view</title>
 	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+	<script type=""text/javascript"" src=""javascript/helper.js""></script>
 	<script type='text/javascript' src='javascript/pccompl_full.js'></script>
 	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
 </head>
@@ -468,12 +472,6 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 		
 			b = escapeBulletin(bulletin);			
 			var data_compl = window[b + '_0'];
-			for (var i = 1; i < data_compl.length; i++) {
-				data_compl[i][0] = data_compl[i][0].split(' ');
-				data_compl[i][0] = data_compl[i][0][0].split('/');
-				data_compl[i][0] = data_compl[i][0].reverse().join('-');
-				data_compl[i][0] = new Date(Date.parse(data_compl[i][0]));
-			}
 
 			var dashboard_compl = new google.visualization.Dashboard(document.getElementById('dashboard_compl'));
 			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
@@ -508,18 +506,12 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 				},
 			});
 
-			var d_compl = new google.visualization.arrayToDataTable(data_compl);
+			var d_compl = new google.visualization.arrayToDataTable(formatToDate(data_compl, 0));
 
 			dashboard_compl.bind(control_compl, chart_compl);
 			dashboard_compl.draw(d_compl);
 
-						var data_vuln = window[b + '_1'];
-			for (var i = 1; i < data_vuln.length; i++) {
-				data_vuln[i][0] = data_vuln[i][0].split(' ');
-				data_vuln[i][0] = data_vuln[i][0][0].split('/');
-				data_vuln[i][0] = data_vuln[i][0].reverse().join('-');
-				data_vuln[i][0] = new Date(Date.parse(data_vuln[i][0]));
-			}
+			var data_vuln = window[b + '_1'];
 
 			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
 			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
@@ -554,7 +546,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 				},
 			});
 
-			var d_vuln = new google.visualization.arrayToDataTable(data_vuln);
+			var d_vuln = new google.visualization.arrayToDataTable(formatToDate(data_vuln, 0));
 
 			dashboard_vuln.bind(control_vuln, chart_vuln);
 			dashboard_vuln.draw(d_vuln);
@@ -572,6 +564,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
   <head>
     <title>Inactive computer trending</title>
     <script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
+	<script type=""text/javascript"" src=""javascript/helper.js""></script>
 	<script type=""text/javascript"" src=""javascript/inactive_computers.js""></script>
 	<script type=""text/javascript"" src=""javascript/inactive_computers_pc.js""></script>
     <script type=""text/javascript"">
@@ -581,8 +574,10 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	  var data;
 	  var options;
 
+      inactive_computer = formatDateString(inactive_computer, 0);
+      inactive_computer_pc = formatDateString(inactive_computer_pc, 0);
+
       function drawChart() {
-        
         var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
         chart.draw(data, options);	
       }
@@ -591,7 +586,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	  function switch_view() {
 		if (percent) {
 			percent = false;
-			data = google.visualization.arrayToDataTable(inactive_computers_pc);
+			data = google.visualization.arrayToDataTable(formatDateString(inactive_computers_pc, 0));
 	        options = {
 			  title: '(in % of managed machines)', 
 			  colors: ['orange', 'red', 'royalblue', 'forestgreen']
@@ -599,7 +594,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 			drawChart();
 		} else {
 			percent = true;
-			data = google.visualization.arrayToDataTable(inactive_computers);
+			data = google.visualization.arrayToDataTable(formatDateString(inactive_computers, 0));
 	        options = {
 			  title: '(in computer count)',
 			  colors: ['orange', 'red', 'royalblue', 'forestgreen']
@@ -687,6 +682,38 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 		google.setOnLoadCallback(drawVisualization);
 	</script>
 </html>
+";
+        #endregion
+
+        #region Javascript Helper functions
+        public static string js_Helper = @"
+function loadJs(filename){
+	var fileref = document.createElement('script')
+	fileref.setAttribute('type','text/javascript')
+	fileref.setAttribute('src', filename)
+	
+	if (typeof fileref!='undefined')
+		document.getElementsByTagName('head')[0].appendChild(fileref)
+}
+
+function escapeString(b) {
+	var t = b.replace('-', '_');
+	return t.replace('.', '_');
+}
+
+function formatToDate(table, column) {
+	for (var i = 1; i < table.length; i++) {
+		table[i][column] = new Date(Date.parse(table[i][column]));
+	}
+	return table;
+}
+
+function formatDateString(table, column) {
+	for (var i = 1; i < table.length; i++) {
+		table[i][column] = table[i][column].replace('T', ' ');
+	}
+	return table;
+}
 ";
         #endregion
     }
