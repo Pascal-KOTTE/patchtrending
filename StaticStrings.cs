@@ -8,7 +8,7 @@ namespace Symantec.CWoC.PatchTrending {
         public static string html_Landing = @"<html>
 	<head>
         <title>{CWoC} Patch Trending home</title>
-        <style type=""text/css"">
+        <style type='text/css'>
         ul { width: 60em; }
         ul li {  float: left; width: 20em;  }
         br { clear: left; }
@@ -16,13 +16,13 @@ namespace Symantec.CWoC.PatchTrending {
 		body { font-family: Arial;};
         </style>
 	</head>
-    <body style=""width:1000"">
-    <h2 style=""text-align: center; width:80%"">Global Compliance view</h2>
+    <body style='width:1000'>
+    <h2 style='text-align: center; width:80%'>Global Compliance view</h2>
     <hr/>
-    <table style=""width: 80%"">
+    <table style='width: 80%'>
         <tr>
-            <td style=""text-align: center""><b>Installed versus Applicable</b></td> 
-            <td style=""text-align: center""><b>Compliance status in %</b></td>
+            <td style='text-align: center'><b>Installed versus Applicable</b></td> 
+            <td style='text-align: center'><b>Compliance status in %</b></td>
         </tr>
         <tr>
             <td><div id='global_div_1' style='width: 500px; height: 300px;'></div></td>
@@ -31,23 +31,23 @@ namespace Symantec.CWoC.PatchTrending {
     </table>";
 
         public static string LandingJs = @"
-	<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
-    <script src=""https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js""></script>
-	<script type=""text/javascript"" src=""javascript/helper.js""></script>
-	<script type=""text/javascript"" src=""javascript/global_0.js""></script>
-	<script type=""text/javascript"" src=""javascript/global_1.js""></script>
-    <script type=""text/javascript"" src=""javascript/pccompl.js""></script>
-    <script type=""text/javascript"" src=""javascript/inactive_computers.js""></script>
-    <script type=""text/javascript"" src=""javascript/inactive_computers_pc.js""></script>
-	<script type=""text/javascript"" src=""javascript/global.js""></script>
-	<script type=""text/javascript"">
-		google.load(""visualization"", ""1"", {packages:[""corechart""]});
+	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js'></script>
+	<script type='text/javascript' src='javascript/helper.js'></script>
+	<script type='text/javascript' src='javascript/global_0.js'></script>
+	<script type='text/javascript' src='javascript/global_1.js'></script>
+    <script type='text/javascript' src='javascript/pccompl.js'></script>
+    <script type='text/javascript' src='javascript/inactive_computers.js'></script>
+    <script type='text/javascript' src='javascript/inactive_computers_pc.js'></script>
+	<script type='text/javascript' src='javascript/global.js'></script>
+	<script type='text/javascript'>
+		google.load('visualization', '1', {packages:['corechart']});
 		google.setOnLoadCallback(drawChart);
 
         function loadBulletin() {
 
-			var bulletin = document.getElementById(""bulletin_name"").value;
-			var jsUrl = ""javascript/"" + escapeBulletin(bulletin) + ""_0.js"";
+			var bulletin = document.getElementById('bulletin_name').value;
+			var jsUrl = 'javascript/' + escapeBulletin(bulletin) + '_0.js';
 
 			new Ajax.Request(jsUrl, {
                 method:'get',
@@ -55,37 +55,37 @@ namespace Symantec.CWoC.PatchTrending {
 					// Handle the response content...
 					if (response.responseText.length > 0) {
 						results = eval(response.responseText);
-						window.location = ""getbulletin.html?"" + bulletin;
+						window.location = 'getbulletin.html?' + bulletin;
 					}
 				}, 
 				onFailure: function() {
-					alert(""Could not find any data to load for bulletin "" + document.getElementById(""bulletin_name"").value);
+					alert('Could not find any data to load for bulletin ' + document.getElementById('bulletin_name').value);
 				}
 
 			});	
 		}
 
 		function escapeBulletin(b) {
-			var t = b.replace(""-"", ""_"");
-            t = t.replace(""."", ""_"");
+			var t = b.replace('-', '_');
+            t = t.replace('.', '_');
 			return t.toUpperCase();
         }
     </script>
-    <script type=""text/javascript"">
+    <script type='text/javascript'>
 
         function numberWithCommas(x) {
-            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "","");
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
 		var msg_a = analyse_compliance();
 		var msg_b = analyse_vulnerability();
 		var msg_c = analyse_pccompl();
 
-		var box = document.getElementById(""daily_summary"");
-		box.innerHTML += ""<hr/><h3>Daily summary</h3>"";
-		box.innerHTML += ""<p>"" + msg_a + ""</p>"";
-		box.innerHTML += ""<p>"" + msg_b + ""</p>"";
-		box.innerHTML += ""<p>"" + msg_c + ""</p>"";
+		var box = document.getElementById('daily_summary');
+		box.innerHTML += '<hr/><h3>Daily summary</h3>';
+		box.innerHTML += '<p>' + msg_a + '</p>';
+		box.innerHTML += '<p>' + msg_b + '</p>';
+		box.innerHTML += '<p>' + msg_c + '</p>';
 
 		function analyse_compliance () {
 			var length = GLOBAL_0.length;
@@ -107,28 +107,28 @@ namespace Symantec.CWoC.PatchTrending {
 				}
 			}
 			var delta = last[1] - first[1];
-			var append = """";
+			var append = '';
 			if (delta > 0) {
-				append = ""+"";
+				append = '+';
 			}
-			var hist_high = """";
-			var hist_low = """";
+			var hist_high = '';
+			var hist_low = '';
 
 			if (high_point[1] == last[1])
-				hist_high = ""We are at a historical high from the "" + (length -1) + "" records available. "";
+				hist_high = 'We are at a historical high from the ' + (length -1) + ' records available. ';
 			else
-				hist_high = ""The historical high value of "" + Math.round(high_point[1]*100)/100 + ""% was recorded on "" + high_point[0] + "". "";
+				hist_high = 'The historical high value of ' + Math.round(high_point[1]*100)/100 + '% was recorded on ' + high_point[0] + '. ';
 
 			if 	(low_point[1] == last[1])
-				hist_low = ""We are at a historical low from the "" + (length -1) + "" records available. "";
+				hist_low = 'We are at a historical low from the ' + (length -1) + ' records available. ';
 			else
-				hist_low = ""The historical low value of "" + Math.round(low_point[1]*100)/100 + ""% was recorded on "" + low_point[0] + "". "";
+				hist_low = 'The historical low value of ' + Math.round(low_point[1]*100)/100 + '% was recorded on ' + low_point[0] + '. ';
 
-			var msg = ""Compliance is at <b>"" + Math.round(last[1]*100)/100 
-					+ ""%</b> ("" + last[0] + ""), ""
-					+ ""from "" + Math.round(first[1]*100)/100 
-					+ ""% ("" + append + """" + Math.round(delta*100)/100
-					+ ""%) on the "" + first[0] + "". "" + hist_high + hist_low
+			var msg = 'Compliance is at <b>' + Math.round(last[1]*100)/100 
+					+ '%</b> (' + last[0] + '), '
+					+ 'from ' + Math.round(first[1]*100)/100 
+					+ '% (' + append + '' + Math.round(delta*100)/100
+					+ '%) on the ' + first[0] + '. ' + hist_high + hist_low
 			;
 
 			return msg;
@@ -155,29 +155,29 @@ namespace Symantec.CWoC.PatchTrending {
 			}
 
 			var delta = last[3] - first[3];
-			var append = """";
+			var append = '';
 			if (delta > 0) {
-				append = ""+"";
+				append = '+';
 			}
 
-			var hist_high = """";
-			var hist_low = """";
+			var hist_high = '';
+			var hist_low = '';
 
 			if (high_point[1] == last[1])
-				hist_high = ""We are at a historical high from the "" + (length -1) + "" records available. "";
+				hist_high = 'We are at a historical high from the ' + (length -1) + ' records available. ';
 			else
-				hist_high = ""The historical high value of "" + numberWithCommas(high_point[3]) + "" vulnerable updates was recorded on "" + high_point[0] + "". "";
+				hist_high = 'The historical high value of ' + numberWithCommas(high_point[3]) + ' vulnerable updates was recorded on ' + high_point[0] + '. ';
 
 			if 	(low_point[1] == last[1])
-				hist_low = ""We are at a historical low from the "" + (length -1) + "" records available. "";
+				hist_low = 'We are at a historical low from the ' + (length -1) + ' records available. ';
 			else
-				hist_low = ""The historical low value of "" + numberWithCommas(low_point[3]) + "" vulnerable updates was recorded on "" + low_point[0] + "". "";
+				hist_low = 'The historical low value of ' + numberWithCommas(low_point[3]) + ' vulnerable updates was recorded on ' + low_point[0] + '. ';
 
-			var msg = ""We currently have <b>"" + numberWithCommas(last[3])
-					+ "" vulnerable updates</b> ("" + last[0] + ""), ""
-					+ ""from "" + numberWithCommas(first[3])
-					+ "" vulnerable updates ("" + append + """" + numberWithCommas(delta)
-					+ "") on the "" + first[0] + "". "" + hist_high + hist_low
+			var msg = 'We currently have <b>' + numberWithCommas(last[3])
+					+ ' vulnerable updates</b> (' + last[0] + '), '
+					+ 'from ' + numberWithCommas(first[3])
+					+ ' vulnerable updates (' + append + '' + numberWithCommas(delta)
+					+ ') on the ' + first[0] + '. ' + hist_high + hist_low
 			;
 
 			return msg;
@@ -227,15 +227,15 @@ namespace Symantec.CWoC.PatchTrending {
 
         public static string html_PcCompl_div = @"
     <hr/>
-    <p style=""text-align: center;""><b>Compliance by computer - upper quarter</b></p>
+    <p style='text-align: center;'><b>Compliance by computer - upper quarter</b></p>
     <div id='pccompl_div' style='width: 1000px; height: 300px;'></div>";
 
         public static string html_PcComplAndInactive_div = @"
     <hr/>
-    <table style=""width: 80%"">
+    <table style='width: 80%'>
         <tr>
-            <td style=""text-align: center""><b>Compliance by Computer (85%+)</b></td> 
-            <td style=""text-align: center""><b>Inactive computers (in % of managed)</b></td>
+            <td style='text-align: center'><b>Compliance by Computer (85%+)</b></td> 
+            <td style='text-align: center'><b>Inactive computers (in % of managed)</b></td>
         </tr>
         <tr>
             <td><div id='pccompl_div' style='width: 500px; height: 300px;'></div></td>
@@ -246,16 +246,16 @@ namespace Symantec.CWoC.PatchTrending {
 
         public static string html_PcInactive_div = @"
     <hr/>
-    <p style=""text-align: center;""><b>Inactive computers (in % of managed)</b></p>
+    <p style='text-align: center;'><b>Inactive computers (in % of managed)</b></p>
     <div id='inactivepc_div' style='width: 1000px; height: 300px;'></div>";
 
         public static string html_DailySummary_div = @"
-	<div id=""daily_summary""></div>
+	<div id='daily_summary'></div>
 ";
 
         public static string html_BulletinSearch = @"
     <hr/>
-	Bulletin name: <input type=""text"" id=""bulletin_name""></input><input type=""button"" value=""View graphs"" onclick=""loadBulletin()""/>
+	Bulletin name: <input type='text' id='bulletin_name'></input><input type='button' value='View graphs' onclick='loadBulletin()'/>
     <hr/>";
 
         #endregion
@@ -432,7 +432,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 <head>
 	<title>Bulletin detailed view</title>
 	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
-	<script type=""text/javascript"" src=""javascript/helper.js""></script>
+	<script type='text/javascript' src='javascript/helper.js'></script>
 	<script type='text/javascript' src='javascript/pccompl_full.js'></script>
 	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
 </head>
@@ -563,12 +563,12 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
         public static string html_GetInactiveComputers_page = @"<html>
   <head>
     <title>Inactive computer trending</title>
-    <script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
-	<script type=""text/javascript"" src=""javascript/helper.js""></script>
-	<script type=""text/javascript"" src=""javascript/inactive_computers.js""></script>
-	<script type=""text/javascript"" src=""javascript/inactive_computers_pc.js""></script>
-    <script type=""text/javascript"">
-      google.load(""visualization"", ""1"", {packages:[""corechart""]});
+    <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+	<script type='text/javascript' src='javascript/helper.js'></script>
+	<script type='text/javascript' src='javascript/inactive_computers.js'></script>
+	<script type='text/javascript' src='javascript/inactive_computers_pc.js'></script>
+    <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['corechart']});
       google.setOnLoadCallback(switch_view);
 	  
 	  var data;
@@ -606,9 +606,9 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
   </head>
   <body>
 	<h2>Inactive computers over time</h2>
-    <div id=""chart_div"" style=""width: 900px; height: 500px;""></div>
-	<a href=""javascript:switch_view()"" title=""Click to switch between Computer Count view and % of Managed machines view."">Switch View</a>
-	<p><b><i>Note:</i></b> ""7 days ++"" reports the number of new inactive computers from the previous snapshot. ""7 days --"" reports the count of computers that were inactive in the previous snapshos and are not in the current snapshot (they are back to Active!).</p>
+    <div id='chart_div' style='width: 900px; height: 500px;'></div>
+	<a href='javascript:switch_view()' title='Click to switch between Computer Count view and % of Managed machines view.'>Switch View</a>
+	<p><b><i>Note:</i></b> '7 days ++' reports the number of new inactive computers from the previous snapshot. '7 days --' reports the count of computers that were inactive in the previous snapshos and are not in the current snapshot (they are back to Active!).</p>
   </body>
 </html>
 ";
