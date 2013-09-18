@@ -687,6 +687,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 
         #region Javascript Helper functions
         public static string js_Helper = @"
+
 function loadJs(filename){
 	var fileref = document.createElement('script')
 	fileref.setAttribute('type','text/javascript')
@@ -710,7 +711,20 @@ function formatToDate(table, column) {
 
 function formatDateString(table, column) {
 	for (var i = 1; i < table.length; i++) {
-		table[i][column] = table[i][column].replace('T', ' ');
+		table[i][column] = table[i][column].replace('T', ', ');
+		table[i][column] = table[i][column].replace(/\.[0-9][0-9][0-9]/g, ' ');
+		table[i][column] = table[i][column].replace(/201[0-9]-01-/g, 'Jan ');
+		table[i][column] = table[i][column].replace(/201[0-9]-02-/g, 'Feb ');
+		table[i][column] = table[i][column].replace(/201[0-9]-03-/g, 'Mar ');
+		table[i][column] = table[i][column].replace(/201[0-9]-04-/g, 'Apr ');
+		table[i][column] = table[i][column].replace(/201[0-9]-05-/g, 'May ');
+		table[i][column] = table[i][column].replace(/201[0-9]-06-/g, 'Jun ');
+		table[i][column] = table[i][column].replace(/201[0-9]-07-/g, 'Jul ');
+		table[i][column] = table[i][column].replace(/201[0-9]-08-/g, 'Aug ');
+		table[i][column] = table[i][column].replace(/201[0-9]-09-/g, 'Sep ');
+		table[i][column] = table[i][column].replace(/201[0-9]-10-/g, 'Oct ');
+		table[i][column] = table[i][column].replace(/201[0-9]-11-/g, 'Nov ');
+		table[i][column] = table[i][column].replace(/201[0-9]-12-/g, 'Dec ');
 	}
 	return table;
 }
