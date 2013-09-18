@@ -430,10 +430,10 @@ namespace Symantec.CWoC.PatchTrending {
 
         private static void GetGlobalData(ref string compliance, ref string data) {
             DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_global_compliance_data);
-            data = GetJSONFromTable(t, "global");
+            data = GetJSONFromTable(t, "GLOBAL");
 
             string[,] _compliance = GetComplianceFromTable(t);
-            compliance = GetComplianceJSONFromArray(_compliance, "global");
+            compliance = GetComplianceJSONFromArray(_compliance, "GLOBAL");
         }
 
         private static string GetComplianceJSONFromArray(string[,] t, string bulletin) {

@@ -424,61 +424,147 @@ select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed 
 #endregion
 
         #region // string html_GetBulletin_page
-        public static string html_GetBulletin_page = @"<html>
-	<head>
-		<script type=""text/javascript"" src=""https://www.google.com/jsapi""></script>
-	<script type=""text/javascript"">
+        public static string html_GetBulletin_page = @"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+	<title>Bulletin detailed view</title>
+	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+	<script type='text/javascript' src='javascript/pccompl_full.js'></script>
+	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
+</head>
+<body>
+	<h3>Installed versus Applicable</h3>
+    <div id='dashboard_vuln'>
+        <div id='chart_vuln' style='width: 915px; height: 300px;'></div>
+        <div id='control_vuln' style='width: 915px; height: 50px;'></div>
+    </div>
+	<h3>Compliance in %</h3>
+    <div id='dashboard_compl'>
+        <div id='chart_compl' style='width: 915px; height: 300px;'></div>
+        <div id='control_compl' style='width: 915px; height: 50px;'></div>
+    </div>
+  </body>
+	<script type='text/javascript'>
 		var bulletin = window.location.search.substring(1).toUpperCase();
 
 		function loadjs(filename){
 			var fileref = document.createElement('script')
-			fileref.setAttribute(""type"",""text/javascript"")
-			fileref.setAttribute(""src"", filename)
+			fileref.setAttribute('type','text/javascript')
+			fileref.setAttribute('src', filename)
 			
-			if (typeof fileref!=""undefined"")
-				document.getElementsByTagName(""head"")[0].appendChild(fileref)
+			if (typeof fileref!='undefined')
+				document.getElementsByTagName('head')[0].appendChild(fileref)
 		}
 		
 		function escapeBulletin(b) {
-			var t = b.replace(""-"", ""_"");
-			return t.replace(""."", ""_"");
+			var t = b.replace('-', '_');
+			return t.replace('.', '_');
 		}
 		 
-		function drawChart() {
-			var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
-			var options2 = { title: '', vAxis: { minValue : 0 }};
+		loadjs('javascript/' + escapeBulletin(bulletin) + '_0.js');
+		loadjs('javascript/' + escapeBulletin(bulletin) + '_1.js');
 
-			b = escapeBulletin(bulletin);
+		function drawVisualization() {
+		
+			b = escapeBulletin(bulletin);			
+			var data_compl = window[b + '_0'];
+			for (var i = 1; i < data_compl.length; i++) {
+				data_compl[i][0] = data_compl[i][0].split(' ');
+				data_compl[i][0] = data_compl[i][0][0].split('/');
+				data_compl[i][0] = data_compl[i][0].reverse().join('-');
+				data_compl[i][0] = new Date(Date.parse(data_compl[i][0]));
+			}
 
-			var d_0 = google.visualization.arrayToDataTable(window[b + ""_0""]);
-			var g_0 = new google.visualization.LineChart(document.getElementById('div_0'));
-			g_0.draw(d_0, options1);
+			var dashboard_compl = new google.visualization.Dashboard(document.getElementById('dashboard_compl'));
+			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
 
- 			var d_1 = google.visualization.arrayToDataTable(window[b + ""_1""]);
-			var g_1 = new google.visualization.LineChart(document.getElementById('div_1'));
-			g_1.draw(d_1, options2);
-		}
+			var control_compl = new google.visualization.ControlWrapper({
+					'controlType': 'ChartRangeFilter',
+					'containerId': 'control_compl',
+					'options': {
+					'filterColumnIndex': 0,
+					'ui': {
+						'chartType': 'LineChart',
+						'chartOptions': {
+							'chartArea': {'width': '90%'},
+							'hAxis': {'baselineColor': 'none'}
+						},
+						'chartView': {
+							'columns': [0, 1]
+						}, 'minRangeSize': 7
+						}
+					}
+				});
 
-		loadjs(""javascript/"" + escapeBulletin(bulletin) + ""_0.js"");
-		loadjs(""javascript/"" + escapeBulletin(bulletin) + ""_1.js"");
+			var chart_compl = new google.visualization.ChartWrapper({
+				'chartType': 'LineChart',
+				'containerId': 'chart_compl',
+				'options': {
+				'chartArea': {'height': '80%', 'width': '90%'},
+				'tooltip': {isHtml: false},
+				'hAxis': {'slantedText': false},
+				'vAxis': {'viewWindow': {'min': 0, 'max': 101}},
+				'legend': {'position': 'none'}
+				},
+			});
 
-		google.load(""visualization"", ""1"", {packages:[""corechart""]});
-		google.setOnLoadCallback(drawChart);
+			var d_compl = new google.visualization.arrayToDataTable(data_compl);
 
+			dashboard_compl.bind(control_compl, chart_compl);
+			dashboard_compl.draw(d_compl);
+
+						var data_vuln = window[b + '_1'];
+			for (var i = 1; i < data_vuln.length; i++) {
+				data_vuln[i][0] = data_vuln[i][0].split(' ');
+				data_vuln[i][0] = data_vuln[i][0][0].split('/');
+				data_vuln[i][0] = data_vuln[i][0].reverse().join('-');
+				data_vuln[i][0] = new Date(Date.parse(data_vuln[i][0]));
+			}
+
+			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
+			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
+
+			var control_vuln = new google.visualization.ControlWrapper({
+					'controlType': 'ChartRangeFilter',
+					'containerId': 'control_vuln',
+					'options': {
+					'filterColumnIndex': 0,
+					'ui': {
+						'chartType': 'LineChart',
+						'chartOptions': {
+							'chartArea': {'width': '90%'},
+							'hAxis': {'baselineColor': 'none'}
+						},
+						'chartView': {
+							'columns': [0, 1]
+						}, 'minRangeSize': 7
+						}
+					}
+				});
+
+			var chart_vuln = new google.visualization.ChartWrapper({
+				'chartType': 'LineChart',
+				'containerId': 'chart_vuln',
+				'options': {
+				'chartArea': {'height': '80%', 'width': '90%'},
+				'tooltip': {isHtml: false},
+				'hAxis': {'slantedText': false},
+				'vAxis': {'viewWindow': {'min': 0}},
+				'legend': {'position': 'none'}
+				},
+			});
+
+			var d_vuln = new google.visualization.arrayToDataTable(data_vuln);
+
+			dashboard_vuln.bind(control_vuln, chart_vuln);
+			dashboard_vuln.draw(d_vuln);
+
+			}
+
+		google.setOnLoadCallback(drawVisualization);
 	</script>
-	</head>
-    <body>
-    <h1 id=""t_012"" style=""width: 800px; text-align: center""></h1>
-	<h2>Installed versus Applicable</h2>
-	<div id='div_1' style='width: 800px; height: 300px;'></div>
-	<h2>Compliance status in %</h2>
-	<div id='div_0' style='width: 800px; height: 300px;'></div>
-    <script type=""text/javascript"">
-	    var head_link = ""<a href=\"""" + bulletin + "".html\"">"" + bulletin + ""</a>"";
-	    var t = document.getElementById(""t_012"").innerHTML = head_link;
-    </script>
-</body>
-</html>";
+</html>
+";
         #endregion
 
         #region //string html_GetInactiveComputers_page
