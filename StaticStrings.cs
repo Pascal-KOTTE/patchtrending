@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Symantec.CWoC.PatchTrending {
     class StaticStrings {
-        #region // string html_Landing
+        #region // Landing (html, javascript)
         public static string html_Landing = @"<html>
 	<head>
         <title>{CWoC} Patch Trending home</title>
@@ -87,15 +87,15 @@ namespace Symantec.CWoC.PatchTrending {
 		box.innerHTML += ""<p>"" + msg_c + ""</p>"";
 
 		function analyse_compliance () {
-			var length = global_0.length;
+			var length = GLOBAL_0.length;
 			var low_point = ['', 100];
 			var high_point = ['', 0];
-			var first = global_0[1];
-			var last = global_0[length -1];
+			var first = GLOBAL_0[1];
+			var last = GLOBAL_0[length -1];
 
 			for (var i = 1; i < length; i++) {
-				current = global_0[i];
-				prev = global_0[i - 1];
+				current = GLOBAL_0[i];
+				prev = GLOBAL_0[i - 1];
 
 				// Track high and low point
 				if (current[1] > high_point[1]) {
@@ -134,15 +134,15 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 
 		function analyse_vulnerability () {
-			var length = global_1.length;
+			var length = GLOBAL_1.length;
 			var low_point = ['', 0, 0, 999999999];
 			var high_point = ['', 0, 0, 0];
-			var first = global_1[1];
-			var last = global_1[length -1];
+			var first = GLOBAL_1[1];
+			var last = GLOBAL_1[length -1];
 
 			for (var i = 1; i < length; i++) {
-				current = global_1[i];
-				prev = global_1[i - 1];
+				current = GLOBAL_1[i];
+				prev = GLOBAL_1[i - 1];
 
 				// Track high and low point
 				if (current[3] > high_point[3]) {
@@ -265,11 +265,11 @@ namespace Symantec.CWoC.PatchTrending {
 	        var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
 	        var options2 = { title: '', vAxis: { minValue : 0 }};
 
-		    var d_global_0 = google.visualization.arrayToDataTable(global_0);
+		    var d_global_0 = google.visualization.arrayToDataTable(GLOBAL_0);
 		    var g_global_0 = new google.visualization.LineChart(document.getElementById('global_div_0'));
 		    g_global_0.draw(d_global_0, options1);
 
-		    var d_global_1 = google.visualization.arrayToDataTable(global_1);
+		    var d_global_1 = google.visualization.arrayToDataTable(GLOBAL_1);
 		    var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
 		    g_global_1.draw(d_global_1, options2);
 
