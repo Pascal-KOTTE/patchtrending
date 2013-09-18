@@ -178,6 +178,7 @@ namespace Symantec.CWoC.PatchTrending {
             SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
             Counters.HtmlPages += 3;
             SaveToFile("javascript\\helper.js", StaticStrings.js_Helper);
+            ++Counters.JsPages;
         }
 
         public static void GenerateUpdatePages() {
