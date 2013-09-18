@@ -310,7 +310,7 @@ namespace Symantec.CWoC.PatchTrending {
                  group by bulletin
                  order by MIN(_exec_time) desc, Bulletin desc";
         public static string sql_get_global_compliance_data = @"
-                         select Convert(Datetime, max(_Exec_time), 101) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
+                         select Convert(varchar, max(_Exec_time), 127) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
                            from TREND_WindowsCompliance_ByUpdate
                           group by _Exec_id order by date";
         public static string sql_get_top10_vulnerable = @"
@@ -411,12 +411,12 @@ select SUM([computer #]), SUM([% of total])
  group by [_exec_id]
 ";
         public static string sql_get_inactive_computer_trend = @"
-select timestamp, [Inactive computers (7 days)], [Inactive computers (17 days)], [New inactive computers], [New Active Computers]
+select Convert(varchar, timestamp, 127), [Inactive computers (7 days)], [Inactive computers (17 days)], [New inactive computers], [New Active Computers]
   from TREND_InactiveComputerCounts
  order by _exec_id
 ";
         public static string sql_get_inactive_computer_percent = @"
-select timestamp, cast([Inactive computers (7 days)] as money) /  cast([Managed machines] as money) * 100 as '7-days inactive (% of managed)', cast([Inactive computers (17 days)] as money) /  cast([Managed machines] as money) * 100 as '17-days inactive (% of managed)', CAST([New inactive computers] as money) / CAST([Managed machines] AS money) * 100 as '++ (% of managed)', CAST([New active computers] as money) / CAST([Managed machines] as money) * 100 as '-- (% of managed)'
+select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as money) /  cast([Managed machines] as money) * 100 as '7-days inactive (% of managed)', cast([Inactive computers (17 days)] as money) /  cast([Managed machines] as money) * 100 as '17-days inactive (% of managed)', CAST([New inactive computers] as money) / CAST([Managed machines] AS money) * 100 as '++ (% of managed)', CAST([New active computers] as money) / CAST([Managed machines] as money) * 100 as '-- (% of managed)'
   from TREND_InactiveComputerCounts
  order by _exec_id
      ";
