@@ -28,12 +28,14 @@ namespace Symantec.CWoC.PatchTrending {
     class SiteBuilder {
 
         public string version = "version 12";
+        private StringBuilder SiteMap;
 
         public SiteBuilder() {
             Timer.Init();
             Counters.Init();
 
             Altiris.NS.Logging.EventLog.ReportInfo("SiteBuilder is starting.");
+            SiteMap = new StringBuilder();
 
             // Make sure we have the required sub-folder for javascript files
             if (!Directory.Exists("javascript")) {
@@ -79,10 +81,11 @@ namespace Symantec.CWoC.PatchTrending {
 
                 if (inactive_computer_trend) {
                     EventLog.ReportInfo("Generating Inactive-computers page...");
+                    GenerateInactiveComputerJs();
                     SaveToFile("inactive-computers.html", StaticStrings.html_GetInactiveComputers_page);
                     ++Counters.HtmlPages;
                     AddToIndex(ref index, "inactive-computers");
-                    GenerateInactiveComputerJs();
+                    AddToSiteMap("inactive-computers", "inactive-computers.html");
                 }
 
                 if (compliance_by_computer) {
@@ -90,6 +93,7 @@ namespace Symantec.CWoC.PatchTrending {
                     SaveToFile("compliance-by-computer.html", StaticStrings.html_ComputerCompliance_page);
                     ++Counters.HtmlPages;
                     AddToIndex(ref index, "compliance-by-computer");
+                    AddToSiteMap("compliance-by-computer", "compliance-by-computer.html");
                 }
 
                 EventLog.ReportInfo("Generating site pages from the layout file...");
@@ -123,6 +127,9 @@ namespace Symantec.CWoC.PatchTrending {
                     Console.ReadLine();
                 }
 
+                SaveToFile("sitemap.html", SiteMap.ToString());
+                ++Counters.HtmlPages;
+
                 Timer.Stop();
                 string msg = string.Format("SiteBuilder took {0} ms to generate {1} pages ({2} html and {3} javascript) with {4} sql queries executed.", Timer.duration(), Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
                 Altiris.NS.Logging.EventLog.ReportInfo(msg);
@@ -133,7 +140,7 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void AddToIndex(ref StringBuilder b, string s) {
-            b.Append("<li><a href=\"" + s + ".html\">" + s + "</a></li>");
+            b.AppendFormat("<li><a href='{0}.html'>{0}</a></li>", s);
         }
 
         private void GenerateIndex(ref StringBuilder b, bool byComputer, bool inactive) {
@@ -218,6 +225,7 @@ namespace Symantec.CWoC.PatchTrending {
         private string GetJSString(string s) {
             s = s.Replace('-', '_');
             s = s.Replace('.', '_');
+            s = s.ToLower();
             return s;
         }
 
@@ -253,6 +261,8 @@ namespace Symantec.CWoC.PatchTrending {
 
         private int GeneratePage(DataTable t, string pagename, string bulletin) {
 
+            AddToSiteMap(pagename + "<ul>", pagename + ".html");
+
             StringBuilder drawChart = new StringBuilder();
             StringBuilder htmlDivs = new StringBuilder();
             StringBuilder jsInclude = new StringBuilder();
@@ -281,10 +291,12 @@ namespace Symantec.CWoC.PatchTrending {
             foreach (DataRow r in t.Rows) {
 
                 entry = r[0].ToString();
-                curr_bulletin = GetJSString(entry);
+                curr_bulletin = GetJSString(entry).ToLower();
                 curr_data = "d_" + curr_bulletin;
                 curr_graph = "g_" + curr_bulletin;
                 curr_div = curr_bulletin + "_div";
+
+                AddToSiteMap(curr_bulletin,  "getbulletin.html?" + curr_bulletin);
 
                 jsInclude.AppendFormat("\t<script type=\"text/javascript\" src=\"javascript/{0}_0.js\"></script>\n"
                     + "\t<script type=\"text/javascript\" src=\"javascript/{0}_1.js\"></script>\n", curr_bulletin);
@@ -344,6 +356,7 @@ namespace Symantec.CWoC.PatchTrending {
             GenerateBulletinHtml(ref htmlDivs, ref jsInclude, pagename);
             Counters.HtmlPages++;
 
+            SiteMap.Append("</ul>");
             return t.Rows.Count;
         }
 
@@ -359,7 +372,6 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void GenerateBulletinHtml(ref StringBuilder divs, ref StringBuilder jsfiles, string pagename) {
-
             string html = String.Format(FormattedStrings.html_BulletinPage, pagename, divs.ToString(), jsfiles.ToString());
             SaveToFile(pagename + ".html", html);
         }
@@ -388,10 +400,10 @@ namespace Symantec.CWoC.PatchTrending {
 
         private void GetGlobalData(ref string compliance, ref string data) {
             DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_global_compliance_data);
-            data = GetJSONFromTable(t, "GLOBAL");
+            data = GetJSONFromTable(t, "global");
 
             string[,] _compliance = GetComplianceFromTable(t);
-            compliance = GetComplianceJSONFromArray(_compliance, "GLOBAL");
+            compliance = GetComplianceJSONFromArray(_compliance, "global");
         }
 
         private string GetComplianceJSONFromArray(string[,] t, string bulletin) {
@@ -504,5 +516,8 @@ namespace Symantec.CWoC.PatchTrending {
 
         }
 
+        private void AddToSiteMap(string page, string url) {
+            SiteMap.AppendFormat("<li><a href='{1}'>{0}</a></li>\n", page, url);
+        }
     }
 }

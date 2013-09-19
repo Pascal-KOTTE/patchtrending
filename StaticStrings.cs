@@ -88,15 +88,15 @@ namespace Symantec.CWoC.PatchTrending {
 		box.innerHTML += '<p>' + msg_c + '</p>';
 
 		function analyse_compliance () {
-			var length = GLOBAL_0.length;
+			var length = global_0.length;
 			var low_point = ['', 100];
 			var high_point = ['', 0];
-			var first = GLOBAL_0[1];
-			var last = GLOBAL_0[length -1];
+			var first = global_0[1];
+			var last = global_0[length -1];
 
 			for (var i = 1; i < length; i++) {
-				current = GLOBAL_0[i];
-				prev = GLOBAL_0[i - 1];
+				current = global_0[i];
+				prev = global_0[i - 1];
 
 				// Track high and low point
 				if (current[1] > high_point[1]) {
@@ -135,15 +135,15 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 
 		function analyse_vulnerability () {
-			var length = GLOBAL_1.length;
+			var length = global_1.length;
 			var low_point = ['', 0, 0, 999999999];
 			var high_point = ['', 0, 0, 0];
-			var first = GLOBAL_1[1];
-			var last = GLOBAL_1[length -1];
+			var first = global_1[1];
+			var last = global_1[length -1];
 
 			for (var i = 1; i < length; i++) {
-				current = GLOBAL_1[i];
-				prev = GLOBAL_1[i - 1];
+				current = global_1[i];
+				prev = global_1[i - 1];
 
 				// Track high and low point
 				if (current[3] > high_point[3]) {
@@ -266,13 +266,13 @@ namespace Symantec.CWoC.PatchTrending {
 	        var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
 	        var options2 = { title: '', vAxis: { minValue : 0 }};
 
-			GLOBAL_0 = formatDateString(GLOBAL_0, 0);
-		    var d_global_0 = google.visualization.arrayToDataTable(GLOBAL_0);
+			global_0 = formatDateString(global_0, 0);
+		    var d_global_0 = google.visualization.arrayToDataTable(global_0);
 		    var g_global_0 = new google.visualization.LineChart(document.getElementById('global_div_0'));
 		    g_global_0.draw(d_global_0, options1);
 
-			GLOBAL_1 = formatDateString(GLOBAL_1, 0);
-		    var d_global_1 = google.visualization.arrayToDataTable(GLOBAL_1);
+			global_1 = formatDateString(global_1, 0);
+		    var d_global_1 = google.visualization.arrayToDataTable(global_1);
 		    var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
 		    g_global_1.draw(d_global_1, options2);
 
@@ -449,7 +449,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
     </div>
   </body>
 	<script type='text/javascript'>
-		var bulletin = window.location.search.substring(1).toUpperCase();
+		var bulletin = window.location.search.substring(1).toLowerCase();
 
 		function loadjs(filename){
 			var fileref = document.createElement('script')
