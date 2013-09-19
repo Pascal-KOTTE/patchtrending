@@ -33,6 +33,8 @@ namespace Symantec.CWoC.PatchTrending {
             Timer.Init();
             Counters.Init();
 
+            Altiris.NS.Logging.EventLog.ReportInfo("SiteBuilder is starting.");
+
             // Make sure we have the required sub-folder for javascript files
             if (!Directory.Exists("javascript")) {
                 Directory.CreateDirectory("javascript");
@@ -122,7 +124,7 @@ namespace Symantec.CWoC.PatchTrending {
                 }
 
                 Timer.Stop();
-                string msg = string.Format("SiteBuilder completed in {0} ms, taking {1} ticks to generate {2} pages ({3} " + "html and {4} javascript) with {5} sql queries executed.", Timer.duration(), Timer.tickCount(), Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
+                string msg = string.Format("SiteBuilder took {0} ms to generate {1} pages ({2} html and {3} javascript) with {4} sql queries executed.", Timer.duration(), Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
                 Altiris.NS.Logging.EventLog.ReportInfo(msg);
             } else {
                 Console.WriteLine("We cannot execute anything as the prerequisite table TREND_WindowsCompliance_ByUpdate is missing.");
