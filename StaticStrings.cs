@@ -433,10 +433,10 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	<title>Bulletin detailed view</title>
 	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
 	<script type='text/javascript' src='javascript/helper.js'></script>
-	<script type='text/javascript' src='javascript/pccompl_full.js'></script>
 	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
 </head>
 <body>
+	<h1 id='t_012' style='width: 800px; text-align: center'></h1>
 	<h3>Installed versus Applicable</h3>
     <div id='dashboard_vuln'>
         <div id='chart_vuln' style='width: 915px; height: 300px;'></div>
@@ -555,6 +555,10 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 
 		google.setOnLoadCallback(drawVisualization);
 	</script>
+    <script type='text/javascript'>
+        var head_link =  bulletin;
+        var t = document.getElementById('t_012').innerHTML = head_link;
+    </script>
 </html>
 ";
         #endregion
