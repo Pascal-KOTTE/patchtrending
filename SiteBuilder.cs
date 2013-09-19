@@ -14,58 +14,48 @@ namespace Symantec.CWoC.PatchTrending {
         public static string version = "version 11";
 
         static int Main(string[] args) {
-            Timer.Init();
-            Counters.Init();
-
             string filename = "site-layout.txt";
             if (args.Length == 1) {
                 filename = args[0];
                 EventLog.ReportInfo("The custom site-layout file " + filename + " will be used.");
             }
 
-            string line, pagename;
-            StringBuilder filter = new StringBuilder();
-            StringBuilder index = new StringBuilder();
-            string [] d;
+            SiteBuilder builder = new SiteBuilder();
+            return builder.Build(filename);
+        }
+    }
 
+    class SiteBuilder {
+
+        public string version = "version 12";
+
+        public SiteBuilder() {
+            Timer.Init();
+            Counters.Init();
+
+            // Make sure we have the required sub-folder for javascript files
             if (!Directory.Exists("javascript")) {
                 Directory.CreateDirectory("javascript");
             }
+        }
+
+        public int Build(string filename) {
+            string line, pagename;
+            StringBuilder filter = new StringBuilder();
+            StringBuilder index = new StringBuilder();
+            string[] d;
+
 
             /* Check that we can run against the database (I.e. prerequisite table does exist) */
-            bool compliance_by_update = false;
-            bool compliance_by_computer = false;
-            bool inactive_computer_trend = false;
-
-            try {
-                string sql = "select top 1 1 from TREND_WindowsCompliance_ByUpdate";
-                if (DatabaseAPI.ExecuteScalar(sql) == 1) {
-                    compliance_by_update = true;
-                }
-            } catch {
-            }
-
-            try {
-                string sql = "select 1 from TREND_WindowsCompliance_ByComputer t group by t._Exec_id having MAX(_exec_id) > 1";
-                if (DatabaseAPI.ExecuteScalar(sql) == 1) {
-                    compliance_by_computer = true;
-                }
-            } catch {
-            }
-
-            try {
-                string sql = "select top 1 1 from TREND_InactiveComputerCounts";
-                if (DatabaseAPI.ExecuteScalar(sql) == 1) {
-                    inactive_computer_trend = true;
-                }
-            } catch {
-            }
-
+            bool compliance_by_update = TestSql("select top 1 1 from TREND_WindowsCompliance_ByUpdate");
+            bool compliance_by_computer = TestSql("select 1 from TREND_WindowsCompliance_ByComputer t group by t._Exec_id having MAX(_exec_id) > 1");
+            bool inactive_computer_trend = TestSql("select top 1 1 from TREND_InactiveComputerCounts");
 
             if (compliance_by_update) {
 
                 SaveToFile("javascript\\helper.js", StaticStrings.js_Helper);
                 ++Counters.JsPages;
+
                 SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
                 ++Counters.HtmlPages;
 
@@ -132,36 +122,38 @@ namespace Symantec.CWoC.PatchTrending {
                 }
 
                 Timer.Stop();
-                string msg = string.Format("SiteBuilder completed in {0} ms, taking {1} ticks to generate {2} pages ({3} " + "html and {4} javascript) with {5} sql queries executed.", Timer.duration(), Timer.tickCount(),
-                                                Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
+                string msg = string.Format("SiteBuilder completed in {0} ms, taking {1} ticks to generate {2} pages ({3} " + "html and {4} javascript) with {5} sql queries executed.", Timer.duration(), Timer.tickCount(), Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
                 Altiris.NS.Logging.EventLog.ReportInfo(msg);
             } else {
                 Console.WriteLine("We cannot execute anything as the prerequisite table TREND_WindowsCompliance_ByUpdate is missing.");
             }
-
             return 0;
         }
 
-        public static void AddToIndex(ref StringBuilder b, string s) {
+        private void AddToIndex(ref StringBuilder b, string s) {
             b.Append("<li><a href=\"" + s + ".html\">" + s + "</a></li>");
         }
 
-        public static void GenerateIndex(ref StringBuilder b, bool byComputer, bool inactive) {
+        private void GenerateIndex(ref StringBuilder b, bool byComputer, bool inactive) {
+            
             StringBuilder p = new StringBuilder();
-
             p.Append(StaticStrings.html_Landing);
+
             GeneratePcComplPages(byComputer, inactive);
-            if (byComputer == true && inactive ==false) {
+            
+            if (byComputer == true && inactive == false) {
                 p.Append(StaticStrings.html_PcCompl_div);
             } else if (byComputer == false && inactive == true) {
                 p.Append(StaticStrings.html_PcInactive_div);
             } else if (byComputer == false && inactive == false) {
+                // Nothing to add in this case :D.
             } else {
                 p.Append(StaticStrings.html_PcComplAndInactive_div);
             }
 
             p.Append(StaticStrings.html_DailySummary_div);
             p.Append(StaticStrings.html_BulletinSearch);
+
             // Add compliance by computer graphs here
             p.AppendLine("<h2 style=\"text-align: center; width:80%\">Custom compliance views</h2>");
             if (b.Length > 0) {
@@ -170,153 +162,17 @@ namespace Symantec.CWoC.PatchTrending {
             p.AppendFormat(FormattedStrings.html_footer, version, DateTime.Now.ToString());
             p.Append(StaticStrings.LandingJs);
             p.AppendLine("</body></html>");
+
             SaveToFile("index.html", p.ToString());
             SaveToFile("default.htm", p.ToString());
             Counters.HtmlPages += 2;
         }
 
-        public static void GenerateUpdatePages() {
-            EventLog.ReportInfo("Generating update pages for bulletins now...");
-            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_all_bulletins);
-
-            string bulletin;
-
-            foreach (DataRow r in t.Rows) {
-                bulletin = r[0].ToString();
-                DataTable u = DatabaseAPI.GetTable(string.Format(StaticStrings.sql_get_updates_bybulletin, bulletin));
-                Console.WriteLine("Generating all update graphs for bulletin " + bulletin);
-                GeneratePage(u, bulletin, bulletin);
-            }
-
-        }
-
-        public static int GeneratePage(string pagename, string sql) {
-            return GeneratePage(pagename, "", sql);
-        }
-
-        public static int GeneratePage(string pagename, string filter, string sql) {
-
-            DataTable t;
-            if (filter != "")
-                t = DatabaseAPI.GetTable(string.Format(sql, filter));
-            else
-                t = DatabaseAPI.GetTable(sql);
-
-            if (t.Rows.Count == 0)
-                return 0;
-
-            return GeneratePage(t, pagename, "");
-
-        }
-
-        public static int GeneratePage(DataTable t, string pagename, string bulletin) {
-
-            StringBuilder drawChart = new StringBuilder();
-            StringBuilder htmlDivs = new StringBuilder();
-            StringBuilder jsInclude = new StringBuilder();
-
-            StringBuilder bList = new StringBuilder();
-
-
-            drawChart.AppendLine("function drawChart() {");
-            drawChart.AppendLine("\tvar options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};\n");
-            drawChart.AppendLine("\tvar options2 = { title: '', vAxis: { minValue : 0 }};\n");
-
-            bool isBulletin;
-
-            if (bulletin == "")
-                isBulletin = true;
-            else
-                isBulletin = false;
-
-            string entry = "";
-            string curr_bul = "";
-            string curr_gra = "";
-            string curr_dat = "";
-            string curr_div = "";
-
-            foreach (DataRow r in t.Rows) {
-
-                entry = r[0].ToString();
-                curr_bul = GetJSString(entry);
-                curr_dat = "d_" + curr_bul;
-                curr_gra = "g_" + curr_bul;
-                curr_div = curr_bul + "_div";
-
-                jsInclude.AppendFormat("\t<script type=\"text/javascript\" src=\"javascript/{0}_0.js\"></script>\n", curr_bul);
-                jsInclude.AppendFormat("\t<script type=\"text/javascript\" src=\"javascript/{0}_1.js\"></script>\n", curr_bul);
-
-                // Generate the compliance % graph js
-                drawChart.AppendFormat("\t\tvar {0}_0 = google.visualization.arrayToDataTable(formatDateString({1}_0, 0));\n", curr_dat, curr_bul);
-                drawChart.AppendFormat("\t\tvar {0}_0 = new google.visualization.LineChart(document.getElementById('{1}_0'));\n", curr_gra, curr_div);
-                drawChart.AppendFormat("\t\t{0}_0.draw({1}_0, options1);\n", curr_gra, curr_dat);
-
-                // Generate the inst / appl graph js
-                drawChart.AppendFormat("\t\tvar {0}_1 = google.visualization.arrayToDataTable(formatDateString({1}_1, 0));\n", curr_dat, curr_bul);
-                drawChart.AppendFormat("\t\tvar {0}_1 = new google.visualization.LineChart(document.getElementById('{1}_1'));\n", curr_gra, curr_div);
-                drawChart.AppendFormat("\t\t{0}_1.draw({1}_1, options2);\n", curr_gra, curr_dat);
-
-                // Generate the divs
-                if (isBulletin) {
-                    htmlDivs.AppendFormat("<h3><a href='{0}.html'>{0}</a></h3>\n", entry);
-                } else {
-                    htmlDivs.AppendFormat("<h3>{0}</h3>\n", entry);
-                }
-
-                htmlDivs.AppendLine("<table width '80%'>");
-                htmlDivs.AppendLine("<tr><td>Installed versus Applicable</td><td>Compliance status in %</td></tr><tr>");
-                htmlDivs.AppendFormat("<td><div id='{0}_1' style='width: 500px; height: 200px;'></div></td>\n", curr_div);
-                htmlDivs.AppendFormat("<td><div id='{0}_0' style='width: 500px; height: 200px;'></div></td>\n", curr_div);
-                htmlDivs.AppendLine("</tr></table>");
-
-                if (isBulletin) {
-                    string bulletin_compliance = "";
-                    string bulletin_stats = "";
-                    GetBulletinData(ref bulletin_compliance, ref bulletin_stats, entry);
-                    SaveToFile("javascript\\" + curr_bul + "_0.js", bulletin_compliance);
-                    SaveToFile("javascript\\" + curr_bul + "_1.js", bulletin_stats);
-                } else {
-                    string update_compliance = "";
-                    string update_stats = "";
-                    GetUpdateData(ref update_compliance, ref update_stats, entry, bulletin);
-                    SaveToFile("javascript\\" + curr_bul + "_0.js", update_compliance);
-                    SaveToFile("javascript\\" + curr_bul + "_1.js", update_stats);
-                }
-                Counters.JsPages += 2;
-            }
-
-            Console.WriteLine("\tGenerating graphing javascript for {0}...", entry);
-
-            drawChart.AppendLine("}");
-            SaveToFile("javascript\\" + pagename + ".js", drawChart.ToString());
-            Counters.JsPages ++;
-
-            Console.WriteLine("\tGenerating html page for {0}...", entry);
-            GenerateBulletinHtml(ref htmlDivs, ref jsInclude, pagename);
-            Counters.HtmlPages++;
-
-            return t.Rows.Count;
-        }
-
-        public static void GenerateGlobalPage() {
-            Counters.HtmlPages++;
-            SaveToFile("javascript\\global.js", StaticStrings.js_GlobalCompliance);
-            string globalcompliance = "";
-            string globalstats = "";
-            GetGlobalData(ref globalcompliance, ref globalstats);
-            SaveToFile("javascript\\global_0.js", globalcompliance);
-            SaveToFile("javascript\\global_1.js", globalstats);
-            Counters.JsPages += 3;
-        }
-
-        public static void GeneratePcComplPages(bool hasData, bool smaller) {
+        private void GeneratePcComplPages(bool hasData, bool smaller) {
             string data = "";
             string data_full = "";
 
-            if (!hasData) {
-                data = "var pccompl = []";
-            } else {
-
+            if (hasData) {
                 int bottom = 74;
                 if (smaller)
                     bottom = 84;
@@ -333,7 +189,6 @@ namespace Symantec.CWoC.PatchTrending {
                         b.AppendFormat(FormattedStrings.js_CandleStickData, r[0], r[1], r[2], r[3], r[4], r[5]);
                     }
                     c.AppendFormat(FormattedStrings.js_CandleStickData, r[0], r[1], r[2], r[3], r[4], r[5]);
-
                 }
                 // Remove the last comma we inserted
                 c.Remove(c.Length - 2, 1);
@@ -343,6 +198,8 @@ namespace Symantec.CWoC.PatchTrending {
                 b.AppendLine("]");
                 data = b.ToString();
                 data_full = c.ToString();
+            } else {                
+                data = "var pccompl = []";
             }
 
             SaveToFile("javascript\\pccompl.js", data);
@@ -350,13 +207,162 @@ namespace Symantec.CWoC.PatchTrending {
             Counters.JsPages += 2;
         }
 
-        public static void GenerateBulletinHtml(ref StringBuilder divs, ref StringBuilder jsfiles, string pagename){
+        private void SaveToFile(string filepath, string data) {
+            using (StreamWriter outfile = new StreamWriter(filepath)) {
+                outfile.Write(data);
+            }
+        }
+
+        private string GetJSString(string s) {
+            s = s.Replace('-', '_');
+            s = s.Replace('.', '_');
+            return s;
+        }
+
+        private bool TestSql(string sql) {
+            try {
+                if (DatabaseAPI.ExecuteScalar(sql) == 1) {
+                    return true;
+                }
+            } catch {
+            }
+            return false;
+        }
+
+        private int GeneratePage(string pagename, string sql) {
+            return GeneratePage(pagename, "", sql);
+        }
+
+        private int GeneratePage(string pagename, string filter, string sql) {
+
+            DataTable t;
+            if (filter != "") {
+                t = DatabaseAPI.GetTable(string.Format(sql, filter));
+            } else {
+                t = DatabaseAPI.GetTable(sql);
+            }
+
+            if (t.Rows.Count == 0) {
+                return 0;
+            }
+
+            return GeneratePage(t, pagename, "");
+        }
+
+        private int GeneratePage(DataTable t, string pagename, string bulletin) {
+
+            StringBuilder drawChart = new StringBuilder();
+            StringBuilder htmlDivs = new StringBuilder();
+            StringBuilder jsInclude = new StringBuilder();
+
+            StringBuilder bList = new StringBuilder();
+
+
+            drawChart.AppendLine("function drawChart() {");
+            drawChart.AppendLine("\tvar options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};\n");
+            drawChart.AppendLine("\tvar options2 = { title: '', vAxis: { minValue : 0 }};\n");
+
+            bool isBulletin;
+
+            if (bulletin == "") {
+                isBulletin = true;
+            } else {
+                isBulletin = false;
+            }
+
+            string entry = "";
+            string curr_bulletin = "";
+            string curr_graph = "";
+            string curr_data = "";
+            string curr_div = "";
+
+            foreach (DataRow r in t.Rows) {
+
+                entry = r[0].ToString();
+                curr_bulletin = GetJSString(entry);
+                curr_data = "d_" + curr_bulletin;
+                curr_graph = "g_" + curr_bulletin;
+                curr_div = curr_bulletin + "_div";
+
+                jsInclude.AppendFormat("\t<script type=\"text/javascript\" src=\"javascript/{0}_0.js\"></script>\n"
+                    + "\t<script type=\"text/javascript\" src=\"javascript/{0}_1.js\"></script>\n", curr_bulletin);
+
+                drawChart.AppendFormat("\t\tvar {0}_0 = google.visualization.arrayToDataTable(formatDateString({1}_0, 0));\n"
+                    + "\t\tvar {2}_0 = new google.visualization.LineChart(document.getElementById('{3}_0'));\n"
+                    + "\t\t{2}_0.draw({0}_0, options1);\n"
+                    , curr_data, curr_bulletin, curr_graph, curr_div);
+
+                // Generate the inst / appl graph js
+                drawChart.AppendFormat("\t\tvar {0}_1 = google.visualization.arrayToDataTable(formatDateString({1}_1, 0));\n"
+                    + "\t\tvar {2}_1 = new google.visualization.LineChart(document.getElementById('{3}_1'));\n"
+                    + "\t\t{2}_1.draw({0}_1, options2);\n"
+                    , curr_data, curr_bulletin, curr_graph, curr_div);
+
+                // Generate the header and divs
+                if (isBulletin) {
+                    htmlDivs.AppendFormat("<h3><a href='{0}.html'>{0}</a></h3>\n", entry);
+                } else {
+                    htmlDivs.AppendFormat("<h3>{0}</h3>\n", entry);
+                }
+
+                htmlDivs.AppendLine("<table width '80%'>");
+                htmlDivs.AppendLine("<tr><td>Installed versus Applicable</td><td>Compliance status in %</td></tr><tr>");
+                htmlDivs.AppendFormat("<td><div id='{0}_1' style='width: 500px; height: 200px;'></div></td>\n"
+                    + "<td><div id='{0}_0' style='width: 500px; height: 200px;'></div></td>\n"
+                    , curr_div);
+                htmlDivs.AppendLine("</tr></table>");
+
+                if (isBulletin) {
+                    string bulletin_compliance = "";
+                    string bulletin_stats = "";
+
+                    GetBulletinData(ref bulletin_compliance, ref bulletin_stats, entry);
+                    
+                    SaveToFile("javascript\\" + curr_bulletin + "_0.js", bulletin_compliance);
+                    SaveToFile("javascript\\" + curr_bulletin + "_1.js", bulletin_stats);
+                } else {
+                    string update_compliance = "";
+                    string update_stats = "";
+                    
+                    GetUpdateData(ref update_compliance, ref update_stats, entry, bulletin);
+                    
+                    SaveToFile("javascript\\" + curr_bulletin + "_0.js", update_compliance);
+                    SaveToFile("javascript\\" + curr_bulletin + "_1.js", update_stats);
+                }
+                Counters.JsPages += 2;
+            }
+
+            Console.WriteLine("\tGenerating graphing javascript for {0}...", entry);
+
+            drawChart.AppendLine("}");
+            SaveToFile("javascript\\" + pagename + ".js", drawChart.ToString());
+            Counters.JsPages++;
+
+            Console.WriteLine("\tGenerating html page for {0}...", entry);
+            GenerateBulletinHtml(ref htmlDivs, ref jsInclude, pagename);
+            Counters.HtmlPages++;
+
+            return t.Rows.Count;
+        }
+
+        private void GenerateGlobalPage() {
+            Counters.HtmlPages++;
+            SaveToFile("javascript\\global.js", StaticStrings.js_GlobalCompliance);
+            string globalcompliance = "";
+            string globalstats = "";
+            GetGlobalData(ref globalcompliance, ref globalstats);
+            SaveToFile("javascript\\global_0.js", globalcompliance);
+            SaveToFile("javascript\\global_1.js", globalstats);
+            Counters.JsPages += 3;
+        }
+
+        private void GenerateBulletinHtml(ref StringBuilder divs, ref StringBuilder jsfiles, string pagename) {
 
             string html = String.Format(FormattedStrings.html_BulletinPage, pagename, divs.ToString(), jsfiles.ToString());
             SaveToFile(pagename + ".html", html);
         }
 
-        public static void GetUpdateData(ref string compliance, ref string stats, string update, string bulletin) {
+        private void GetUpdateData(ref string compliance, ref string stats, string update, string bulletin) {
             if (update.Length == 0 || update == string.Empty)
                 return;
 
@@ -369,7 +375,7 @@ namespace Symantec.CWoC.PatchTrending {
 
         }
 
-        private static void GetBulletinData(ref string compliance, ref string data, string bulletin) {
+        private void GetBulletinData(ref string compliance, ref string data, string bulletin) {
             string sql = String.Format(FormattedStrings.sql_get_bulletin_data, bulletin);
             DataTable t = DatabaseAPI.GetTable(sql);
             data = GetJSONFromTable(t, bulletin);
@@ -378,7 +384,7 @@ namespace Symantec.CWoC.PatchTrending {
             compliance = GetComplianceJSONFromArray(_compliance, bulletin);
         }
 
-        private static void GetGlobalData(ref string compliance, ref string data) {
+        private void GetGlobalData(ref string compliance, ref string data) {
             DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_global_compliance_data);
             data = GetJSONFromTable(t, "GLOBAL");
 
@@ -386,13 +392,13 @@ namespace Symantec.CWoC.PatchTrending {
             compliance = GetComplianceJSONFromArray(_compliance, "GLOBAL");
         }
 
-        private static string GetComplianceJSONFromArray(string[,] t, string bulletin) {
+        private string GetComplianceJSONFromArray(string[,] t, string bulletin) {
             StringBuilder b = new StringBuilder();
 
             b.AppendLine("var " + GetJSString(bulletin) + "_0 = [");
             b.AppendLine("['Date', 'Compliance %'],");
-            for (int i = 0; i < t.Length / 2 ; i++) {
-               b.AppendLine("['" + t[i, 0] + "', " + t[i, 1].Replace(',', '.') + "],");
+            for (int i = 0; i < t.Length / 2; i++) {
+                b.AppendLine("['" + t[i, 0] + "', " + t[i, 1].Replace(',', '.') + "],");
             }
             b.Remove(b.Length - 3, 1);
             b.AppendLine("]");
@@ -400,7 +406,7 @@ namespace Symantec.CWoC.PatchTrending {
             return b.ToString();
         }
 
-        private static void GenerateInactiveComputerJs() {
+        private void GenerateInactiveComputerJs() {
             DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_inactive_computer_trend);
             SaveToFile("Javascript\\inactive_computers.js", GetInactiveComputer_JSONFromTable(t, "inactive_computers"));
 
@@ -409,7 +415,7 @@ namespace Symantec.CWoC.PatchTrending {
             ++Counters.JsPages;
         }
 
-        private static string[,] GetComplianceFromTable(DataTable t) {
+        private string[,] GetComplianceFromTable(DataTable t) {
             string[,] d = new string[t.Rows.Count, 2];
             int i = 0;
 
@@ -431,7 +437,7 @@ namespace Symantec.CWoC.PatchTrending {
             return d;
         }
 
-        private static string GetPcComplianceSummary() {
+        private string GetPcComplianceSummary() {
             string s = "";
             DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_compliance_bypc_bottom75percent);
             if (t.Rows.Count > 0) {
@@ -440,13 +446,7 @@ namespace Symantec.CWoC.PatchTrending {
             return s;
         }
 
-        private static void SaveToFile(string filepath, string data) {
-            using (StreamWriter outfile = new StreamWriter(filepath)) {
-                outfile.Write(data);
-            }
-        }
-
-        private static string GetJSONFromTable(DataTable t, string entry) {
+        private string GetJSONFromTable(DataTable t, string entry) {
 
 
             StringBuilder b = new StringBuilder();
@@ -465,7 +465,7 @@ namespace Symantec.CWoC.PatchTrending {
             return b.ToString();
         }
 
-        private static string GetInactiveComputer_JSONFromTable(DataTable t, string entry) {
+        private string GetInactiveComputer_JSONFromTable(DataTable t, string entry) {
 
             if (t.Rows.Count == 0) {
                 string json = "var " + GetJSString(entry) + " = [];";
@@ -487,11 +487,20 @@ namespace Symantec.CWoC.PatchTrending {
             return b.ToString();
         }
 
-        public static string GetJSString(string s) {
-            s = s.Replace('-','_');
-            s = s.Replace('.', '_');
+        private void GenerateUpdatePages() {
+            EventLog.ReportInfo("Generating update pages for bulletins now...");
+            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_all_bulletins);
 
-            return s;
+            string bulletin;
+
+            foreach (DataRow r in t.Rows) {
+                bulletin = r[0].ToString();
+                DataTable u = DatabaseAPI.GetTable(string.Format(StaticStrings.sql_get_updates_bybulletin, bulletin));
+                Console.WriteLine("Generating all update graphs for bulletin " + bulletin);
+                GeneratePage(u, bulletin, bulletin);
+            }
+
         }
+
     }
 }
