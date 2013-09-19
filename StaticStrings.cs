@@ -528,7 +528,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 							'hAxis': {'baselineColor': 'none'}
 						},
 						'chartView': {
-							'columns': [0, 1]
+							'columns': [0, 3]
 						}, 'minRangeSize': 7
 						}
 					}
