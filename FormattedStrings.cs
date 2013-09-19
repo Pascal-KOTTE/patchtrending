@@ -23,7 +23,7 @@ namespace Symantec.CWoC.PatchTrending {
         public static string js_CandleStickData = "[{0}, {1}, {2}, {3}, {4}, "
                 + "'<div style=\"font-family: Arial; font-size: 14px; text-align: center;\">{0}% compliant:</div>"
                 + "<div style=\"font-family: Arial; font-size: 12px;\">"
-                + "<p> <b>{3}computers ({5}% of total)</b> </p>"
+                + "<p> <b>{3} computers ({5}% of total)</b> </p>"
                 + "<p> Min = {1}, Prev = {2}, Max = {4}</p></div>'],\n";
         public static string html_BulletinPage = @"<html>
     <head>
