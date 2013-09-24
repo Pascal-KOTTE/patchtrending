@@ -350,6 +350,8 @@ namespace Symantec.CWoC.PatchTrending {
                  select distinct([UPDATE])
                    from TREND_WindowsCompliance_ByUpdate
                   where bulletin = '{0}'
+				  group by [update]
+				 having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  ";
 
         public static string sql_get_compliance_bypccount = @"
