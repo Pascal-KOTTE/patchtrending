@@ -432,9 +432,10 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	<title>Bulletin detailed view</title>
 	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
 	<script type='text/javascript' src='javascript/helper.js'></script>
+    <link rel='stylesheet' type='text/css' href='menu.css'>
 	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
 </head>
-<body>
+<body>" + html_navigationbar + @"
 	<h2 id='t_012' style='width: 800px; text-align: center'></h2>
 	<h3>Installed versus Applicable</h3>
     <div id='dashboard_vuln'>
@@ -458,18 +459,13 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 			if (typeof fileref!='undefined')
 				document.getElementsByTagName('head')[0].appendChild(fileref)
 		}
-		
-		function escapeBulletin(b) {
-			var t = b.replace('-', '_');
-			return t.replace('.', '_');
-		}
-		 
-		loadjs('javascript/' + escapeBulletin(bulletin) + '_0.js');
-		loadjs('javascript/' + escapeBulletin(bulletin) + '_1.js');
+			 
+		loadjs('javascript/' + escapeString(bulletin) + '_0.js');
+		loadjs('javascript/' + escapeString(bulletin) + '_1.js');
 
 		function drawVisualization() {
 		
-			b = escapeBulletin(bulletin);			
+			b = escapeString(bulletin);
 			var data_compl = window[b + '_0'];
 
 			var dashboard_compl = new google.visualization.Dashboard(document.getElementById('dashboard_compl'));
@@ -519,6 +515,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 					'controlType': 'ChartRangeFilter',
 					'containerId': 'control_vuln',
 					'options': {
+                    'backgroundColor' : { fill:'transparent' },
 					'filterColumnIndex': 0,
 					'ui': {
 						'chartType': 'LineChart',
@@ -537,6 +534,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 				'chartType': 'LineChart',
 				'containerId': 'chart_vuln',
 				'options': {
+                'backgroundColor' : { fill:'transparent' },
 				'chartArea': {'height': '80%', 'width': '90%'},
 				'tooltip': {isHtml: false},
 				'hAxis': {'slantedText': false},
@@ -573,6 +571,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
     <title>Inactive computer trending</title>
     <script type='text/javascript' src='https://www.google.com/jsapi'></script>
 	<script type='text/javascript' src='javascript/helper.js'></script>
+    <link rel='stylesheet' type='text/css' href='menu.css'>
 	<script type='text/javascript' src='javascript/inactive_computers.js'></script>
 	<script type='text/javascript' src='javascript/inactive_computers_pc.js'></script>
     <script type='text/javascript'>
@@ -597,6 +596,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 			data = google.visualization.arrayToDataTable(formatDateString(inactive_computers_pc, 0));
 	        options = {
 			  title: '(in % of managed machines)', 
+              backgroundColor: { fill:'transparent' },
 			  colors: ['orange', 'red', 'royalblue', 'forestgreen']
 			};
 			drawChart();
@@ -604,6 +604,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 			percent = true;
 			data = google.visualization.arrayToDataTable(formatDateString(inactive_computers, 0));
 	        options = {
+              backgroundColor: { fill:'transparent' },
 			  title: '(in computer count)',
 			  colors: ['orange', 'red', 'royalblue', 'forestgreen']
 			};
@@ -612,7 +613,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	  }
     </script>
   </head>
-  <body>
+  <body>" + html_navigationbar + @"
 	<h2>Inactive computers over time</h2>
     <div id='chart_div' style='width: 900px; height: 500px;'></div>
 	<a href='javascript:switch_view()' title='Click to switch between Computer Count view and % of Managed machines view.'>Switch View</a>
@@ -627,11 +628,13 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
 	<title>Compliance by Computer</title>
+	<script type='text/javascript' src='javascript/helper.js'></script>
+    <link rel='stylesheet' type='text/css' href='menu.css'>
 	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
 	<script type='text/javascript' src='javascript/pccompl_full.js'></script>
 	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
 </head>
-<body>
+<body>" + html_navigationbar + @"
 	<h2>Compliance by Computer</h2> 
     <div id='dashboard'>
         <div id='chart' style='width: 915px; height: 400px;'></div>
@@ -646,6 +649,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 					'controlType': 'ChartRangeFilter',
 					'containerId': 'control',
 					'options': {
+                    'backgroundColor' : { fill:'transparent' },
 					'filterColumnIndex': 0,
 					'ui': {
 						'chartType': 'LineChart',
@@ -666,6 +670,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 				'chartType': 'CandlestickChart',
 				'containerId': 'chart',
 				'options': {
+                'backgroundColor' : { fill:'transparent' },
 				'chartArea': {'height': '80%', 'width': '90%'},
 				'tooltip': {isHtml: true},
 				'hAxis': {'slantedText': false},
@@ -694,7 +699,19 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
         #endregion
 
         #region Javascript Helper functions
-        public static string js_Helper = @"
+        public static string js_Helper = @"menu_status = new Array();
+
+function showhide(elem_id){
+    var switch_id = document.getElementById(elem_id);
+
+	if (menu_status[elem_id] != 'show') {
+		switch_id.className = 'show';
+		menu_status[elem_id] = 'show';
+	} else {
+		switch_id.className = 'hide';
+		menu_status[elem_id] = 'hide';
+	}
+}
 
 function loadJs(filename){
 	var fileref = document.createElement('script')
@@ -706,8 +723,8 @@ function loadJs(filename){
 }
 
 function escapeString(b) {
-	var t = b.replace('-', '_');
-	return t.replace('.', '_');
+	var t = b.replace(/-/g, '_');
+	return t.replace(/\./g, '_');
 }
 
 function formatToDate(table, column) {
@@ -746,5 +763,47 @@ function formatDateString(table, column) {
 		document.getElementById('uHeader').innerHTML = head_link;
     </script>";
         #endregion
+
+        #region CSS Navigation bar
+        public static string css_navigation = @"		#_menu {
+			position: absolute;
+			top: 38px;
+			padding-bottom: 2px;
+			padding-top: 2px;
+			left:800px;
+			text-align: left;
+		}
+		.menu{
+			padding-top:2px;
+			padding-bottom: 2px;
+			color: #000000;
+			height: 20px;
+			left: 800px;
+			position: absolute;
+		}
+		.submenu{
+			display: block;
+			height: 19px;
+			padding-top: 2px;
+			padding-right: 2px;
+			color: #333333;
+		}
+
+		.hide{
+		display: none;
+		}
+		.show{
+		display: block;
+		}
+";
+#endregion
+
+        public static string html_navigationbar = @"    <a class='menu' onclick='showhide(""_menu"")'>[Navigation]</a>
+    <div id='_menu' class='hide'> 
+        <b><a href='./' class='submenu'>Home</a>
+        <a href='./getbulletin.html?global' class='submenu'>Global compliance</a>
+        <a href='./sitemap.html' class='submenu'>Sitemap</a></b>
+    </div>
+";
     }
 }

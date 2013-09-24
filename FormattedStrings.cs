@@ -33,6 +33,7 @@ namespace Symantec.CWoC.PatchTrending {
         {1}
         <script type='text/javascript' src='https://www.google.com/jsapi'></script>
         <script type='text/javascript' src='javascript/helper.js'></script>
+        <link rel='stylesheet' type='text/css' href='menu.css'>
         {2}
         <script type='text/javascript' src='javascript/{3}.js'></script>
         <script type='text/javascript'>

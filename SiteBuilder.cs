@@ -56,6 +56,7 @@ namespace Symantec.CWoC.PatchTrending {
             bool inactive_computer_trend = TestSql("select top 1 1 from TREND_InactiveComputerCounts");
 
             AddToSiteMap("Global compliance", "getbulletin.html?global");
+            SaveToFile("menu.css", StaticStrings.css_navigation);
 
             if (compliance_by_update) {
 
@@ -273,8 +274,11 @@ namespace Symantec.CWoC.PatchTrending {
 
 
             drawChart.AppendLine("function drawChart() {");
-            drawChart.AppendLine("\tvar options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};\n");
-            drawChart.AppendLine("\tvar options2 = { title: '', vAxis: { minValue : 0 }};\n");
+            drawChart.AppendLine("\tvar options1 = { backgroundColor: { fill:'transparent' },title: '', vAxis: { maxValue : 100, minValue : 0 }};\n");
+            drawChart.AppendLine("\tvar options2 = { backgroundColor: { fill:'transparent' },title: '', vAxis: { minValue : 0 }};\n");
+
+            htmlDivs.Append(StaticStrings.html_navigationbar);
+            jsInclude.AppendLine("<link rel='stylesheet' type='text/css' href='menu.css'>");
 
             bool isBulletin;
 
