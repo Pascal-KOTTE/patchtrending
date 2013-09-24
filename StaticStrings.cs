@@ -578,8 +578,8 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	  var data;
 	  var options;
 
-      inactive_computer = formatDateString(inactive_computer, 0);
-      inactive_computer_pc = formatDateString(inactive_computer_pc, 0);
+      inactive_computers = formatDateString(inactive_computers, 0);
+      inactive_computers_pc = formatDateString(inactive_computers_pc, 0);
 
       function drawChart() {
         var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
