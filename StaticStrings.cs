@@ -306,6 +306,7 @@ namespace Symantec.CWoC.PatchTrending {
                 select bulletin
                   from TREND_WindowsCompliance_ByUpdate
                  group by bulletin
+                having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  order by MIN(_exec_time) desc, Bulletin desc";
         public static string sql_get_global_compliance_data = @"
                          select Convert(varchar, max(_Exec_time), 127) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
