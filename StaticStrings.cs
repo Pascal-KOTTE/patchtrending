@@ -735,10 +735,12 @@ function formatDateString(table, column) {
 ";
         #endregion
 
+        #region Update page javascript (header link generaiton)
         public static string js_UpdatePageHeader = @"    <script type='text/javascript'>
 		var bulletin = location.pathname.substring(location.pathname.lastIndexOf('/') + 1, location.pathname.lastIndexOf('.'));
 		var head_link = '<a href=""getbulletin.html?' + bulletin + '"">' + bulletin.toUpperCase() + '</a>';
 		document.getElementById('uHeader').innerHTML = head_link;
     </script>";
+        #endregion
     }
 }
