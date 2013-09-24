@@ -298,7 +298,7 @@ namespace Symantec.CWoC.PatchTrending {
                 curr_graph = "g_" + curr_bulletin;
                 curr_div = curr_bulletin + "_div";
 
-                AddToSiteMap(curr_bulletin,  "getbulletin.html?" + curr_bulletin);
+                AddToSiteMap(entry.ToLower(), "getbulletin.html?" + entry.ToLower());
 
                 jsInclude.AppendFormat("\t<script type=\"text/javascript\" src=\"javascript/{0}_0.js\"></script>\n"
                     + "\t<script type=\"text/javascript\" src=\"javascript/{0}_1.js\"></script>\n", curr_bulletin);

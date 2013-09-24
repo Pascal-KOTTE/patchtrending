@@ -550,8 +550,13 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 		google.setOnLoadCallback(drawVisualization);
 	</script>
     <script type='text/javascript'>
-        var head_link =  bulletin;
-        var t = document.getElementById('t_012').innerHTML = head_link;
+		var head_link;
+		if (bulletin == 'global') {
+			head_link = bulletin;
+		} else {
+			head_link =  '<a href=""' + bulletin + '.html"">' + bulletin + '</a>';
+		}
+		var t = document.getElementById('t_012').innerHTML = head_link;
     </script>
 </html>
 ";
