@@ -290,6 +290,11 @@ namespace Symantec.CWoC.PatchTrending {
             string curr_data = "";
             string curr_div = "";
 
+            if (!isBulletin) {
+                htmlDivs.AppendLine("<h2 style='text-align: center; width: 1000px' id='uHeader'></h2>");
+                jsInclude.AppendLine(StaticStrings.js_UpdatePageHeader);
+            }
+
             foreach (DataRow r in t.Rows) {
 
                 entry = r[0].ToString();

@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Symantec.CWoC.PatchTrending {
     class StaticStrings {
-        #region // Landing (html, javascript)
+
+        #region Landing (html, javascript)
         public static string html_Landing = @"<html>
 	<head>
         <title>{CWoC} Patch Trending home</title>
@@ -254,7 +255,7 @@ namespace Symantec.CWoC.PatchTrending {
 
         #endregion
 
-        #region // string js_GlobalCompliance
+        #region Global Compliance Javascript
         public static string js_GlobalCompliance = @"
         function drawChart() {
 	        var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
@@ -292,7 +293,7 @@ namespace Symantec.CWoC.PatchTrending {
         }";
         #endregion
 
-        #region // SQL query strings
+        #region SQL query strings
         public static string sql_get_bulletins_in = @"
                -- Get all tracked bulletins
                 select bulletin
@@ -420,7 +421,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 
 #endregion
 
-        #region // string html_GetBulletin_page
+        #region Get Bulletin (html + js page)
         public static string html_GetBulletin_page = @"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
@@ -430,7 +431,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
 </head>
 <body>
-	<h1 id='t_012' style='width: 800px; text-align: center'></h1>
+	<h2 id='t_012' style='width: 800px; text-align: center'></h2>
 	<h3>Installed versus Applicable</h3>
     <div id='dashboard_vuln'>
         <div id='chart_vuln' style='width: 915px; height: 300px;'></div>
@@ -554,7 +555,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 		if (bulletin == 'global') {
 			head_link = bulletin;
 		} else {
-			head_link =  '<a href=""' + bulletin + '.html"">' + bulletin + '</a>';
+			head_link =  '<a href=""' + bulletin + '.html"">' + bulletin.toUpperCase() + '</a>';
 		}
 		var t = document.getElementById('t_012').innerHTML = head_link;
     </script>
@@ -562,7 +563,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 ";
         #endregion
 
-        #region //string html_GetInactiveComputers_page
+        #region Get Inactive Computers (html + js page)
         public static string html_GetInactiveComputers_page = @"<html>
   <head>
     <title>Inactive computer trending</title>
@@ -617,7 +618,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 ";
         #endregion
 
-        #region string html_ComputerCompliance_page
+        #region Computer Compliance (html + js page)
         public static string html_ComputerCompliance_page = @"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
@@ -733,5 +734,11 @@ function formatDateString(table, column) {
 }
 ";
         #endregion
+
+        public static string js_UpdatePageHeader = @"    <script type='text/javascript'>
+		var bulletin = location.pathname.substring(location.pathname.lastIndexOf('/') + 1, location.pathname.lastIndexOf('.'));
+		var head_link = '<a href=""getbulletin.html?' + bulletin + '"">' + bulletin.toUpperCase() + '</a>';
+		document.getElementById('uHeader').innerHTML = head_link;
+    </script>";
     }
 }
