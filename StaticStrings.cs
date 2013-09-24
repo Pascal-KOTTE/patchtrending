@@ -17,7 +17,7 @@ namespace Symantec.CWoC.PatchTrending {
         </style>
 	</head>
     <body style='width:1000'>
-    <h2 style='text-align: center; width:80%'>Global Compliance view</h2>
+    <h2 style='text-align: center;'>Global Compliance view</h2>
     <hr/>
     <table style='width: 80%'>
         <tr>
@@ -47,7 +47,7 @@ namespace Symantec.CWoC.PatchTrending {
         function loadBulletin() {
 
 			var bulletin = document.getElementById('bulletin_name').value;
-			var jsUrl = 'javascript/' + escapeBulletin(bulletin) + '_0.js';
+			var jsUrl = 'javascript/' + escapeString(bulletin) + '_0.js';
 
 			new Ajax.Request(jsUrl, {
                 method:'get',
@@ -64,12 +64,6 @@ namespace Symantec.CWoC.PatchTrending {
 
 			});	
 		}
-
-		function escapeBulletin(b) {
-			var t = b.replace('-', '_');
-            t = t.replace('.', '_');
-			return t.toUpperCase();
-        }
     </script>
     <script type='text/javascript'>
 

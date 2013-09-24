@@ -219,7 +219,7 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void SaveToFile(string filepath, string data) {
-            using (StreamWriter outfile = new StreamWriter(filepath)) {
+            using (StreamWriter outfile = new StreamWriter(filepath.ToLower())) {
                 outfile.Write(data);
             }
         }
@@ -293,7 +293,7 @@ namespace Symantec.CWoC.PatchTrending {
             foreach (DataRow r in t.Rows) {
 
                 entry = r[0].ToString();
-                curr_bulletin = GetJSString(entry).ToLower();
+                curr_bulletin = GetJSString(entry);
                 curr_data = "d_" + curr_bulletin;
                 curr_graph = "g_" + curr_bulletin;
                 curr_div = curr_bulletin + "_div";
@@ -316,7 +316,7 @@ namespace Symantec.CWoC.PatchTrending {
 
                 // Generate the header and divs
                 if (isBulletin) {
-                    htmlDivs.AppendFormat("<h3><a href='{0}.html'>{0}</a></h3>\n", entry);
+                    htmlDivs.AppendFormat("<h3><a href='{0}.html'>{1}</a></h3>\n", entry.ToLower(), entry);
                 } else {
                     htmlDivs.AppendFormat("<h3>{0}</h3>\n", entry);
                 }
@@ -374,7 +374,7 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void GenerateBulletinHtml(ref StringBuilder divs, ref StringBuilder jsfiles, string pagename) {
-            string html = String.Format(FormattedStrings.html_BulletinPage, pagename, divs.ToString(), jsfiles.ToString());
+            string html = String.Format(FormattedStrings.html_BulletinPage, pagename, divs.ToString(), jsfiles.ToString(), pagename.ToLower());
             SaveToFile(pagename + ".html", html);
         }
 

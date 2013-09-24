@@ -34,7 +34,7 @@ namespace Symantec.CWoC.PatchTrending {
         <script type='text/javascript' src='https://www.google.com/jsapi'></script>
         <script type='text/javascript' src='javascript/helper.js'></script>
         {2}
-        <script type='text/javascript' src='javascript/{0}.js'></script>
+        <script type='text/javascript' src='javascript/{3}.js'></script>
         <script type='text/javascript'>
             google.load('visualization', '1', {{packages:['corechart']}});
             google.setOnLoadCallback(drawChart);
