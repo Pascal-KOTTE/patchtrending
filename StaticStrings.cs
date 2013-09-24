@@ -300,6 +300,7 @@ namespace Symantec.CWoC.PatchTrending {
                   from TREND_WindowsCompliance_ByUpdate
                  where bulletin in ({0})
                  group by bulletin
+                having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  order by MIN(_exec_time) desc, Bulletin desc";
         public static string sql_get_all_bulletins = @"
                -- Get all tracked bulletins
