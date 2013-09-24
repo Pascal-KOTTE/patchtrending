@@ -25,7 +25,7 @@ namespace Symantec.CWoC.PatchTrending {
 
     class SiteBuilder {
 
-        public string version = "version 12";
+        public string version = "version 13";
         private StringBuilder SiteMap;
 
         public SiteBuilder() {
