@@ -11,8 +11,6 @@ using Symantec.CWoC.APIWrappers;
 namespace Symantec.CWoC.PatchTrending {
     class SiteGenerator {
 
-        public static string version = "version 11";
-
         static int Main(string[] args) {
             string filename = "site-layout.txt";
             if (args.Length == 1) {
@@ -57,6 +55,8 @@ namespace Symantec.CWoC.PatchTrending {
 
             AddToSiteMap("Global compliance", "getbulletin.html?global");
             SaveToFile("menu.css", StaticStrings.css_navigation);
+            SaveToFile("help.html", StaticStrings.html_help);
+            Counters.HtmlPages += 2;
 
             if (compliance_by_update) {
 
@@ -288,6 +288,7 @@ namespace Symantec.CWoC.PatchTrending {
                 isBulletin = false;
             }
 
+
             string entry = "";
             string curr_bulletin = "";
             string curr_graph = "";
@@ -297,6 +298,8 @@ namespace Symantec.CWoC.PatchTrending {
             if (!isBulletin) {
                 htmlDivs.AppendLine("<h2 style='text-align: center; width: 1000px' id='uHeader'></h2>");
                 jsInclude.AppendLine(StaticStrings.js_UpdatePageHeader);
+            } else {
+                htmlDivs.AppendFormat("<h2 style='text-align: center; width: 1000px'>{0}</h2>", pagename);
             }
 
             foreach (DataRow r in t.Rows) {
