@@ -193,7 +193,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
         function loadBulletin() {
 
 			var bulletin = document.getElementById('bulletin_name').value;
-			var jsUrl = 'javascript/' + escapeString(bulletin) + '_0.js';
+			var jsUrl = 'javascript/' + escapeString(bulletin.toLowerCase()) + '_0.js';
 
 			new Ajax.Request(jsUrl, {
                 method:'get',
@@ -826,15 +826,93 @@ function formatDateString(table, column) {
         public static string html_help = @"<html>
 <head>
     <title>{CWoC} Patch trending help page</title>
+	<link rel='stylesheet' type='text/css' href='menu.css'>
+	<script type='text/javascript' src='javascript/helper.js'></script>
 </head>
-<body>
-<h3>Help</h3>
-<p>More documentation will come to this page. For now please refer to <a href='http://www.symantec.com/connect/search/apachesolr_search/cwoc%20patch%20trending'>Symantec Connect</a> for documentation on this CWoC project.
+<body style='width: 1000px;'>
+<a class='menu' onclick='showhide(""_menu"")'><b>[Navigation]</b></a>
+<div id='_menu' class='hide'> 
+	<a href='./' class='submenu'>Home</a>
+	<a href='./sitemap.html' class='submenu'>Sitemap</a>
+	<a href='./help.html' class='submenu'>Help</a>
+</div>
+<h2 id='top'>Help</h2>
+<h3>Content:</h3>
+<ul>
+    <li><a href='#intro'>Introduction</a></li>
+    <li><a href='#landing'>The site Landing page</a></li>
+    <li><a href='#complpercent'>Compliance in % view</a></li>
+    <li><a href='#instvsappl'>Installed versus Applicable view</a></li>
+    <li><a href='#pccompl'>Compliance by Computer view</a></li>
+    <li><a href='#inactive'>Inactive Computers view</a></li>
+    <li><a href='#layouttxt'>Customisable site-layout</a></li>
+	<li><a href='#sitemap'>Sitemap and site navigation</a></li>
+	<li><a href='#googlecharts'>Google Charts API</a></li>
+	<li><a href='#changelog'>Change log</a></li>
+    <li><a href='#references'>External references</a></li>
+</ul>
+<h3 id='intro'>Introduction</h3>
+<p>This site is generate from the {CWoC} site builder executable <a href='#ref1' id='_ref1'>[1]</a>. It contains pages to quickly access compliance data on currently active software bulletin and updates from all vendors. If you have gotten this far you probably have met all the dependencies but here is a summary just in case:</p>
+<ul>
+    <li>Patch trending report or stored procedure (required) <a href='#ref2' id='_ref2'>[2]</a><a href='#ref3' id='_ref3'>[3]</a></li>
+    <li>Compliance by computer trending report or stored procedure (optional) <a href='#ref4' id='_ref4'>[4]</a><a href='#ref3' id='_ref3'>[3]</a></li>
+    <li>Inactive computers trending report or stored procedure (optional) <a href='#ref5' id='_ref5'>[5]</a><a href='#ref3' id='_ref3'>[3]</a></li>
+</ul>
+<p>This help file should help clarify what the charts are showing and how the data is gathered or handled.</p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='landing'>The site Landing page</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='complpercent'>Compliance in % view</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='instvsappl'>Installed versus Applicable view</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='pccompl'>Compliance by Computer</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='inactive'>Inactive computers</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='layouttxt'>Customisable site-layout</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='sitemap'>Sitemap and site navigation</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='googlecharts'>Google Charts API</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='changelog'>Changelog</h3>
+<p></p>
+<h4><a href='#top'>Top</a></h4>
+<h3 id='references'>External references</h3>
+<a id='ref1' href='#_ref1'>[1]</a> <a target='_blank' href='http://www.symantec.com/connect/downloads/cwoc-patch-trending-sitebuilder'>{CWoc} Patch Trending SiteBuilder</a><br/>
+<a id='ref2' href='#_ref2'>[2]</a> <a target='_blank' href='http://www.symantec.com/connect/articles/cwoc-patch-trending-adding-patch-compliance-trending-capacity-smp-simple-running-report-dai'>{CWoC} Patch Trending: Adding Patch Compliance Trending Capacity to SMP is as Simple as Running a Report Daily</a><br/>
+<a id='ref3' href='#_ref3'>[3]</a> <a target='_blank' href='http://www.symantec.com/connect/downloads/cwoc-patch-trending-stored-procedures'>{CWoC} Patch Trending Stored Procedures</a><br/>
+<a id='ref4' href='#_ref4'>[4]</a> <a target='_blank' href='http://www.symantec.com/connect/articles/cwoc-patch-trending-adding-compliance-computer-module'>{CWoC} Patch Trending: Adding a Compliance by Computer module</a><br/>
+<a id='ref5' href='#_ref5'>[5]</a> <a target='_blank' href='http://www.symantec.com/connect/articles/cwoc-patch-trending-inactive-computer-trending-report'>{CWoC} Patch Trending: Inactive Computer Trending Report</a><br/>
+
+<h4><a href='#top'>Top</a></h4>
+<p>For additional documentation please refer to <a href='http://www.symantec.com/connect/search/apachesolr_search/cwoc%20patch%20trending'>Symantec Connect</a>. Support for this CWoC project is also available thru Symantec Connect.</p>
 </body>
+<!-- MODEL HTML
+Reference pointer: <a href='#ref6' id='_ref6'>[6]</a>
+Reference entry: <a id='ref6' href='#_ref6'>[6]</a> <a target='_blank' href='#externalref'>TTT</a><br/>
+
+Content entry:
+	<li><a href='#'></a></li>
+Subsection:
+	<h3 id=''></h3>
+	<p></p>
+	<h4><a href='#top'>Top</a></h4>
+
+-->
 </html>";
         #endregion
 
-        #region Default Pages strnigs
+        #region Default Pages strings
         public static string[,] DefaultPages = new string[6,3] {
                 {"top10-vulnerable", StaticStrings.sql_get_topn_vulnerable, "Generating Top 10 bulletins by vulnerable computers page..."},
                 {"top25-vulnerable-upd", StaticStrings.sql_get_topn_vulnerable_upd, "Generating Top 25 update by vulnerable computers page..." },
