@@ -72,33 +72,6 @@ namespace Symantec.CWoC.PatchTrending {
                     AddToIndex(ref index, StaticStrings.DefaultPages[i, 0]);
                 }
 
-                /*
-                EventLog.ReportInfo("Generating Top 10 bulletins by vulnerable computers page...");
-                GeneratePage("top10-vulnerable", StaticStrings.sql_get_topn_vulnerable);
-                AddToIndex(ref index, "top10-vulnerable");
-
-                EventLog.ReportInfo("Generating Top 25 update by vulnerable computers page...");
-                GeneratePage("top25-vulnerable-upd", StaticStrings.sql_get_topn_vulnerable_upd);
-                AddToIndex(ref index, "top25-vulnerable-upd");
-
-
-                EventLog.ReportInfo("Generating Top 10 movers (++) page...");
-                GeneratePage("top10-movers-up", StaticStrings.sql_get_topn_movers_up);
-                AddToIndex(ref index, "top10-movers-up");
-
-                EventLog.ReportInfo("Generating Top 10 movers (--) page...");
-                GeneratePage("top10-movers-down", StaticStrings.sql_get_topn_movers_down);
-                AddToIndex(ref index, "top10-movers-down");
-
-                EventLog.ReportInfo("Generating Bottom 10 bulletins by compliance...");
-                GeneratePage("bottom-10-compliance", StaticStrings.sql_get_bottomn_compliance_upd);
-                AddToIndex(ref index, "bottom-10-compliance");
-
-                EventLog.ReportInfo("Generating Bottom 25 updates by compliance...");
-                GeneratePage("bottom-25-compliance-upd", StaticStrings.sql_get_bottomn_compliance);
-                AddToIndex(ref index, "bottom-25-compliance-upd");
-                */
-
                 if (inactive_computer_trend) {
                     EventLog.ReportInfo("Generating Inactive-computers page...");
                     GenerateInactiveComputerJs();
