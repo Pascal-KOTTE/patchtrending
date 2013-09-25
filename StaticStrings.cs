@@ -357,9 +357,9 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 				}
 			}
 
-			var msg = '~<b>' + compl_top.toFixed(2) + '%</b> of computers are at <i>95%</i> compliance or above';
-			msg += ', ~<b>' + compl_mid.toFixed(2) + '%</b> of computers are at <i>90%</i> compliance or above';
-			msg += ' and ~<b>' + compl_all.toFixed(2) + '%</b> of computers are at <i>75%</i> compliance or above</i>.';
+			var msg = '<b>' + compl_top.toFixed(2) + '%</b> of computers are at <i>95%</i> compliance or above';
+			msg += ', <b>' + compl_mid.toFixed(2) + '%</b> of computers are at <i>90%</i> compliance or above';
+			msg += ' and <b>' + compl_all.toFixed(2) + '%</b> of computers are at <i>75%</i> compliance or above</i>.';
 
 			return msg;
 		}
