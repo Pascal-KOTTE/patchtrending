@@ -28,12 +28,12 @@ namespace Symantec.CWoC.PatchTrending {
         public static string html_BulletinPage = @"<html>
     <head>
         <title>{0}</title>
+        <link rel='stylesheet' type='text/css' href='menu.css'>
     </head>
     <body>
         {1}
         <script type='text/javascript' src='https://www.google.com/jsapi'></script>
         <script type='text/javascript' src='javascript/helper.js'></script>
-        <link rel='stylesheet' type='text/css' href='menu.css'>
         {2}
         <script type='text/javascript' src='javascript/{3}.js'></script>
         <script type='text/javascript'>

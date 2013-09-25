@@ -295,7 +295,6 @@ namespace Symantec.CWoC.PatchTrending {
             drawChart.AppendLine("\tvar options2 = { backgroundColor: { fill:'transparent' },title: '', vAxis: { minValue : 0 }};\n");
 
             htmlDivs.Append(StaticStrings.html_navigationbar);
-            jsInclude.AppendLine("<link rel='stylesheet' type='text/css' href='menu.css'>");
 
             bool isBulletin, isUpdate;
 
