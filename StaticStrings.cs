@@ -25,20 +25,33 @@ namespace Symantec.CWoC.PatchTrending {
                          select Convert(varchar, max(_Exec_time), 127) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
                            from TREND_WindowsCompliance_ByUpdate
                           group by _Exec_id order by date";
-        public static string sql_get_top10_vulnerable = @"
+        public static string sql_get_topn_vulnerable = @"
                 select top 10 Bulletin --, SUM(Applicable) - SUM(installed)
                   from TREND_WindowsCompliance_ByUpdate
                  where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  group by Bulletin
                  order by SUM(Applicable) - SUM(installed) desc";
-        public static string sql_get_bottom10_compliance = @"
+        public static string sql_get_topn_vulnerable_upd = @"
+                select top 25 [Update]
+                  from TREND_WindowsCompliance_ByUpdate
+                 where [_Exec_id] = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+                 group by [Update], [Bulletin]
+                 order by SUM(Applicable) - SUM(installed) desc";
+        public static string sql_get_bottomn_compliance = @"
                 select top 10 Bulletin --, CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100
                   from TREND_WindowsCompliance_ByUpdate
                  where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
                  group by Bulletin
                 having SUM(Applicable) - SUM(installed) > 100
                  order by CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100";
-        public static string sql_get_top10movers_up = @"
+        public static string sql_get_bottomn_compliance_upd = @"
+                select top 25 [Update] --, CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100
+                  from TREND_WindowsCompliance_ByUpdate
+                 where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+                 group by Bulletin, [Update]
+                having SUM(Applicable) - SUM(installed) > 100
+                 order by CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100";
+        public static string sql_get_topn_movers_up = @"
                 -- Return the 10 bulletins for which more computers are secured
                 select top 10 t1.Bulletin, t1._Exec_id, (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) as 'Delta'
                   from TREND_WindowsCompliance_ByUpdate t1
@@ -49,7 +62,7 @@ namespace Symantec.CWoC.PatchTrending {
                 having (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) > 0
                  order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) desc
                 ";
-        public static string sql_get_top10movers_down = @"
+        public static string sql_get_topn_movers_down = @"
                 -- Return the 10 bulletins for which more computers are vulnerable
                 select top 10 t1.Bulletin, t1._Exec_id, (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) as 'Delta'
                   from TREND_WindowsCompliance_ByUpdate t1

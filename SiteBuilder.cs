@@ -67,20 +67,30 @@ namespace Symantec.CWoC.PatchTrending {
                 ++Counters.HtmlPages;
 
                 EventLog.ReportInfo("Generating Top 10 bulletins by vulnerable computers page...");
-                GeneratePage("top10-vulnerable", StaticStrings.sql_get_top10_vulnerable);
+                GeneratePage("top10-vulnerable", StaticStrings.sql_get_topn_vulnerable);
                 AddToIndex(ref index, "top10-vulnerable");
 
+                EventLog.ReportInfo("Generating Top 25 update by vulnerable computers page...");
+                GeneratePage("top25-vulnerable-upd", StaticStrings.sql_get_topn_vulnerable_upd);
+                AddToIndex(ref index, "top25-vulnerable-upd");
+
+
                 EventLog.ReportInfo("Generating Top 10 movers (++) page...");
-                GeneratePage("top10-movers-up", StaticStrings.sql_get_top10movers_up);
+                GeneratePage("top10-movers-up", StaticStrings.sql_get_topn_movers_up);
                 AddToIndex(ref index, "top10-movers-up");
 
                 EventLog.ReportInfo("Generating Top 10 movers (--) page...");
-                GeneratePage("top10-movers-down", StaticStrings.sql_get_top10movers_down);
+                GeneratePage("top10-movers-down", StaticStrings.sql_get_topn_movers_down);
                 AddToIndex(ref index, "top10-movers-down");
 
                 EventLog.ReportInfo("Generating Bottom 10 bulletins by compliance...");
-                GeneratePage("bottom-10-compliance", StaticStrings.sql_get_bottom10_compliance);
+                GeneratePage("bottom-10-compliance", StaticStrings.sql_get_bottomn_compliance_upd);
                 AddToIndex(ref index, "bottom-10-compliance");
+
+                EventLog.ReportInfo("Generating Bottom 25 updates by compliance...");
+                GeneratePage("bottom-25-compliance-upd", StaticStrings.sql_get_bottomn_compliance);
+                AddToIndex(ref index, "bottom-25-compliance-upd");
+
 
                 if (inactive_computer_trend) {
                     EventLog.ReportInfo("Generating Inactive-computers page...");
@@ -280,7 +290,7 @@ namespace Symantec.CWoC.PatchTrending {
             htmlDivs.Append(StaticStrings.html_navigationbar);
             jsInclude.AppendLine("<link rel='stylesheet' type='text/css' href='menu.css'>");
 
-            bool isBulletin;
+            bool isBulletin, isUpdate;
 
             if (bulletin == "") {
                 isBulletin = true;
@@ -288,6 +298,11 @@ namespace Symantec.CWoC.PatchTrending {
                 isBulletin = false;
             }
 
+            if (pagename.EndsWith("-upd")) {
+                isUpdate = true;
+            } else {
+                isUpdate = false;
+            }
 
             string entry = "";
             string curr_bulletin = "";
@@ -327,7 +342,9 @@ namespace Symantec.CWoC.PatchTrending {
                     , curr_data, curr_bulletin, curr_graph, curr_div);
 
                 // Generate the header and divs
-                if (isBulletin) {
+                if (isUpdate) {
+                    htmlDivs.AppendFormat("<h3><a href='getbulletin.html?{0}'>{1}</a></h3>\n", entry.ToLower(), entry);
+                } else if (isBulletin) {
                     htmlDivs.AppendFormat("<h3><a href='{0}.html'>{1}</a></h3>\n", entry.ToLower(), entry);
                 } else {
                     htmlDivs.AppendFormat("<h3>{0}</h3>\n", entry);
