@@ -42,6 +42,7 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         public int Build(string filename) {
+
             string line, pagename;
             StringBuilder filter = new StringBuilder();
             StringBuilder index = new StringBuilder();
@@ -110,15 +111,13 @@ namespace Symantec.CWoC.PatchTrending {
                                 AddToIndex(ref index, pagename);
                         }
                     }
-
-                    GenerateIndex(ref index, compliance_by_computer, inactive_computer_trend);
-                    GenerateGlobalPage();
-                    Console.WriteLine("Generating updates pages...");
-                    GenerateUpdatePages();
-                } catch (Exception e) {
-                    Console.WriteLine(e.Message + "\n" + e.StackTrace);
-                    Console.ReadLine();
+                } catch {
+                    // Something happened with the site-layout. But it doesn't matter - this is now an optional element.
                 }
+                GenerateIndex(ref index, compliance_by_computer, inactive_computer_trend);
+                GenerateGlobalPage();
+                Console.WriteLine("Generating updates pages...");
+                GenerateUpdatePages();
 
                 SaveToFile("sitemap.html", SiteMap.ToString());
                 ++Counters.HtmlPages;
