@@ -833,5 +833,16 @@ function formatDateString(table, column) {
 </body>
 </html>";
         #endregion
+
+        #region
+        public static string[,] DefaultPages = new string[6,3] {
+                {"top10-vulnerable", StaticStrings.sql_get_topn_vulnerable, "Generating Top 10 bulletins by vulnerable computers page..."},
+                {"top25-vulnerable-upd", StaticStrings.sql_get_topn_vulnerable_upd, "Generating Top 25 update by vulnerable computers page..." },
+                {"top10-movers-up", StaticStrings.sql_get_topn_movers_up, "Generating Top 10 movers (++) page..." },
+                {"top10-movers-down", StaticStrings.sql_get_topn_movers_down, "Generating Top 10 movers (--) page..." },
+                {"bottom-10-compliance", StaticStrings.sql_get_bottomn_compliance_upd, "Generating Bottom 10 bulletins by compliance..." },
+                {"bottom-25-compliance-upd", StaticStrings.sql_get_bottomn_compliance, "Generating Bottom 25 updates by compliance..." },
+        };
+        #endregion
     }
 }

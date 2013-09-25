@@ -66,6 +66,13 @@ namespace Symantec.CWoC.PatchTrending {
                 SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
                 ++Counters.HtmlPages;
 
+                for (int i = 0; i < StaticStrings.DefaultPages.Length / 3; i++) {
+                    EventLog.ReportInfo(StaticStrings.DefaultPages[i, 2]);
+                    GeneratePage(StaticStrings.DefaultPages[i, 0], StaticStrings.DefaultPages[i, 1]);
+                    AddToIndex(ref index, StaticStrings.DefaultPages[i, 0]);
+                }
+
+                /*
                 EventLog.ReportInfo("Generating Top 10 bulletins by vulnerable computers page...");
                 GeneratePage("top10-vulnerable", StaticStrings.sql_get_topn_vulnerable);
                 AddToIndex(ref index, "top10-vulnerable");
@@ -90,7 +97,7 @@ namespace Symantec.CWoC.PatchTrending {
                 EventLog.ReportInfo("Generating Bottom 25 updates by compliance...");
                 GeneratePage("bottom-25-compliance-upd", StaticStrings.sql_get_bottomn_compliance);
                 AddToIndex(ref index, "bottom-25-compliance-upd");
-
+                */
 
                 if (inactive_computer_trend) {
                     EventLog.ReportInfo("Generating Inactive-computers page...");
