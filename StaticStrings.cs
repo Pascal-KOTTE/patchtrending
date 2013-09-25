@@ -183,6 +183,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	<script type='text/javascript' src='javascript/global_0.js'></script>
 	<script type='text/javascript' src='javascript/global_1.js'></script>
     <script type='text/javascript' src='javascript/pccompl.js'></script>
+    <script type='text/javascript' src='javascript/pccompl_full.js'></script>
     <script type='text/javascript' src='javascript/inactive_computers.js'></script>
     <script type='text/javascript' src='javascript/inactive_computers_pc.js'></script>
 	<script type='text/javascript' src='javascript/global.js'></script>
@@ -324,7 +325,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 		}
 
 		function analyse_pccompl () {
-			var length = pccompl.length;
+			var length = pccompl_full.length;
             var compl_all = 0;
 			var compl_top = 0;
 			var compl_mid = 0;
@@ -333,22 +334,22 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 				return '';
 
 			for (var i = 1; i < length; i++) {
-				if (parseInt(pccompl[i]) > 74) {
-					var s = pccompl[i][5];
+				if (parseInt(pccompl_full[i]) > 74) {
+					var s = pccompl_full[i][5];
 					var j = s.indexOf('(') + 1;
 					var k = s.indexOf('% of');
 
 					compl_all += parseFloat(s.substring(j, k))
 				}
-				if (parseInt(pccompl[i]) > 89) {
-					var s = pccompl[i][5];
+				if (parseInt(pccompl_full[i]) > 89) {
+					var s = pccompl_full[i][5];
 					var j = s.indexOf('(') + 1;
 					var k = s.indexOf('% of');
 
 					compl_mid += parseFloat(s.substring(j, k))
 				}
-				if (parseInt(pccompl[i]) > 94) {
-					var s = pccompl[i][5];
+				if (parseInt(pccompl_full[i]) > 94) {
+					var s = pccompl_full[i][5];
 					var j = s.indexOf('(') + 1;
 					var k = s.indexOf('% of');
 
