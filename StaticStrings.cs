@@ -87,7 +87,7 @@ declare @id as int
 
 if (@id > 1)
 begin
-	select t1.[Percent], t3.[min], t2.[Computer #], t1.[Computer #], t3.[max], t2.[% of Total]
+	select t1.[Percent], t3.[min], t2.[Computer #], t1.[Computer #], t3.[max], t1.[% of Total]
 
 --	, t1.[% of Total], t2.[% of Total]
 	  from TREND_WindowsCompliance_ByComputer t1
