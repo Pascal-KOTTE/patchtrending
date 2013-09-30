@@ -54,6 +54,10 @@ namespace Symantec.CWoC.PatchTrending {
             bool compliance_by_computer = TestSql("select 1 from TREND_WindowsCompliance_ByComputer t group by t._Exec_id having MAX(_exec_id) > 1");
             bool inactive_computer_trend = TestSql("select top 1 1 from TREND_InactiveComputerCounts");
 
+            SiteMap.Append(StaticStrings.html_navigationbar_sitemap);
+            SiteMap.AppendLine("<link rel='stylesheet' type='text/css' href='menu.css'>");
+            SiteMap.AppendLine("<script type='text/javascript' src='javascript/helper.js'></script>");
+
             AddToSiteMap("Home page", "./");
             AddToSiteMap("Help center", "help.html");
             AddToSiteMap("Global compliance", "getbulletin.html?global");

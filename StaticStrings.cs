@@ -150,6 +150,61 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 
         #endregion
 
+        #region Navigation bar (html)
+        public static string html_navigationbar = @"
+    <a class='menu' onclick='showhide(""_menu"")'><b>[Navigation]</b></a>
+    <div id='_menu' class='hide'> 
+        <a href='./' class='submenu'>Home</a>
+        <a href='./sitemap.html' class='submenu'>Sitemap</a>
+        <a href='./help.html' class='submenu'>Help</a>
+    </div>
+";
+        public static string html_navigationbar_sitemap = @"
+    <a class='menu' onclick='showhide(""_menu"")'><b>[Navigation]</b></a>
+    <div id='_menu' class='hide'> 
+        <a href='./' class='submenu'>Home</a>
+        <a href='./help.html' class='submenu'>Help</a>
+    </div>
+";
+
+        #endregion
+
+        #region Navigation bar (css)
+        public static string css_navigation = @"        body { font-family: Arial;}
+        #_menu {
+	        position: absolute;
+	        top: 20px;
+	        padding-bottom: 2px;
+	        padding-top: 2px;
+	        left:900px;
+	        text-align: left;
+        }
+        .menu{
+	        padding-top:0px;
+	        padding-bottom: 2px;
+	        color: #000000;
+	        height: 20px;
+	        left: 900px;
+	        position: absolute;
+	        font-size: 10px;
+        }
+        .submenu{
+	        display: block;
+	        height: 19px;
+	        padding-top: 2px;
+	        padding-right: 2px;
+	        color: #333333;
+        }
+
+        .hide{
+        display: none;
+        }
+        .show{
+        display: block;
+        }
+";
+        #endregion
+
         #region Landing (html, javascript)
         public static string html_Landing = @"<html>
 	<head>
@@ -161,8 +216,14 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
         div.wrapper {  margin-bottom: 1em;}
 		body { font-family: Arial;};
         </style>
+        <link rel='stylesheet' type='text/css' href='menu.css'>
 	</head>
     <body style='width:1000'>
+    <a class='menu' onclick='showhide(""_menu"")'><b>[Navigation]</b></a>
+    <div id='_menu' class='hide'> 
+        <a href='./sitemap.html' class='submenu'>Sitemap</a>
+        <a href='./help.html' class='submenu'>Help</a>
+    </div>
     <h2 style='text-align: center;'>Global Compliance view</h2>
     <hr/>
     <table style='width: 80%'>
@@ -437,51 +498,6 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
                 g_inactive.draw(d_inactive, {colors: ['orange', 'red', 'royalblue', 'forestgreen']});	
             }
         }";
-        #endregion
-
-        #region Navigation bar (html)
-        public static string html_navigationbar = @"
-    <a class='menu' onclick='showhide(""_menu"")'><b>[Navigation]</b></a>
-    <div id='_menu' class='hide'> 
-        <a href='./' class='submenu'>Home</a>
-        <a href='./sitemap.html' class='submenu'>Sitemap</a>
-        <a href='./help.html' class='submenu'>Help</a>
-    </div>
-";
-        #endregion
-
-        #region Navigation bar (css)
-        public static string css_navigation = @"		#_menu {
-			position: absolute;
-			top: 38px;
-			padding-bottom: 2px;
-			padding-top: 2px;
-			left:800px;
-			text-align: left;
-		}
-		.menu{
-			padding-top:0px;
-			padding-bottom: 2px;
-			color: #000000;
-			height: 20px;
-			left: 800px;
-			position: absolute;
-		}
-		.submenu{
-			display: block;
-			height: 19px;
-			padding-top: 2px;
-			padding-right: 2px;
-			color: #333333;
-		}
-
-		.hide{
-		display: none;
-		}
-		.show{
-		display: block;
-		}
-";
         #endregion
 
         #region Get Bulletin (html + js page)
@@ -835,7 +851,6 @@ function formatDateString(table, column) {
 <div id='_menu' class='hide'> 
 	<a href='./' class='submenu'>Home</a>
 	<a href='./sitemap.html' class='submenu'>Sitemap</a>
-	<a href='./help.html' class='submenu'>Help</a>
 </div>
 <h2 id='top'>{CWoC} Patch Trending Help center</h2>
 <h3>Content:</h3>
