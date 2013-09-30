@@ -152,9 +152,7 @@ namespace Symantec.CWoC.PatchTrending {
                 p.Append(StaticStrings.html_PcCompl_div);
             } else if (byComputer == false && inactive == true) {
                 p.Append(StaticStrings.html_PcInactive_div);
-            } else if (byComputer == false && inactive == false) {
-                // Nothing to add in this case :D.
-            } else {
+            } else if (byComputer == true && inactive == true) {
                 p.Append(StaticStrings.html_PcComplAndInactive_div);
             }
 
