@@ -42,7 +42,6 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         public int Build(string filename) {
-
             string line, pagename;
             StringBuilder filter = new StringBuilder();
             StringBuilder index = new StringBuilder();
@@ -54,18 +53,19 @@ namespace Symantec.CWoC.PatchTrending {
             bool compliance_by_computer = TestSql("select 1 from TREND_WindowsCompliance_ByComputer t group by t._Exec_id having MAX(_exec_id) > 1");
             bool inactive_computer_trend = TestSql("select top 1 1 from TREND_InactiveComputerCounts");
 
-            SiteMap.Append(StaticStrings.html_navigationbar_sitemap);
-            SiteMap.AppendLine("<link rel='stylesheet' type='text/css' href='menu.css'>");
-            SiteMap.AppendLine("<script type='text/javascript' src='javascript/helper.js'></script>");
-
-            AddToSiteMap("Home page", "./");
-            AddToSiteMap("Help center", "help.html");
-            AddToSiteMap("Global compliance", "getbulletin.html?global");
-            SaveToFile("menu.css", StaticStrings.css_navigation);
-            SaveToFile("help.html", StaticStrings.html_help);
-            Counters.HtmlPages += 2;
-
             if (compliance_by_update) {
+
+                SaveToFile("menu.css", StaticStrings.css_navigation);
+                SaveToFile("help.html", StaticStrings.html_help);
+                Counters.HtmlPages += 2;
+
+                SiteMap.Append(StaticStrings.html_navigationbar_sitemap);
+                SiteMap.AppendLine("<link rel='stylesheet' type='text/css' href='menu.css'>");
+                SiteMap.AppendLine("<script type='text/javascript' src='javascript/helper.js'></script>");
+
+                AddToSiteMap("Home page", "./");
+                AddToSiteMap("Help center", "help.html");
+                AddToSiteMap("Global compliance", "getbulletin.html?global");
 
                 SaveToFile("javascript\\helper.js", StaticStrings.js_Helper);
                 ++Counters.JsPages;
@@ -73,6 +73,7 @@ namespace Symantec.CWoC.PatchTrending {
                 SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
                 ++Counters.HtmlPages;
 
+                // Generate default pages showing in the custom compliance view
                 for (int i = 0; i < StaticStrings.DefaultPages.Length / 3; i++) {
                     EventLog.ReportInfo(StaticStrings.DefaultPages[i, 2]);
                     GeneratePage(StaticStrings.DefaultPages[i, 0], StaticStrings.DefaultPages[i, 1]);
@@ -120,6 +121,7 @@ namespace Symantec.CWoC.PatchTrending {
                 } catch {
                     // Something happened with the site-layout. But it doesn't matter - this is now an optional element.
                 }
+
                 GenerateIndex(ref index, compliance_by_computer, inactive_computer_trend);
                 GenerateGlobalPage();
                 Console.WriteLine("Generating updates pages...");
@@ -174,8 +176,8 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void GeneratePcComplPages(bool hasData, bool smaller) {
-            string data = "";
-            string data_full = "";
+            string data = "var pccompl = []";
+            string data_full = "var pccompl_full = []";
 
             if (hasData) {
                 int bottom = 74;
@@ -186,8 +188,8 @@ namespace Symantec.CWoC.PatchTrending {
                 StringBuilder b = new StringBuilder();
                 StringBuilder c = new StringBuilder();
 
-                b.AppendLine("var " + GetJSString("pccompl") + " = [");
-                c.AppendLine("var " + GetJSString("pccompl_full") + " = [");
+                b.AppendLine("var pccompl = [");
+                c.AppendLine("var pccompl_full = [");
 
                 foreach (DataRow r in t.Rows) {
                     if (Convert.ToInt32(r[0]) > bottom) {
@@ -203,13 +205,11 @@ namespace Symantec.CWoC.PatchTrending {
                 b.AppendLine("]");
                 data = b.ToString();
                 data_full = c.ToString();
-            } else {                
-                data = "var pccompl = []";
-            }
 
-            SaveToFile("javascript\\pccompl.js", data);
-            SaveToFile("javascript\\pccompl_full.js", data_full);
-            Counters.JsPages += 2;
+                SaveToFile("javascript\\pccompl.js", data);
+                SaveToFile("javascript\\pccompl_full.js", data_full);
+                Counters.JsPages += 2;
+            }
         }
 
         private void SaveToFile(string filepath, string data) {
@@ -240,7 +240,6 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private int GeneratePage(string pagename, string filter, string sql) {
-
             DataTable t;
             if (filter != "") {
                 t = DatabaseAPI.GetTable(string.Format(sql, filter));
@@ -256,7 +255,6 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private int GeneratePage(DataTable t, string pagename, string bulletin) {
-
             AddToSiteMap(pagename + "<ul>", pagename + ".html");
 
             StringBuilder drawChart = new StringBuilder();
@@ -272,25 +270,15 @@ namespace Symantec.CWoC.PatchTrending {
 
             htmlDivs.Append(StaticStrings.html_navigationbar);
 
-            bool isBulletin, isUpdate;
+            bool isBulletin = false, isUpdate = false;
 
-            if (bulletin == "") {
+            if (bulletin == "")
                 isBulletin = true;
-            } else {
-                isBulletin = false;
-            }
 
-            if (pagename.EndsWith("-upd")) {
+            if (pagename.EndsWith("-upd"))
                 isUpdate = true;
-            } else {
-                isUpdate = false;
-            }
 
-            string entry = "";
-            string curr_bulletin = "";
-            string curr_graph = "";
-            string curr_data = "";
-            string curr_div = "";
+            string entry = "", curr_bulletin = "", curr_graph = "", curr_data = "", curr_div = "";
 
             if (!isBulletin) {
                 htmlDivs.AppendLine("<h2 style='text-align: center; width: 1000px' id='uHeader'></h2>");
@@ -374,13 +362,16 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void GenerateGlobalPage() {
-            Counters.HtmlPages++;
             SaveToFile("javascript\\global.js", StaticStrings.js_GlobalCompliance);
+
             string globalcompliance = "";
             string globalstats = "";
+
             GetGlobalData(ref globalcompliance, ref globalstats);
+
             SaveToFile("javascript\\global_0.js", globalcompliance);
             SaveToFile("javascript\\global_1.js", globalstats);
+
             Counters.JsPages += 3;
         }
 
@@ -450,10 +441,7 @@ namespace Symantec.CWoC.PatchTrending {
                 d[i, 0] = r[0].ToString();
                 // Catch cases of division by zero
                 if (Convert.ToInt32(r[1]) > 0) {
-                    Single inst = Convert.ToSingle(r[1]);
-                    Single appl = Convert.ToSingle(r[2]);
-                    Single compliance = (inst / appl) * 100;
-
+                    Single compliance = Convert.ToSingle(r[1]) / Convert.ToSingle(r[2]) * 100;
                     d[i, 1] = compliance.ToString();
                 } else {
                     d[i, 1] = "0";
@@ -464,18 +452,7 @@ namespace Symantec.CWoC.PatchTrending {
             return d;
         }
 
-        private string GetPcComplianceSummary() {
-            string s = "";
-            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_compliance_bypc_bottom75percent);
-            if (t.Rows.Count > 0) {
-                s = string.Format("There are <i><b>{0}</b> computers, <b>{1}</b>% of the total</i> reporting compliance level below 75%.", t.Rows[0][0], t.Rows[0][1]);
-            }
-            return s;
-        }
-
         private string GetJSONFromTable(DataTable t, string entry) {
-
-
             StringBuilder b = new StringBuilder();
 
             b.AppendLine("var " + GetJSString(entry) + "_1 = [");
@@ -493,7 +470,6 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private string GetInactiveComputer_JSONFromTable(DataTable t, string entry) {
-
             if (t.Rows.Count == 0) {
                 string json = "var " + GetJSString(entry) + " = [];";
                 return json;
