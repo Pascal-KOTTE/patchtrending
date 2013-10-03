@@ -126,17 +126,6 @@ begin
 --	   and t1.[Percent] > 74
 end
 ";
-        public static string sql_get_compliance_bypc_bottom75percent = @"
-/* BOTTOM 75% SUMMARY */
-declare @id as int
-	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
-
-select SUM([computer #]), SUM([% of total])
-  from TREND_WindowsCompliance_ByComputer t3
- where t3._Exec_id = @id
-   and t3.[Percent] < 75
- group by [_exec_id]
-";
         public static string sql_get_inactive_computer_trend = @"
 select Convert(varchar, timestamp, 127), [Inactive computers (7 days)], [Inactive computers (17 days)], [New inactive computers], [New Active Computers]
   from TREND_InactiveComputerCounts
@@ -185,6 +174,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 	        color: #000000;
 	        height: 20px;
 	        left: 900px;
+            top: 5px;
 	        position: absolute;
 	        font-size: 10px;
         }
