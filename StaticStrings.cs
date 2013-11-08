@@ -977,6 +977,10 @@ The file is read line by line and each line is a list of comma separated values.
 </ul>
 <h4><a href='#top'>Top</a></h4>
 <h3 id='changelog'>Changelog</h3>
+<h4>Release 14</h4>
+<p>Adding the stored procedure code inside the site builder to simplify the installation process. The command line invocation is simple: 'sitebuilder.exe /install'.</p><p><b><i> Note! </i></b>This will reset the stored procedures to default if they were customized.</p>
+<h4>Release 13</h4>
+<p>Added some information in the help section. Also generalized the menu to all pages and changed some of the page linking. One important feature is that the site layout file is now optional, as the site navigation does not depend on customised pages. Also fixed a few problems and improve code ordering.</p>
 <h4>Release 12</h4>
 <p>Version 12 is here with massive amount of changes. A full release note article will be published soon, but here&#39;s a short list of additions / improvements: all dates are not ISO based and displayed on the graphs using the MMM dd (for example 2013-07-14 is displayed Jul 14). We have a new site layout that lists all Microsoft bulletins by month, all the way to January 2009, we now have a site map, headers (linked or not) on all stub pages, a navigation tool, a help centre (empty for now), we filter out superseded / inactive updates / bulletins from the site, we added a Compliance by Computer page that use a range selector and we have used the same range selector in the bulletin / update page (getbulletin.html).</p>
 <h4>Release 11</h4>
