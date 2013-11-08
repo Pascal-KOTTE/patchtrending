@@ -13,9 +13,13 @@ namespace Symantec.CWoC.PatchTrending {
 
         static int Main(string[] args) {
             string filename = "site-layout.txt";
-            if (args.Length == 1) {
-                filename = args[0];
-                EventLog.ReportInfo("The custom site-layout file " + filename + " will be used.");
+            if (args.Length > 0) {
+                if (args[0] == "/install") {
+                    return Installer.install();
+                } else {
+                    filename = args[0];
+                    EventLog.ReportInfo("The custom site-layout file " + filename + " will be used.");
+                }
             }
 
             SiteBuilder builder = new SiteBuilder();
@@ -25,7 +29,7 @@ namespace Symantec.CWoC.PatchTrending {
 
     class SiteBuilder {
 
-        public string version = "version 13";
+        public string version = "version 14";
         private StringBuilder SiteMap;
 
         public SiteBuilder() {
@@ -507,6 +511,40 @@ namespace Symantec.CWoC.PatchTrending {
 
         private void AddToSiteMap(string page, string url) {
             SiteMap.AppendFormat("<li><a href='{1}'>{0}</a></li>\n", page, url);
+        }
+    }
+
+    class Installer {
+        public static int install() {
+
+            try {
+                Console.Write("Dropping spTrendPatchComplianceByUpdate...\t");
+                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByUpdate);
+                Console.WriteLine("Done!");
+                Console.Write("Installing spTrendPatchComplianceByUpdate...\t");
+                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByUpdate);
+                Console.WriteLine("Done!");
+
+                Console.Write("Dropping spTrendPatchComplianceByComputer...\t");
+                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByComputer);
+                Console.WriteLine("Done!");
+                Console.Write("Installing spTrendPatchComplianceByComputer...\t");
+                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByComputer);
+                Console.WriteLine("Done!");
+
+                Console.Write("Dropping spTrendInactiveComputers...\t\t");
+                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendInactiveComputers);
+                Console.WriteLine("Done!");
+                Console.Write("Installing spTrendInactiveComputers...\t\t");
+                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendInactiveComputers);
+                Console.WriteLine("Done!");
+
+                Console.WriteLine("\nAll Done!");
+            } catch (Exception e){
+                Console.WriteLine(e.Message);
+                return -1;
+            }
+            return 0;
         }
     }
 }

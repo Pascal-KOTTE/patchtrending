@@ -69,34 +69,24 @@ namespace Symantec.CWoC.APIWrappers
         }
 
         public static int ExecuteNonQuery(string sqlStatement) {
-            try {
-                using (DatabaseContext context = DatabaseContext.GetContext()) {
-                    SqlCommand sql_cmd = context.CreateCommand() as SqlCommand;
-                    sql_cmd.CommandText = sqlStatement;
+            using (DatabaseContext context = DatabaseContext.GetContext()) {
+                SqlCommand sql_cmd = context.CreateCommand() as SqlCommand;
+                sql_cmd.CommandText = sqlStatement;
 
-                    return sql_cmd.ExecuteNonQuery();
-                }
-            } catch {
-                throw new Exception("Failed to execute non query SQL command...");
+                return sql_cmd.ExecuteNonQuery();
             }
-
         }
 
         public static int ExecuteScalar(string sqlStatement) {
-            try {
-                using (DatabaseContext context = DatabaseContext.GetContext()) {
-                    SqlCommand cmd = context.CreateCommand() as SqlCommand;
+            using (DatabaseContext context = DatabaseContext.GetContext()) {
+                SqlCommand cmd = context.CreateCommand() as SqlCommand;
 
-                    cmd.CommandText = sqlStatement;
-                    Object result = cmd.ExecuteScalar();
+                cmd.CommandText = sqlStatement;
+                Object result = cmd.ExecuteScalar();
 
-                    return Convert.ToInt32(result);
-                }
-            } catch {
-                throw new Exception("Failed to execute scalar SQL command...");
+                return Convert.ToInt32(result);
             }
         }
-
     }
 
     class Timer {

@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Symantec.CWoC.PatchTrending</RootNamespace>
-    <AssemblyName>SiteBuilder-v13</AssemblyName>
+    <AssemblyName>SiteBuilder-v14</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,6 +45,7 @@
     <Compile Include="FormattedStrings.cs" />
     <Compile Include="SiteBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SQLStrings.cs" />
     <Compile Include="StaticStrings.cs" />
   </ItemGroup>
   <ItemGroup>

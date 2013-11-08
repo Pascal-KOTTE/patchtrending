@@ -46,7 +46,7 @@ end
 if (select MAX(_exec_time) from TREND_WindowsCompliance_ByComputer) <  dateadd(hour, -23, getdate()) or ((select COUNT(*) from TREND_WindowsCompliance_ByComputer) = 0) or (@force = 1)
 begin
 
--- Get the compliance by update to a "temp" table
+-- Get the compliance by update to a 'temp' table
 truncate table PM_TRENDS2_TEMP
 insert into PM_TRENDS2_TEMP
 exec spPMWindows_ComplianceByComputer

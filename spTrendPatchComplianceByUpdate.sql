@@ -65,7 +65,7 @@ end
 if (select MAX(_exec_time) from TREND_WindowsCompliance_ByUpdate) <  dateadd(hour, -23, getdate()) or ((select COUNT(*) from TREND_WindowsCompliance_ByUpdate) = 0) or (@force = 1)
 begin
 
--- Get the compliance by update to a "temp" table
+-- Get the compliance by update to a 'temp' table
 insert into PM_TRENDS_TEMP
   exec spPMWindows_ComplianceByUpdate
 			@OperatingSystem = '%',
