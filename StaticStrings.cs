@@ -615,10 +615,10 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 
 			}
 
-		google.setOnLoadCallback(drawVisualization);
-	</script>
-    <script type='text/javascript'>
-		var head_link;
+        setTimeout(drawVisualization, 300);
+        //google.setOnLoadCallback(drawVisualization);
+
+        var head_link;
 		if (bulletin == 'global'  || bulletin.search(/KB/i) > 1 || bulletin.search(/\.exe/i) > 1 || bulletin.search(/\.msi/i) > 1 || bulletin.search(/\.msp/i) > 1) {
 			head_link =  bulletin.toUpperCase();
 		} else {
@@ -794,7 +794,9 @@ function escapeString(b) {
 
 function formatToDate(table, column) {
 	for (var i = 1; i < table.length; i++) {
-		table[i][column] = new Date(Date.parse(table[i][column]));
+		var d_base = table[i][column].split('T');
+		var d = d_base[0].split('-');
+		table[i][column] = new Date(d[0], d[1]-1, d[2]);
 	}
 	return table;
 }
