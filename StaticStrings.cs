@@ -1034,6 +1034,28 @@ Note: <b><i>Notes!</i></b>
 </html>";
         #endregion
 
+        #region CLI Help
+        public static string CLIHelp = @"
+Welcome to the Patch Trending SiteBuilder. Here are the currently supported
+command line arguments:
+
+    /install
+
+        This command line installs the pre-requisite stored procedures to the
+        Symantec CMDB and terminates.
+
+    /write-all
+
+        This command line will prevent static html and css  files from being 
+        written to disk. This allows you to customise the site look and feel
+        to better suit your needs.
+
+    /?
+
+        This command line prints out this help message and terminates.
+        ";
+        #endregion
+
         #region Default Pages strings
         public static string[,] DefaultPages = new string[6,3] {
                 {"top10-vulnerable", StaticStrings.sql_get_topn_vulnerable, "Generating Top 10 bulletins by vulnerable computers page..."},

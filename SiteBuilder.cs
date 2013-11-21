@@ -12,17 +12,25 @@ namespace Symantec.CWoC.PatchTrending {
     class SiteGenerator {
 
         static int Main(string[] args) {
+
             string filename = "site-layout.txt";
+            bool write_all = false;
+
             if (args.Length > 0) {
                 if (args[0] == "/install") {
                     return Installer.install();
+                } else if (args[0] == "/write-all") {
+                    write_all = true;
+                } else if (args[0] == "/?") {
+                    Console.WriteLine(StaticStrings.CLIHelp);
+                    return 0;
                 } else {
                     filename = args[0];
                     EventLog.ReportInfo("The custom site-layout file " + filename + " will be used.");
                 }
             }
 
-            SiteBuilder builder = new SiteBuilder();
+            SiteBuilder builder = new SiteBuilder(write_all);
             return builder.Build(filename);
         }
     }
@@ -31,10 +39,13 @@ namespace Symantec.CWoC.PatchTrending {
 
         public string version = "version 14";
         private StringBuilder SiteMap;
+        private bool WriteAll;
 
-        public SiteBuilder() {
+        public SiteBuilder(bool write_all) {
             Timer.Init();
             Counters.Init();
+
+            WriteAll = write_all;
 
             Altiris.NS.Logging.EventLog.ReportInfo("SiteBuilder is starting.");
             SiteMap = new StringBuilder();
@@ -59,9 +70,14 @@ namespace Symantec.CWoC.PatchTrending {
 
             if (compliance_by_update) {
 
-                SaveToFile("menu.css", StaticStrings.css_navigation);
-                SaveToFile("help.html", StaticStrings.html_help);
-                Counters.HtmlPages += 2;
+                if (File.Exists("menu.css") && WriteAll) {
+                    SaveToFile("menu.css", StaticStrings.css_navigation);
+                    ++Counters.HtmlPages;
+                }
+                if (File.Exists("help.html") && WriteAll) {
+                    SaveToFile("help.html", StaticStrings.html_help);
+                    ++Counters.HtmlPages;
+                }
 
                 SiteMap.Append(StaticStrings.html_navigationbar_sitemap);
                 SiteMap.AppendLine("<link rel='stylesheet' type='text/css' href='menu.css'>");
@@ -71,11 +87,15 @@ namespace Symantec.CWoC.PatchTrending {
                 AddToSiteMap("Help center", "help.html");
                 AddToSiteMap("Global compliance", "getbulletin.html?global");
 
-                SaveToFile("javascript\\helper.js", StaticStrings.js_Helper);
-                ++Counters.JsPages;
+                if (File.Exists("javascript\\helper.js") && WriteAll) {
+                    SaveToFile("javascript\\helper.js", StaticStrings.js_Helper);
+                    ++Counters.JsPages;
+                }
 
-                SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
-                ++Counters.HtmlPages;
+                if (File.Exists("getbulletin.html") && WriteAll) {
+                    SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
+                    ++Counters.HtmlPages;
+                }
 
                 // Generate default pages showing in the custom compliance view
                 for (int i = 0; i < StaticStrings.DefaultPages.Length / 3; i++) {
@@ -87,16 +107,23 @@ namespace Symantec.CWoC.PatchTrending {
                 if (inactive_computer_trend) {
                     EventLog.ReportInfo("Generating Inactive-computers page...");
                     GenerateInactiveComputerJs();
-                    SaveToFile("inactive-computers.html", StaticStrings.html_GetInactiveComputers_page);
-                    ++Counters.HtmlPages;
+
+                    if (File.Exists("inactive-computers.html") && WriteAll) {
+                        SaveToFile("inactive-computers.html", StaticStrings.html_GetInactiveComputers_page);
+                        ++Counters.HtmlPages;
+                    }
                     AddToIndex(ref index, "inactive-computers");
                     AddToSiteMap("inactive-computers", "inactive-computers.html");
                 }
 
                 if (compliance_by_computer) {
                     EventLog.ReportInfo("Generating Compliance-by-computer page...");
-                    SaveToFile("compliance-by-computer.html", StaticStrings.html_ComputerCompliance_page);
-                    ++Counters.HtmlPages;
+
+                    if (File.Exists("compliance-by-computer.html") && WriteAll) {
+                        SaveToFile("compliance-by-computer.html", StaticStrings.html_ComputerCompliance_page);
+                        ++Counters.HtmlPages;
+                    }
+
                     AddToIndex(ref index, "compliance-by-computer");
                     AddToSiteMap("compliance-by-computer", "compliance-by-computer.html");
                 }
