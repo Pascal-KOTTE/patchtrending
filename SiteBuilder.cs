@@ -70,11 +70,11 @@ namespace Symantec.CWoC.PatchTrending {
 
             if (compliance_by_update) {
 
-                if (File.Exists("menu.css") && WriteAll) {
+                if (!File.Exists("menu.css") || WriteAll) {
                     SaveToFile("menu.css", StaticStrings.css_navigation);
                     ++Counters.HtmlPages;
                 }
-                if (File.Exists("help.html") && WriteAll) {
+                if (!File.Exists("help.html") || WriteAll) {
                     SaveToFile("help.html", StaticStrings.html_help);
                     ++Counters.HtmlPages;
                 }
@@ -87,12 +87,12 @@ namespace Symantec.CWoC.PatchTrending {
                 AddToSiteMap("Help center", "help.html");
                 AddToSiteMap("Global compliance", "getbulletin.html?global");
 
-                if (File.Exists("javascript\\helper.js") && WriteAll) {
+                if (!File.Exists("javascript\\helper.js") || WriteAll) {
                     SaveToFile("javascript\\helper.js", StaticStrings.js_Helper);
                     ++Counters.JsPages;
                 }
 
-                if (File.Exists("getbulletin.html") && WriteAll) {
+                if (!File.Exists("getbulletin.html") || WriteAll) {
                     SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
                     ++Counters.HtmlPages;
                 }
@@ -108,7 +108,7 @@ namespace Symantec.CWoC.PatchTrending {
                     EventLog.ReportInfo("Generating Inactive-computers page...");
                     GenerateInactiveComputerJs();
 
-                    if (File.Exists("inactive-computers.html") && WriteAll) {
+                    if (!File.Exists("inactive-computers.html") || WriteAll) {
                         SaveToFile("inactive-computers.html", StaticStrings.html_GetInactiveComputers_page);
                         ++Counters.HtmlPages;
                     }
@@ -119,7 +119,7 @@ namespace Symantec.CWoC.PatchTrending {
                 if (compliance_by_computer) {
                     EventLog.ReportInfo("Generating Compliance-by-computer page...");
 
-                    if (File.Exists("compliance-by-computer.html") && WriteAll) {
+                    if (!File.Exists("compliance-by-computer.html") || WriteAll) {
                         SaveToFile("compliance-by-computer.html", StaticStrings.html_ComputerCompliance_page);
                         ++Counters.HtmlPages;
                     }
