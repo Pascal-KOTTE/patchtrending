@@ -1006,7 +1006,7 @@ The file is read line by line and each line is a list of comma separated values.
 </ul>
 <h4>Release 14</h4>
 <p>Adding the stored procedure code inside the site builder to simplify the installation process. The command line invocation is simple: 'sitebuilder.exe /install'.</p>
-<p><b><i>Note!</i></b>This will reset the stored procedures to default if they were customized.</p>
+<p><b><i>Note!</i></b> This will reset the stored procedures to default if they were customized.</p>
 <h4>Release 13</h4>
 <p>Added some information in the help section. Also generalized the menu to all pages and changed some of the page linking. One important feature is that the site layout file is now optional, as the site navigation does not depend on customised pages. Also fixed a few problems and improve code ordering.</p>
 <h4>Release 12</h4>
