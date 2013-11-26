@@ -96,6 +96,10 @@ namespace Symantec.CWoC.PatchTrending {
                     SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
                     ++Counters.HtmlPages;
                 }
+                if (!File.Exists("webpart-fullview.html") || WriteAll) {
+                    SaveToFile("webpart-fullview.html", StaticStrings.html_webpart_fullview);
+                    ++Counters.HtmlPages;
+                }
 
                 // Generate default pages showing in the custom compliance view
                 for (int i = 0; i < StaticStrings.DefaultPages.Length / 3; i++) {

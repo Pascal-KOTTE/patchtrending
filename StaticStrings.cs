@@ -531,7 +531,14 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 		function drawVisualization() {
 		
 			b = escapeString(bulletin);
-			var data_compl = window[b + '_0'];
+
+            var data_compl = window[b + '_0'];
+            var data_vuln = window[b + '_1'];
+
+			if (typeof(data_compl) == 'undefined' || typeof(data_vuln) == 'undefined') {
+				document.getElementById('dashboard_vuln').innerHTML = '<p>No trending data is available...</p>';
+				return;
+			}
 
 			var dashboard_compl = new google.visualization.Dashboard(document.getElementById('dashboard_compl'));
 			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
@@ -570,8 +577,6 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 
 			dashboard_compl.bind(control_compl, chart_compl);
 			dashboard_compl.draw(d_compl);
-
-			var data_vuln = window[b + '_1'];
 
 			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
 			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
@@ -1065,6 +1070,144 @@ command line arguments:
                 {"bottom-10-compliance", StaticStrings.sql_get_bottomn_compliance, "Generating Bottom 10 bulletins by compliance..." },
                 {"bottom-25-compliance-upd", StaticStrings.sql_get_bottomn_compliance_upd, "Generating Bottom 25 updates by compliance..." },
         };
+        #endregion
+
+        #region webpart-fullview (html)
+        public static string html_webpart_fullview = @"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+	<title>Bulletin detailed view</title>
+	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+	<script type='text/javascript' src='javascript/helper.js'></script>
+    <link rel='stylesheet' type='text/css' href='menu.css'>
+	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
+</head>
+<body>
+	<h4 id='t_012' style='text-align: center'></h4>
+    <div id='dashboard_vuln'>
+        <div id='chart_vuln' style='height: 200px;'></div>
+        <div id='control_vuln' style='height: 50px;'></div>
+    </div>
+    <div id='dashboard_compl'>
+        <div id='chart_compl' style='height: 200px;'></div>
+        <div id='control_compl' style='height: 50px;'></div>
+    </div>
+  </body>
+	<script type='text/javascript'>
+		var bulletin = window.location.search.substring(1).toLowerCase();
+
+		function loadjs(filename){
+			var fileref = document.createElement('script')
+			fileref.setAttribute('type','text/javascript')
+			fileref.setAttribute('src', filename)
+			
+			if (typeof fileref!='undefined')
+				document.getElementsByTagName('head')[0].appendChild(fileref)
+		}
+			 
+		loadjs('javascript/' + escapeString(bulletin) + '_0.js');
+		loadjs('javascript/' + escapeString(bulletin) + '_1.js');
+
+		function drawVisualization() {
+		
+			b = escapeString(bulletin);
+			
+			
+			var data_compl = window[b + '_0'];
+			var data_vuln = window[b + '_1'];
+
+			if (typeof(data_compl) == 'undefined' || typeof(data_vuln) == 'undefined') {
+				document.getElementById('dashboard_vuln').innerHTML = '<p>No trending data is available...</p>';
+				return;
+			}
+			
+			var dashboard_compl = new google.visualization.Dashboard(document.getElementById('dashboard_compl'));
+			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
+
+			var control_compl = new google.visualization.ControlWrapper({
+					'controlType': 'ChartRangeFilter',
+					'containerId': 'control_compl',
+					'options': {
+					'filterColumnIndex': 0,
+					'ui': {
+						'chartType': 'LineChart',
+						'chartOptions': {
+							'chartArea': {'width': '90%'},
+							'hAxis': {'baselineColor': 'none'}
+						},
+						'chartView': {
+							'columns': [0, 1]
+						}, 'minRangeSize': 7
+						}
+					}
+				});
+
+			var chart_compl = new google.visualization.ChartWrapper({
+				'chartType': 'LineChart',
+				'containerId': 'chart_compl',
+				'options': {
+				'chartArea': {'height': '80%', 'width': '90%'},
+				'tooltip': {isHtml: false},
+				'hAxis': {'slantedText': false},
+				'vAxis': {'viewWindow': {'min': 0, 'max': 101}},
+				'legend': {'position': 'none'}
+				},
+			});
+
+			var d_compl = new google.visualization.arrayToDataTable(formatToDate(data_compl, 0));
+
+			dashboard_compl.bind(control_compl, chart_compl);
+			dashboard_compl.draw(d_compl);
+
+			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
+			var dashboard_vuln = new google.visualization.Dashboard(document.getElementById('dashboard_vuln'));
+
+			var control_vuln = new google.visualization.ControlWrapper({
+					'controlType': 'ChartRangeFilter',
+					'containerId': 'control_vuln',
+					'options': {
+                    'backgroundColor' : { fill:'transparent' },
+					'filterColumnIndex': 0,
+					'ui': {
+						'chartType': 'LineChart',
+						'chartOptions': {
+							'chartArea': {'width': '90%'},
+							'hAxis': {'baselineColor': 'none'}
+						},
+						'chartView': {
+							'columns': [0, 3]
+						}, 'minRangeSize': 7
+						}
+					}
+				});
+
+			var chart_vuln = new google.visualization.ChartWrapper({
+				'chartType': 'LineChart',
+				'containerId': 'chart_vuln',
+				'options': {
+                'backgroundColor' : { fill:'transparent' },
+				'chartArea': {'height': '80%', 'width': '90%'},
+				'tooltip': {isHtml: false},
+				'hAxis': {'slantedText': false},
+				'vAxis': {'viewWindow': {'min': 0}},
+				'legend': {'position': 'none'}
+				},
+			});
+
+			var d_vuln = new google.visualization.arrayToDataTable(formatToDate(data_vuln, 0));
+
+			dashboard_vuln.bind(control_vuln, chart_vuln);
+			dashboard_vuln.draw(d_vuln);
+
+			}
+
+        setTimeout(drawVisualization, 150);
+
+        var head_link =  bulletin.toUpperCase();
+		document.getElementById('t_012').innerHTML = head_link;
+    </script>
+</html>
+";
         #endregion
     }
 }
