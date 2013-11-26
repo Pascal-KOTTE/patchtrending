@@ -989,7 +989,7 @@ The file is read line by line and each line is a list of comma separated values.
 <ul>
 <li>Code fix (1): Modified the getbulletin.html page to ensure it loads charts properly under various Internet Explorer versions (tested on Version 8, 9 and 10)</li>
 <li>Code fix (2): Modified getbulletin.html to verify whether trending data exists or not for the requested entry. If not the message 'No data is available...' is displayed.</li>
-<li><p>Feature (1): Added command line option /write-all to prevent the following static pages from being over-written with each site builder invocation (i.e. they will only be overwritten if you invoke ;sitebuilder.exe /write-all'):</p>
+<li><p>Feature (1): Added command line option /write-all to prevent the following static pages from being over-written with each site builder invocation (i.e. they will only be overwritten if you invoke 'sitebuilder.exe /write-all'):</p>
 <ul>
 <li>inactive-computers.html</li>
 <li>compliance-by-computer.html</li>
@@ -997,7 +997,7 @@ The file is read line by line and each line is a list of comma separated values.
 <li>webpart-fullview.html</li>
 <li>menu.css</li>
 <li>help.html</li>
-<li>javascript\helper.js</li>
+<li>javascript/helper.js</li>
 </ul>
 <p>You will notice that this feature include the menu.css. This will allow you to customise the look and feel of the site without loosing your work in between all execution. The same is true for the html pages, as you can now customise them further without the risk of loosing them.</p>
 </li>
