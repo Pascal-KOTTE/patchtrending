@@ -984,8 +984,29 @@ The file is read line by line and each line is a list of comma separated values.
 </ul>
 <h4><a href='#top'>Top</a></h4>
 <h3 id='changelog'>Changelog</h3>
+<h4>Release 15</h4>
+<p>This release contains a major codefix, a minor codefix and two important new features and a minor CLI change:</p>
+<ul>
+<li>Code fix (1): Modified the getbulletin.html page to ensure it loads charts properly under various Internet Explorer versions (tested on Version 8, 9 and 10)</li>
+<li>Code fix (2): Modified getbulletin.html to verify whether trending data exists or not for the requested entry. If not the message 'No data is available...' is displayed.</li>
+<li><p>Feature (1): Added command line option /write-all to prevent the following static pages from being over-written with each site builder invocation (i.e. they will only be overwritten if you invoke ;sitebuilder.exe /write-all'):</p>
+<ul>
+<li>inactive-computers.html</li>
+<li>compliance-by-computer.html</li>
+<li>getbulletin.html</li>
+<li>webpart-fullview.html</li>
+<li>menu.css</li>
+<li>help.html</li>
+<li>javascript\helper.js</li>
+</ul>
+<p>You will notice that this feature include the menu.css. This will allow you to customise the look and feel of the site without loosing your work in between all execution. The same is true for the html pages, as you can now customise them further without the risk of loosing them.</p>
+</li>
+<li>Feature (2): Added a new html page name 'webpart-fullview.html'. This page is a copy of getbulletin.html without the site navigation. It is designed to be used inside the SMP console right-click actions inside a virtual window.</li>
+<li>CLI change: Added a standard message to display all valid option when invoking the executable with the help paremeter (/? or --help)</li>
+</ul>
 <h4>Release 14</h4>
-<p>Adding the stored procedure code inside the site builder to simplify the installation process. The command line invocation is simple: 'sitebuilder.exe /install'.</p><p><b><i> Note! </i></b>This will reset the stored procedures to default if they were customized.</p>
+<p>Adding the stored procedure code inside the site builder to simplify the installation process. The command line invocation is simple: 'sitebuilder.exe /install'.</p>
+<p><b><i>Note!</i></b>This will reset the stored procedures to default if they were customized.</p>
 <h4>Release 13</h4>
 <p>Added some information in the help section. Also generalized the menu to all pages and changed some of the page linking. One important feature is that the site layout file is now optional, as the site navigation does not depend on customised pages. Also fixed a few problems and improve code ordering.</p>
 <h4>Release 12</h4>

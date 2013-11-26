@@ -17,11 +17,11 @@ namespace Symantec.CWoC.PatchTrending {
             bool write_all = false;
 
             if (args.Length > 0) {
-                if (args[0] == "/install") {
+                if (args[0].ToLower() == "/install") {
                     return Installer.install();
-                } else if (args[0] == "/write-all") {
+                } else if (args[0].ToLower() == "/write-all") {
                     write_all = true;
-                } else if (args[0] == "/?") {
+                } else if (args[0] == "/?" || args[0].ToLower() == "--help") {
                     Console.WriteLine(StaticStrings.CLIHelp);
                     return 0;
                 } else {
@@ -37,7 +37,7 @@ namespace Symantec.CWoC.PatchTrending {
 
     class SiteBuilder {
 
-        public string version = "version 14";
+        public string version = "version 15";
         private StringBuilder SiteMap;
         private bool WriteAll;
 
