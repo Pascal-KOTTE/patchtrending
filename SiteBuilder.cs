@@ -256,6 +256,8 @@ namespace Symantec.CWoC.PatchTrending {
         private string GetJSString(string s) {
             s = s.Replace('-', '_');
             s = s.Replace('.', '_');
+            s = s.Replace('(', '_');
+            s = s.Replace(')', '_');
             s = s.ToLower();
             return s;
         }
