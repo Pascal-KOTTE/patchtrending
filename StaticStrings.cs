@@ -4,141 +4,6 @@ using System.Text;
 
 namespace Symantec.CWoC.PatchTrending {
     class StaticStrings {
-
-        #region SQL query strings
-        public static string sql_get_bulletins_in = @"
-               -- Get all tracked bulletins
-                select bulletin
-                  from TREND_WindowsCompliance_ByUpdate
-                 where bulletin in ({0})
-                 group by bulletin
-                having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 order by MIN(_exec_time) desc, Bulletin desc";
-        public static string sql_get_all_bulletins = @"
-               -- Get all tracked bulletins
-                select bulletin
-                  from TREND_WindowsCompliance_ByUpdate
-                 group by bulletin
-                having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 order by MIN(_exec_time) desc, Bulletin desc";
-        public static string sql_get_global_compliance_data = @"
-                         select Convert(varchar, max(_Exec_time), 127) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
-                           from TREND_WindowsCompliance_ByUpdate
-                          group by _Exec_id order by date";
-        public static string sql_get_topn_vulnerable = @"
-                select top 10 Bulletin --, SUM(Applicable) - SUM(installed)
-                  from TREND_WindowsCompliance_ByUpdate
-                 where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 group by Bulletin
-                 order by SUM(Applicable) - SUM(installed) desc";
-        public static string sql_get_topn_vulnerable_upd = @"
-                select top 25 [Update]
-                  from TREND_WindowsCompliance_ByUpdate
-                 where [_Exec_id] = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 group by [Update], [Bulletin]
-                 order by SUM(Applicable) - SUM(installed) desc";
-        public static string sql_get_bottomn_compliance = @"
-                select top 10 Bulletin --, CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100
-                  from TREND_WindowsCompliance_ByUpdate
-                 where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 group by Bulletin
-                having SUM(Applicable) - SUM(installed) > 100
-                 order by CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100";
-        public static string sql_get_bottomn_compliance_upd = @"
-                select top 25 [Update] --, CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100
-                  from TREND_WindowsCompliance_ByUpdate
-                 where _Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 group by Bulletin, [Update]
-                having SUM(Applicable) - SUM(installed) > 100
-                 order by CAST(SUM(installed) as float) / CAST(SUM(Applicable) as float) * 100";
-        public static string sql_get_topn_movers_up = @"
-                -- Return the 10 bulletins for which more computers are secured
-                select top 10 t1.Bulletin, t1._Exec_id, (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) as 'Delta'
-                  from TREND_WindowsCompliance_ByUpdate t1
-                  join TREND_WindowsCompliance_ByUpdate t2
-                    on t1._Exec_id -1 = t2._Exec_id and t1.Bulletin = t2.Bulletin and t1.[UPDATE] = t2.[update]
-                 where t1._Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 group by t1.Bulletin, t1._Exec_id
-                having (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) > 0
-                 order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) desc
-                ";
-        public static string sql_get_topn_movers_down = @"
-                -- Return the 10 bulletins for which more computers are vulnerable
-                select top 10 t1.Bulletin, t1._Exec_id, (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) as 'Delta'
-                  from TREND_WindowsCompliance_ByUpdate t1
-                  join TREND_WindowsCompliance_ByUpdate t2
-                    on t1._Exec_id -1 = t2._Exec_id and t1.Bulletin = t2.Bulletin and t1.[UPDATE] = t2.[update]
-                 where t1._Exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 group by t1.Bulletin, t1._Exec_id
-                having (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed)) < 0
-                 order by (sum(t2.Applicable) - SUM(t2.installed)) - (sum(t1.Applicable) - SUM(t1.installed))
-                ";
-        public static string sql_get_updates_bybulletin = @"
-                 select distinct([UPDATE])
-                   from TREND_WindowsCompliance_ByUpdate
-                  where bulletin = '{0}'
-				  group by [update]
-				 having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
-                 ";
-
-        public static string sql_get_compliance_bypccount = @"
-declare @id as int
-	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
-
-if (@id > 1)
-begin
-	select t1.[Percent], t3.[min], t2.[Computer #], t1.[Computer #], t3.[max], t1.[% of Total]
-
---	, t1.[% of Total], t2.[% of Total]
-	  from TREND_WindowsCompliance_ByComputer t1
-	  join TREND_WindowsCompliance_ByComputer t2
-		on t1.[Percent] = t2.[Percent]
-	  join (
-				select[Percent], MIN(t3.[Computer #]) as min, MAX(t3.[computer #]) as max
-				  from TREND_WindowsCompliance_ByComputer t3
-				group by [Percent]
-			) t3
-	    on t1.[Percent] = t3.[percent]
-	 where t1._Exec_id = @id
-	   and t2._Exec_id = @id - 1
---	   and t1.[Percent] > 74
-end
-";
-
-        public static string sql_get_compliance_bypcpercent = @"declare @id as int
-	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
-
-if (@id > 1)
-begin
-	select t1.[Percent], t3.[min], t2.[% of Total], t1.[% of Total], t3.[max], t1.[% of Total]
---	, t1.[% of Total], t2.[% of Total]
-	  from TREND_WindowsCompliance_ByComputer t1
-	  join TREND_WindowsCompliance_ByComputer t2
-		on t1.[Percent] = t2.[Percent]
-	  join (
-				select[Percent], MIN(t3.[% of Total]) as min, MAX(t3.[% of Total]) as max
-				  from TREND_WindowsCompliance_ByComputer t3
-				group by [Percent]
-			) t3
-	    on t1.[Percent] = t3.[percent]
-	 where t1._Exec_id = @id
-	   and t2._Exec_id = @id - 1
---	   and t1.[Percent] > 74
-end
-";
-        public static string sql_get_inactive_computer_trend = @"
-select Convert(varchar, timestamp, 127), [Inactive computers (7 days)], [Inactive computers (17 days)], [New inactive computers], [New Active Computers]
-  from TREND_InactiveComputerCounts
- order by _exec_id
-";
-        public static string sql_get_inactive_computer_percent = @"
-select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as money) /  cast([Managed machines] as money) * 100 as '7-days inactive (% of managed)', cast([Inactive computers (17 days)] as money) /  cast([Managed machines] as money) * 100 as '17-days inactive (% of managed)', CAST([New inactive computers] as money) / CAST([Managed machines] AS money) * 100 as '++ (% of managed)', CAST([New active computers] as money) / CAST([Managed machines] as money) * 100 as '-- (% of managed)'
-  from TREND_InactiveComputerCounts
- order by _exec_id
-     ";
-
-        #endregion
-
         #region Navigation bar (html)
         public static string html_navigationbar = @"
     <a class='menu' onclick='showhide(""_menu"")'><b>[Navigation]</b></a>
@@ -495,7 +360,7 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
 	<title>Bulletin detailed view</title>
-	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
 	<script type='text/javascript' src='javascript/helper.js'></script>
     <link rel='stylesheet' type='text/css' href='menu.css'>
 	<script type='text/javascript'>google.load('visualization', '1.1', {packages: ['corechart', 'controls']});</script>
@@ -1086,12 +951,12 @@ command line arguments:
 
         #region Default Pages strings
         public static string[,] DefaultPages = new string[6,3] {
-                {"top10-vulnerable", StaticStrings.sql_get_topn_vulnerable, "Generating Top 10 bulletins by vulnerable computers page..."},
-                {"top25-vulnerable-upd", StaticStrings.sql_get_topn_vulnerable_upd, "Generating Top 25 update by vulnerable computers page..." },
-                {"top10-movers-up", StaticStrings.sql_get_topn_movers_up, "Generating Top 10 movers (++) page..." },
-                {"top10-movers-down", StaticStrings.sql_get_topn_movers_down, "Generating Top 10 movers (--) page..." },
-                {"bottom-10-compliance", StaticStrings.sql_get_bottomn_compliance, "Generating Bottom 10 bulletins by compliance..." },
-                {"bottom-25-compliance-upd", StaticStrings.sql_get_bottomn_compliance_upd, "Generating Bottom 25 updates by compliance..." },
+                {"top10-vulnerable", SQLStrings.sql_get_topn_vulnerable, "Generating Top 10 bulletins by vulnerable computers page..."},
+                {"top25-vulnerable-upd", SQLStrings.sql_get_topn_vulnerable_upd, "Generating Top 25 update by vulnerable computers page..." },
+                {"top10-movers-up", SQLStrings.sql_get_topn_movers_up, "Generating Top 10 movers (++) page..." },
+                {"top10-movers-down", SQLStrings.sql_get_topn_movers_down, "Generating Top 10 movers (--) page..." },
+                {"bottom-10-compliance", SQLStrings.sql_get_bottomn_compliance, "Generating Bottom 10 bulletins by compliance..." },
+                {"bottom-25-compliance-upd", SQLStrings.sql_get_bottomn_compliance_upd, "Generating Bottom 25 updates by compliance..." },
         };
         #endregion
 

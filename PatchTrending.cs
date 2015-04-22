@@ -1,4 +1,3 @@
-using Altiris.NS.Logging;
 using Altiris.NS.ContextManagement;
 using System;
 using System.Collections.Generic;
@@ -15,39 +14,46 @@ namespace Symantec.CWoC.PatchTrending {
 
             string filename = "site-layout.txt";
             bool write_all = false;
+			string collectionguid = "01024956-1000-4cdb-b452-7db0cff541b6";
+			
+			Logger.Log("PatchTrending is starting...");
 
             if (args.Length > 0) {
                 if (args[0].ToLower() == "/install") {
                     return Installer.install();
                 } else if (args[0].ToLower() == "/write-all") {
                     write_all = true;
+				} else if (args[0].ToLower().StartsWith("/collectionguid=")) {
+					collectionguid = args[0].Substring("/collectionguid=".Length);
                 } else if (args[0] == "/?" || args[0].ToLower() == "--help") {
                     Console.WriteLine(StaticStrings.CLIHelp);
                     return 0;
                 } else {
                     filename = args[0];
-                    EventLog.ReportInfo("The custom site-layout file " + filename + " will be used.");
+                    Logger.Log("The custom site-layout file " + filename + " will be used.");
                 }
             }
 
-            SiteBuilder builder = new SiteBuilder(write_all);
+            SiteBuilder builder = new SiteBuilder(write_all, collectionguid);
             return builder.Build(filename);
         }
     }
 
     class SiteBuilder {
 
-        public string version = "version 15";
+        public string version = "version 16";
         private StringBuilder SiteMap;
         private bool WriteAll;
+		private string CollectionGuid;
 
-        public SiteBuilder(bool write_all) {
+        public SiteBuilder(bool write_all, string collectionguid) {
             Timer.Init();
             Counters.Init();
 
             WriteAll = write_all;
+			CollectionGuid = collectionguid;
 
-            Altiris.NS.Logging.EventLog.ReportInfo("SiteBuilder is starting.");
+            Logger.Log("SiteBuilder is starting...");
             SiteMap = new StringBuilder();
 
             // Make sure we have the required sub-folder for javascript files
@@ -103,13 +109,13 @@ namespace Symantec.CWoC.PatchTrending {
 
                 // Generate default pages showing in the custom compliance view
                 for (int i = 0; i < StaticStrings.DefaultPages.Length / 3; i++) {
-                    EventLog.ReportInfo(StaticStrings.DefaultPages[i, 2]);
-                    GeneratePage(StaticStrings.DefaultPages[i, 0], StaticStrings.DefaultPages[i, 1]);
+                    Altiris.NS.Logging.EventLog.ReportInfo(StaticStrings.DefaultPages[i, 2]);
+                    GeneratePage(StaticStrings.DefaultPages[i, 0], String.Format(StaticStrings.DefaultPages[i, 1], CollectionGuid));
                     AddToIndex(ref index, StaticStrings.DefaultPages[i, 0]);
                 }
 
                 if (inactive_computer_trend) {
-                    EventLog.ReportInfo("Generating Inactive-computers page...");
+                    Logger.Log("Generating Inactive-computers page...");
                     GenerateInactiveComputerJs();
 
                     if (!File.Exists("inactive-computers.html") || WriteAll) {
@@ -121,7 +127,7 @@ namespace Symantec.CWoC.PatchTrending {
                 }
 
                 if (compliance_by_computer) {
-                    EventLog.ReportInfo("Generating Compliance-by-computer page...");
+                    Logger.Log("Generating Compliance-by-computer page...");
 
                     if (!File.Exists("compliance-by-computer.html") || WriteAll) {
                         SaveToFile("compliance-by-computer.html", StaticStrings.html_ComputerCompliance_page);
@@ -132,7 +138,7 @@ namespace Symantec.CWoC.PatchTrending {
                     AddToSiteMap("compliance-by-computer", "compliance-by-computer.html");
                 }
 
-                EventLog.ReportInfo("Generating site pages from the layout file...");
+                Logger.Log("Generating site pages from the layout file...");
                 try {
                     using (StreamReader reader = new StreamReader(filename)) {
                         while (!reader.EndOfStream) {
@@ -148,13 +154,13 @@ namespace Symantec.CWoC.PatchTrending {
                             for (int i = 2; i < d.Length; i++) {
                                 filter.Append(", '" + d[i].Trim() + "'");
                             }
-                            int j = GeneratePage(pagename, filter.ToString(), StaticStrings.sql_get_bulletins_in);
+                            int j= GeneratePage(pagename, filter.ToString(), String.Format(SQLStrings.sql_get_bulletins_in, CollectionGuid));
                             if (j > 0)
                                 AddToIndex(ref index, pagename);
                         }
                     }
-                } catch {
-                    // Something happened with the site-layout. But it doesn't matter - this is now an optional element.
+                } catch (Exception ex) {
+                    Logger.LogEx(ex);
                 }
 
                 GenerateIndex(ref index, compliance_by_computer, inactive_computer_trend);
@@ -166,7 +172,7 @@ namespace Symantec.CWoC.PatchTrending {
                 ++Counters.HtmlPages;
 
                 Timer.Stop();
-                string msg = string.Format("SiteBuilder took {0} ms to generate {1} pages ({2} html and {3} javascript) with {4} sql queries executed.", Timer.duration(), Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries);
+                string msg = string.Format("SiteBuilder took {0} ms to generate {1} pages ({2} html and {3} javascript) with {4} sql queries executed (returning {5} rows).", Timer.duration(), Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries, Counters.SqlRows);
                 Altiris.NS.Logging.EventLog.ReportInfo(msg);
             } else {
                 Console.WriteLine("We cannot execute anything as the prerequisite table TREND_WindowsCompliance_ByUpdate is missing.");
@@ -219,7 +225,7 @@ namespace Symantec.CWoC.PatchTrending {
                 if (smaller)
                     bottom = 84;
 
-                DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_compliance_bypccount);
+                DataTable t = DatabaseAPI.GetTable(String.Format(SQLStrings.sql_get_compliance_bypccount, CollectionGuid));
                 StringBuilder b = new StringBuilder();
                 StringBuilder c = new StringBuilder();
 
@@ -248,6 +254,7 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void SaveToFile(string filepath, string data) {
+			Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("Saving data to file {0}:\n{1}", filepath, data));
             using (StreamWriter outfile = new StreamWriter(filepath.ToLower())) {
                 outfile.Write(data);
             }
@@ -279,7 +286,7 @@ namespace Symantec.CWoC.PatchTrending {
         private int GeneratePage(string pagename, string filter, string sql) {
             DataTable t;
             if (filter != "") {
-                t = DatabaseAPI.GetTable(string.Format(sql, filter));
+                t = DatabaseAPI.GetTable(string.Format(sql, filter, CollectionGuid));
             } else {
                 t = DatabaseAPI.GetTable(sql);
             }
@@ -384,13 +391,13 @@ namespace Symantec.CWoC.PatchTrending {
                 Counters.JsPages += 2;
             }
 
-            Console.WriteLine("\tGenerating graphing javascript for {0}...", entry);
+            Altiris.NS.Logging.EventLog.ReportInfo(String.Format("Generating graphing javascript for {0}...", entry));
 
             drawChart.AppendLine("}");
             SaveToFile("javascript\\" + pagename + ".js", drawChart.ToString());
             Counters.JsPages++;
 
-            Console.WriteLine("\tGenerating html page for {0}...", entry);
+            Altiris.NS.Logging.EventLog.ReportInfo(String.Format("Generating html page for {0}...", entry));
             GenerateBulletinHtml(ref htmlDivs, ref jsInclude, pagename);
             Counters.HtmlPages++;
 
@@ -418,20 +425,22 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void GetUpdateData(ref string compliance, ref string stats, string update, string bulletin) {
-            if (update.Length == 0 || update == string.Empty)
+            if (update.Length == 0 || update == string.Empty) {
+				Altiris.NS.Logging.EventLog.ReportInfo(String.Format("GetUpdateData returns without generating compliance json for {0}.{1}.", bulletin, update));
                 return;
+			}
 
-            string sql = String.Format(FormattedStrings.sql_get_update_data, update, bulletin);
+			string sql = String.Format(SQLStrings.sql_get_update_data, update, bulletin, CollectionGuid);
             DataTable t = DatabaseAPI.GetTable(sql);
             stats = GetJSONFromTable(t, update);
 
             string[,] _compliance = GetComplianceFromTable(t);
             compliance = GetComplianceJSONFromArray(_compliance, update);
-
+			Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("GetUpdateData processing with {0}.{1}.Data = \n{2}\n{3}", bulletin, update, compliance, stats));
         }
 
         private void GetBulletinData(ref string compliance, ref string data, string bulletin) {
-            string sql = String.Format(FormattedStrings.sql_get_bulletin_data, bulletin);
+			string sql = String.Format(SQLStrings.sql_get_bulletin_data, bulletin, CollectionGuid);
             DataTable t = DatabaseAPI.GetTable(sql);
             data = GetJSONFromTable(t, bulletin);
 
@@ -440,7 +449,7 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void GetGlobalData(ref string compliance, ref string data) {
-            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_global_compliance_data);
+			DataTable t = DatabaseAPI.GetTable(String.Format(SQLStrings.sql_get_global_compliance_data, CollectionGuid));
             data = GetJSONFromTable(t, "global");
 
             string[,] _compliance = GetComplianceFromTable(t);
@@ -462,10 +471,10 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void GenerateInactiveComputerJs() {
-            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_inactive_computer_trend);
+            DataTable t = DatabaseAPI.GetTable(String.Format(SQLStrings.sql_get_inactive_computer_trend, CollectionGuid));
             SaveToFile("Javascript\\inactive_computers.js", GetInactiveComputer_JSONFromTable(t, "inactive_computers"));
 
-            t = DatabaseAPI.GetTable(StaticStrings.sql_get_inactive_computer_percent);
+            t = DatabaseAPI.GetTable(String.Format(SQLStrings.sql_get_inactive_computer_percent, CollectionGuid));
             SaveToFile("Javascript\\inactive_computers_pc.js", GetInactiveComputer_JSONFromTable(t, "inactive_computers_pc"));
             ++Counters.JsPages;
         }
@@ -528,15 +537,14 @@ namespace Symantec.CWoC.PatchTrending {
         }
 
         private void GenerateUpdatePages() {
-            EventLog.ReportInfo("Generating update pages for bulletins now...");
-            DataTable t = DatabaseAPI.GetTable(StaticStrings.sql_get_all_bulletins);
-
+            Logger.Log("Generating update pages for bulletins now...");
+			DataTable t = DatabaseAPI.GetTable(String.Format(SQLStrings.sql_get_all_bulletins, CollectionGuid));
             string bulletin;
 
             foreach (DataRow r in t.Rows) {
                 bulletin = r[0].ToString();
-                DataTable u = DatabaseAPI.GetTable(string.Format(StaticStrings.sql_get_updates_bybulletin, bulletin));
-                Console.WriteLine("Generating all update graphs for bulletin " + bulletin);
+				DataTable u = DatabaseAPI.GetTable(string.Format(SQLStrings.sql_get_updates_bybulletin, bulletin, CollectionGuid));
+                Altiris.NS.Logging.EventLog.ReportInfo(String.Format("Generating all update graphs for bulletin " + bulletin));
                 GeneratePage(u, bulletin, bulletin);
             }
 
@@ -551,28 +559,19 @@ namespace Symantec.CWoC.PatchTrending {
         public static int install() {
 
             try {
-                Console.Write("Dropping spTrendPatchComplianceByUpdate...\t");
+                Logger.Log("Dropping spTrendPatchComplianceByUpdate...\t");
                 DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByUpdate);
-                Console.WriteLine("Done!");
-                Console.Write("Installing spTrendPatchComplianceByUpdate...\t");
+                Logger.Log("Installing spTrendPatchComplianceByUpdate...\t");
                 DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByUpdate);
-                Console.WriteLine("Done!");
-
-                Console.Write("Dropping spTrendPatchComplianceByComputer...\t");
+                Logger.Log("Dropping spTrendPatchComplianceByComputer...\t");
                 DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByComputer);
-                Console.WriteLine("Done!");
-                Console.Write("Installing spTrendPatchComplianceByComputer...\t");
+                Logger.Log("Installing spTrendPatchComplianceByComputer...\t");
                 DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByComputer);
-                Console.WriteLine("Done!");
-
-                Console.Write("Dropping spTrendInactiveComputers...\t\t");
+                Logger.Log("Dropping spTrendInactiveComputers...\t\t");
                 DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendInactiveComputers);
-                Console.WriteLine("Done!");
-                Console.Write("Installing spTrendInactiveComputers...\t\t");
+                Logger.Log("Installing spTrendInactiveComputers...\t\t");
                 DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendInactiveComputers);
-                Console.WriteLine("Done!");
-
-                Console.WriteLine("\nAll Done!");
+                Logger.Log("All Done!");
             } catch (Exception e){
                 Console.WriteLine(e.Message);
                 return -1;

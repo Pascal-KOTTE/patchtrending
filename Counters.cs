@@ -7,6 +7,7 @@ namespace Symantec.CWoC.PatchTrending {
         private static int _jspages;
         private static int _htmlpages;
         private static int _sqlqueries;
+		private static int _sqlrows;
 
         public static int Pages {
             get { return _htmlpages + _jspages; }
@@ -15,8 +16,7 @@ namespace Symantec.CWoC.PatchTrending {
         public static int JsPages {
             get { return _jspages; }
             set { _jspages = value; }
-        }
-        
+        }        
 
         public static int HtmlPages {
             get { return _htmlpages;  }
@@ -28,12 +28,16 @@ namespace Symantec.CWoC.PatchTrending {
             set { _sqlqueries = value; }
         }
 
+        public static int SqlRows {
+            get { return _sqlrows; }
+            set { _sqlrows = value; }
+        }
+
         public static void Init() {
             _jspages = 0;
             _htmlpages = 0;
             _sqlqueries = 0;
+			_sqlrows = 0;
         }
-
-        
     }
 }
