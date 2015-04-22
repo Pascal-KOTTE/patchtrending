@@ -1,11 +1,13 @@
-create procedure spTrendInactiveComputers
-	@force as int = 0
+alter procedure spTrendInactiveComputers
+	@force as int = 0,
+	@collectionguid as uniqueidentifier = '01024956-1000-4CDB-B452-7DB0CFF541B6'
 as
 if not exists (select 1 from sys.objects where type = 'u' and name = 'TREND_InactiveComputerCounts')
 begin
 	create table TREND_InactiveComputerCounts (
 		[_exec_id] int not null,
 		[timestamp] datetime not null,
+		[collectionguid] uniqueidentifier not null,
 		[Managed machines] int not null,
 		[Inactive computers (7 days)] int not null,
 		[New Inactive computers] int not null,
@@ -16,46 +18,45 @@ end
 
 if not exists (select 1 from sys.objects where type = 'u' and name = 'TREND_InactiveComputer_Current')
 begin
-	CREATE TABLE [TREND_InactiveComputer_Current] (guid uniqueidentifier not null, _exec_time datetime not null)
+	CREATE TABLE [TREND_InactiveComputer_Current] (guid uniqueidentifier not null, collectionguid uniqueidentifier not null, _exec_time datetime not null)
 	CREATE UNIQUE CLUSTERED INDEX [IX_TREND_InactiveComputer_Current] ON [dbo].[TREND_InactiveComputer_Current] 
 		(
-			[Guid] ASC
+			[CollectionGuid] ASC, [Guid] ASC
 	)
 end
 
 if not exists (select 1 from sys.objects where type = 'u' and name = 'TREND_InactiveComputer_Previous')
 begin
-	CREATE TABLE [TREND_InactiveComputer_Previous] (guid uniqueidentifier not null, _exec_time datetime not null)
+	CREATE TABLE [TREND_InactiveComputer_Previous] (guid uniqueidentifier not null, collectionguid uniqueidentifier not null, _exec_time datetime not null)
 	CREATE UNIQUE CLUSTERED INDEX [IX_TREND_InactiveComputer_Previous] ON [dbo].[TREND_InactiveComputer_Previous] 
 		(
-			[Guid] ASC
+			[CollectionGuid] ASC, [Guid] ASC
 	)
 end
 
-if ((select MAX(_exec_time) from TREND_InactiveComputer_Current where _exec_time >  dateadd(hour, -23, getdate())) is null) or (@force = 1)
+if ((select MAX(_exec_time) from TREND_InactiveComputer_Current where collectionguid = @Collectionguid and _exec_time >  dateadd(hour, -23, getdate())) is null) or (@force = 1)
 begin
 	-- STAGE 1: If we have current data, save it in the _previous table
 	if (select count (*) from TREND_InactiveComputer_Current) > 0
 		begin
-			truncate table TREND_InactiveComputer_Previous
-			insert TREND_InactiveComputer_Previous (guid, _exec_time)
-			select * from TREND_InactiveComputer_Current
+			delete from TREND_InactiveComputer_Previous where CollectionGuid = '{0}'
+			insert TREND_InactiveComputer_Previous (guid, collectionguid, _exec_time)
+			select * from TREND_InactiveComputer_Current where CollectionGuid = @CollectionGuid
 
 		-- STAGE 2: Insert current data in the current table
-		truncate table TREND_InactiveComputer_Current
-		insert TREND_InactiveComputer_Current (guid, _exec_time)
-		select distinct(c.Guid) as 'Guid', getdate()
-		  from RM_ResourceComputer c
-		 INNER JOIN
-			(
-			select [ResourceGuid]
-			  from dbo.ResourceUpdateSummary
-			 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
-			 group by [ResourceGuid]
-			having max([ModifiedDate]) < GETDATE() - 7
+		delete from TREND_InactiveComputer_Current where CollectionGuid = @CollectionGuid
+		insert TREND_InactiveComputer_Current (guid, CollectionGuid, _exec_time)
+		SELECT DISTINCT(c.ResourceGuid) as 'Guid', @collectionguid, getdate()
+		  FROM CollectionMembership c
+		 INNER JOIN (
+						select [ResourceGuid]
+						  from dbo.ResourceUpdateSummary
+						 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
+						 group by [ResourceGuid]
+						having max([ModifiedDate]) < GETDATE() - 7
 			 ) as dt 
-			ON c.Guid = dt.ResourceGuid	
-		 where c.IsManaged = 1
+			ON c.ResourceGuid = dt.ResourceGuid	
+		 WHERE c.CollectionGuid = @CollectionGuid
 		 
 		 --STAGE 3: Extract the add/drop counts and insert data in the trending table
 		 declare @added as int, @removed as int
@@ -66,6 +67,7 @@ begin
 					  full join TREND_InactiveComputer_Previous p
 						on p.guid = c.guid
 					 where p.guid is null
+					   and p.collectionguid = @CollectionGuid
 			)
 			    
 			-- Removed in c
@@ -75,13 +77,14 @@ begin
 					  full join TREND_InactiveComputer_Previous p
 						on p.guid = c.guid
 					 where c.guid is null
+					   and p.CollectionGuid = @CollectionGuid
 			)
 
 		declare @managed as int, @inactive_1 as int, @inactive_2 as int
-		set @managed = (select count(distinct(Guid)) from RM_ResourceComputer where IsManaged = 1)
+		set @managed = (select count(distinct(ResourceGuid)) from CollectionMembership where CollectionGuid = @CollectionGuid)
 		set @inactive_1 = (
-			select count(distinct(c.Guid))
-			  from RM_ResourceComputer c
+			select count(distinct(c.ResourceGuid))
+			  from CollectionMembership c
 			 INNER JOIN
 				(
 				select [ResourceGuid]
@@ -90,12 +93,12 @@ begin
 				 group by [ResourceGuid]
 				having max([ModifiedDate]) < GETDATE() - 7
 				 ) as dt 
-				ON c.Guid = dt.ResourceGuid	
-			 where c.IsManaged = 1
+				ON c.ResourceGuid = dt.ResourceGuid	
+			 where c.CollectionGuid = @collectionguid
 		)
 		set @inactive_2 = (
-			select count(distinct(c.Guid))
-			  from RM_ResourceComputer c
+			select count(distinct(c.ResourceGuid))
+			  from CollectionMembership c
 			 INNER JOIN
 				(
 				select [ResourceGuid]
@@ -104,32 +107,33 @@ begin
 				 group by [ResourceGuid]
 				having max([ModifiedDate]) < GETDATE() - 17
 				 ) as dt 
-				ON c.Guid = dt.ResourceGuid	
-			 where c.IsManaged = 1
+				ON c.ResourceGuid = dt.ResourceGuid	
+			 where c.CollectionGuid = @collectionguid
 		)
 		declare @execid as int
-			set @execid = (select isnull(max(_exec_id), 0) from TREND_InactiveComputerCounts) + 1
+			set @execid = (select isnull(max(_exec_id), 0) from TREND_InactiveComputerCounts where collectionguid = @collectionguid) + 1
 
-		insert TREND_InactiveComputerCounts (_exec_id, timestamp, [Managed machines], [inactive computers (7 days)], [New Inactive Computers], [New Active Computers], [Inactive Computers (17 days)])
-		values (@execid, getdate(), @managed, @inactive_1, @added, @removed, @inactive_2)
+		insert TREND_InactiveComputerCounts (_exec_id, timestamp, collectionguid, [Managed machines], [inactive computers (7 days)], [New Inactive Computers], [New Active Computers], [Inactive Computers (17 days)])
+		values (@execid, getdate(), @collectionguid, @managed, @inactive_1, @added, @removed, @inactive_2)
 	end
 	else
 	begin
-		truncate table TREND_InactiveComputer_Current
-		insert TREND_InactiveComputer_Current (guid, _exec_time)
-		select distinct(c.Guid) as 'Guid', getdate()
-		  from RM_ResourceComputer c
-		 INNER JOIN
-			(
-			select [ResourceGuid]
-			  from dbo.ResourceUpdateSummary
-			 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
-			 group by [ResourceGuid]
-			having max([ModifiedDate]) < GETDATE() - 7
-			 ) as dt 
-			ON c.Guid = dt.ResourceGuid	
-		 where c.IsManaged = 1
+		  delete from TREND_InactiveComputer_Current where collectionguid = @collectionguid
+  		  insert TREND_InactiveComputer_Current (guid, collectionguid, _exec_time)
+		  select distinct(c.ResourceGuid) as 'Guid', @collectionguid, getdate()
+			  from CollectionMembership c
+			 INNER JOIN
+				(
+				select [ResourceGuid]
+				  from dbo.ResourceUpdateSummary
+				 where InventoryClassGuid = '9E6F402A-6A45-4CBA-9299-C2323F73A506' 		
+				 group by [ResourceGuid]
+				having max([ModifiedDate]) < GETDATE() - 17
+				 ) as dt 
+				ON c.ResourceGuid = dt.ResourceGuid	
+			 where c.CollectionGuid = @collectionguid
 	end
 end
 
-select * from TREND_InactiveComputerCounts order by _exec_id desc
+select * from TREND_InactiveComputerCounts where CollectionGuid = @collectionguid  order by _exec_id desc
+

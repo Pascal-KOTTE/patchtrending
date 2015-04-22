@@ -1,4 +1,5 @@
 create procedure spTrendPatchComplianceByUpdate
+
 	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6',
 	@force as int = 0
 as
@@ -37,6 +38,7 @@ if (not exists(select 1 from sys.objects where type = 'U' and name = 'TREND_Wind
 begin
 	CREATE TABLE [dbo].[TREND_WindowsCompliance_ByUpdate](
 		[_Exec_id] [int] NOT NULL,
+		[CollectionGuid] [uniqueidentifier] NOT NULL,
 		[_Exec_time] [datetime] NOT NULL,
 		[Bulletin] [varchar](250) NOT NULL,
 		[UPDATE] [varchar](250) NOT NULL,
@@ -48,6 +50,7 @@ begin
 
 	CREATE UNIQUE CLUSTERED INDEX [IX_TREND_WindowsCompliance_ByUpdate] ON [dbo].[TREND_WindowsCompliance_ByUpdate] 
 	(
+		[CollectionGuid] asc,
 		[Bulletin] ASC,
 		[Update] ASC,
 		[_exec_id] ASC
@@ -62,7 +65,7 @@ OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 end
 
 -- PART II: Get data into the trending table if no data was captured in the last 24 hours
-if (select MAX(_exec_time) from TREND_WindowsCompliance_ByUpdate) <  dateadd(hour, -23, getdate()) or ((select COUNT(*) from TREND_WindowsCompliance_ByUpdate) = 0) or (@force = 1)
+if (select MAX(_exec_time) from TREND_WindowsCompliance_ByUpdate where CollectionGuid = @CollectionGuid) <  dateadd(hour, -23, getdate()) or ((select COUNT(*) from TREND_WindowsCompliance_ByUpdate where CollectionGuid = @CollectionGuid) = 0) or (@force = 1)
 begin
 
 -- Get the compliance by update to a 'temp' table
@@ -81,24 +84,26 @@ insert into PM_TRENDS_TEMP
 			@DisplayMode = 'all' 
 
 declare @id as int
-	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate where CollectionGuid = @CollectionGuid)
 		insert into TREND_WindowsCompliance_ByUpdate
-		select (ISNULL(@id + 1, 1)), GETDATE() as '_Exec_time', Bulletin, [UPDATE], Severity, [Installed (Count)] as 'Installed', [Applicable (Count)] as 'Applicable', _DistributionStatus as 'DistributionStatus'
+		select (ISNULL(@id + 1, 1)), @collectionguid, GETDATE() as '_Exec_time', Bulletin, [UPDATE], Severity, [Installed (Count)] as 'Installed', [Applicable (Count)] as 'Applicable', _DistributionStatus as 'DistributionStatus'
 		  from PM_TRENDS_TEMP
 end
 
 -- Return the latest results
 select *, applicable - installed as 'Vulnerable',  cast(cast(installed as float) / cast(applicable as float) * 100 as money) as 'Compliance %'
   from TREND_WindowsCompliance_ByUpdate
- where _exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+ where _exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate where CollectionGuid = @CollectionGuid)
+   and CollectionGuid = @CollectionGuid
 --   and cast(cast(installed as float) / cast(applicable as float) * 100 as money) < %ComplianceThreshold%
 --   and applicable > %ApplicableThreshold%
 
 union
 
-select max(_exec_id), max(_exec_time), Bulletin, '-- ALL --' as [update], '' as severity, sum(installed) as 'Installed', sum(applicable) as 'Applicable', '' as DistributionStatus,  sum(applicable) - sum(installed) as 'Vulnerable',  cast(cast(sum(installed) as float) / cast(sum(applicable) as float) * 100 as money) as 'Compliance %'
+select max(_exec_id), @CollectionGuid, max(_exec_time), Bulletin, '-- ALL --' as [update], '' as severity, sum(installed) as 'Installed', sum(applicable) as 'Applicable', '' as DistributionStatus,  sum(applicable) - sum(installed) as 'Vulnerable',  cast(cast(sum(installed) as float) / cast(sum(applicable) as float) * 100 as money) as 'Compliance %'
   from TREND_WindowsCompliance_ByUpdate
- where _exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)
+ where _exec_id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate where CollectionGuid = @CollectionGuid)
+   and CollectionGuid = @CollectionGuid
  group by Bulletin
 --having sum(applicable) >%ApplicableThreshold%
 --   and cast(cast(sum(installed) as float) / cast(sum(applicable) as float) * 100 as money) < %ComplianceThreshold%

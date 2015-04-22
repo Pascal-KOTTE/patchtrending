@@ -1,11 +1,9 @@
-create procedure as spTrendPatchComplianceByComputer
+exec spTrendPatchComplianceByComputer
+create procedure spTrendPatchComplianceByComputer
 	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6',
 	@force as int = 0
 as
-/* 
-      COMPLIANCE BY COMPUTER TRENDING
-*/
--- PART I: Make sure underlying infrastructure exists and is ready to use
+
 if (not exists(select 1 from sys.objects where name = 'PM_TRENDS2_TEMP' and type = 'U'))
 begin
 CREATE TABLE [dbo].[PM_TRENDS2_TEMP](
@@ -27,6 +25,7 @@ if (not exists(select 1 from sys.objects where type = 'U' and name = 'TREND_Wind
 begin
 	CREATE TABLE [dbo].[TREND_WindowsCompliance_ByComputer](
 		[_Exec_id] [int] NOT NULL,
+		[CollectionGuid] [uniqueidentifier] NOT NULL,
 		[_Exec_time] [datetime] NOT NULL,
 		[Percent] int NOT NULL,
 		[Computer #] int NOT NULL,
@@ -35,6 +34,7 @@ begin
 
 	CREATE UNIQUE CLUSTERED INDEX [IX_TREND_WindowsCompliance_ByComputer] ON [dbo].[TREND_WindowsCompliance_ByComputer] 
 	(
+		[CollectionGuid] ASC,
 		[Percent] ASC,
 		[_exec_id] ASC
 	)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = 
@@ -43,7 +43,7 @@ OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 end
 
 -- PART II: Get data into the trending table if no data was captured in the last 23 hours
-if (select MAX(_exec_time) from TREND_WindowsCompliance_ByComputer) <  dateadd(hour, -23, getdate()) or ((select COUNT(*) from TREND_WindowsCompliance_ByComputer) = 0) or (@force = 1)
+if (select MAX(_exec_time) from TREND_WindowsCompliance_ByComputer where collectionguid = @collectionguid) <  dateadd(hour, -23, getdate()) or ((select COUNT(*) from TREND_WindowsCompliance_ByComputer where collectionguid = @collectionguid) = 0) or (@force = 1)
 begin
 
 -- Get the compliance by update to a 'temp' table
@@ -58,16 +58,16 @@ exec spPMWindows_ComplianceByComputer
 							@pCulture = 'en-gb',
 							@TrusteeScope = '{2e1f478a-4986-4223-9d1e-b5920a63ab41}',
 							@VendorGuid	= '00000000-0000-0000-0000-000000000000',
-							@CategoryGuid = '00000000-0000-0000-0000-000000000000'
+							@CategoryGuid = '-0000-0000-0000-000000000000'
 
 declare @id as int
-	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer)
+	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer where collectionguid = @collectionguid)
 
 declare @total as float
 	set @total = (select COUNT(*) from PM_TRENDS2_TEMP)
 
 insert into TREND_WindowsCompliance_ByComputer
-select (ISNULL(@id + 1, 1)), GETDATE() as '_Exec_time', CAST(compliance as decimal) as 'Percentile', COUNT(*) as 'Computer #', cast((CAST(count(*) as float) / @total) * 100 as money) as '% of Total'
+select (ISNULL(@id + 1, 1)), @CollectionGuid as CollectionGuid, GETDATE() as '_Exec_time', CAST(compliance as decimal) as 'Percentile', COUNT(*) as 'Computer #', cast((CAST(count(*) as float) / @total) * 100 as money) as '% of Total'
   from PM_TRENDS2_TEMP
  group by CAST(compliance as decimal)
  order by CAST(compliance as decimal)
@@ -76,4 +76,5 @@ end
 
  select *
    from TREND_WindowsCompliance_ByComputer
-  where _exec_id = (select max(_exec_id from TREND_WindowsCompliance_ByComputer)
+  where _exec_id = (select max(_exec_id) from TREND_WindowsCompliance_ByComputer where collectionguid = @collectionguid)
+    and collectionguid = @collectionguid
