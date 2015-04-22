@@ -534,6 +534,19 @@ select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as m
  where CollectionGuid = '{0}'
  order by _exec_id
      ";
+	 
+		public static string sql_exec_spTrendInactiveComputers = @"
+if exists (select 1 from sys.objects where type = 'p' and name = 'spTrendInactiveComputers')
+exec spTrendInactiveComputers @CollectionGuid = '{0}'
+		";
+		public static string sql_exec_spTrendPatchComplianceByComputer = @"
+if exists (select 1 from sys.objects where type = 'p' and name = 'spTrendPatchComplianceByComputer')
+exec spTrendPatchComplianceByComputer @CollectionGuid = '{0}'
+		";
+		public static string sql_exec_spTrendPatchComplianceByUpdate = @"
+if exists (select 1 from sys.objects where type = 'p' and name = 'spTrendPatchComplianceByUpdate')
+exec spTrendPatchComplianceByUpdate @CollectionGuid = '{0}'
+		";
 
         #endregion
 

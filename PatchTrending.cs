@@ -25,6 +25,8 @@ namespace Symantec.CWoC.PatchTrending {
                     write_all = true;
 				} else if (args[0].ToLower().StartsWith("/collectionguid=")) {
 					collectionguid = args[0].Substring("/collectionguid=".Length);
+				} else if (args[0].ToLower() == "/collectdata") {
+					return DataCollector.CollectData();
                 } else if (args[0] == "/?" || args[0].ToLower() == "--help") {
                     Console.WriteLine(StaticStrings.CLIHelp);
                     return 0;
@@ -581,4 +583,43 @@ namespace Symantec.CWoC.PatchTrending {
             return 0;
         }
     }
+
+	class DataCollector {
+		private static readonly String CollectionGuid = "01024956-1000-4cdb-b452-7db0cff541b6";
+		public static int CollectData() {
+			// Get the site configuration file
+			try {
+				using (StreamReader reader = new StreamReader("SiteConfig.txt")) {
+					while (!reader.EndOfStream) {
+						string line = reader.ReadLine();
+						if (line.StartsWith("#") || line.Length == 0) {
+							continue;
+						}
+						string [] d = line.Split(',');
+						
+						if (d[0] == "1") {
+							CollectData(d[1]);
+						}
+
+					}
+				}
+			} catch {
+				// If the file does not exist use the default collectionguid
+				CollectData(CollectionGuid);
+			}
+			return 0;
+		}
+		
+		private static void CollectData(String CollectionGuid) {
+			Logger.Log("Preparing to collect Inactive Computer data...");
+			DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendInactiveComputers, CollectionGuid));
+			Logger.Log("...collect Inactive Computer data done.");
+			Logger.Log("Preparing to collect Compliance by Computer data...");
+			DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByComputer, CollectionGuid));
+			Logger.Log("...collect Compliance by Computer data done.");
+			Logger.Log("Preparing to collect Compliance by Update data...");
+			DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByUpdate, CollectionGuid));
+			Logger.Log("...collect Compliance by Update data done.");
+		}
+	}
 }
