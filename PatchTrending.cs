@@ -35,7 +35,10 @@ namespace Symantec.CWoC.PatchTrending {
             }
 
             SiteBuilder builder = new SiteBuilder(write_all, collectionguid);
-            return builder.Build(filename);
+            int rc = builder.Build(filename);
+			// Keep the process running for a few seconds to ensure all event logging is completed.
+			System.Threading.Thread.Sleep(5000);
+			return rc;
         }
     }
 
@@ -159,8 +162,7 @@ namespace Symantec.CWoC.PatchTrending {
                                 AddToIndex(ref index, pagename);
                         }
                     }
-                } catch (Exception ex) {
-                    Logger.LogEx(ex);
+                } catch {
                 }
 
                 GenerateIndex(ref index, compliance_by_computer, inactive_computer_trend);

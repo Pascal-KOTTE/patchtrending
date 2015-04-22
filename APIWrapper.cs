@@ -61,6 +61,7 @@ namespace Symantec.CWoC.APIWrappers
                     }
                 }
                 ++Counters.SqlQueries;
+				Counters.SqlRows += t.Rows.Count;
 				
 				// Logger.Log(sqlStatement);
 				// Logger.Log(String.Format("SQL result set contained {0} rows.", t.Rows.Count.ToString()));
