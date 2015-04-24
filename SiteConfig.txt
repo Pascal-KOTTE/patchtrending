@@ -1,5 +1,5 @@
 ### Lines started with # are not process
 #
-# enabled (1 | 0), collectionguid, site name (comma not allowed)
+# enabled (1 | 0), collectionguid, site name (comma not allowed), site description, root site (only one allowed)
 #
-1,01024956-1000-4cdb-b452-7db0cff541b6,All computers with the Software Update plugin installed
+1,01024956-1000-4cdb-b452-7db0cff541b6,AllComputers,All computers with the Software Update plugin installed, 0
