@@ -383,7 +383,7 @@ select max(_exec_id), @CollectionGuid, max(_exec_time), Bulletin, '-- ALL --' as
                -- Get all tracked bulletins
                 select bulletin
                   from TREND_WindowsCompliance_ByUpdate
-                 where bulletin in ({0})
+                 where bulletin in ('{0}')
 				   and collectionguid = '{0}'
                  group by bulletin
                 having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate)

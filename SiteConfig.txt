@@ -2,4 +2,12 @@
 #
 # enabled (1 | 0), collectionguid, site name (comma not allowed), site description, root site (only one allowed)
 #
-1,01024956-1000-4cdb-b452-7db0cff541b6,AllComputers,All computers with the Software Update plugin installed, 0
+
+# This is the default site - all files will be saved to the running directory
+1, 01024956-1000-4cdb-b452-7db0cff541b6, AllComputers2, All computers with the Software Update plugin installed, 1
+
+# Create a copy of the default site under AllComputers
+1, 01024956-1000-4cdb-b452-7db0cff541b6, AllComputers, All computers with the Software Update plugin installed, 0
+
+# This site is disabled - just a test case for the enabled feature
+0, 01024956-1000-4cdb-b452-7db0cff541b6, AllComputers3, All computers with the Software Update plugin installed, 0

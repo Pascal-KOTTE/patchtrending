@@ -8,7 +8,7 @@ using System.Text;
 using Symantec.CWoC.APIWrappers;
 
 namespace Symantec.CWoC.PatchTrending {
-    class SiteGenerator {
+    class PatchTrending {
 
         static int Main(string[] args) {
 
@@ -53,19 +53,18 @@ namespace Symantec.CWoC.PatchTrending {
 							}
 							Altiris.NS.Logging.EventLog.ReportInfo(String.Format("Processing SiteConfig.txt line '{0}'.", line));
 							string [] d = line.Split(',');
-							string enabled = d[0];
-							string collection_guid = d[1];
-							string site_name = d[2];
-							string site_description = d[3];
-							string default_site = d[4];
+							string enabled = d[0].Trim();
+							string collection_guid = d[1].Trim();
+							string site_name = d[2].Trim();
+							string site_description = d[3].Trim();
+							string default_site = d[4].Trim();
 							
 							if (default_site == "1") {
-								site_name = ""; // Write the default site to root
+								site_name = "."; // Write the default site to root
 							}
 							
-							if (d[0] == "1") {
-								
-								SiteBuilder builder = new SiteBuilder(write_all, collection_guid,site_name);
+							if (enabled == "1") {								
+								SiteBuilder builder = new SiteBuilder(write_all, collection_guid, site_name);
 								rc = builder.Build(filename);
 							}
 						}
@@ -129,9 +128,9 @@ namespace Symantec.CWoC.PatchTrending {
 
 
             /* Check that we can run against the database (I.e. prerequisite table does exist) */
-            bool compliance_by_update = TestSql("select top 1 1 from TREND_WindowsCompliance_ByUpdate");
-            bool compliance_by_computer = TestSql("select 1 from TREND_WindowsCompliance_ByComputer t group by t._Exec_id having MAX(_exec_id) > 1");
-            bool inactive_computer_trend = TestSql("select top 1 1 from TREND_InactiveComputerCounts");
+            bool compliance_by_update = TestSql(String.Format("select top 1 1 from TREND_WindowsCompliance_ByUpdate where collectionguid = '{0}'", CollectionGuid));
+            bool compliance_by_computer = TestSql(String.Format("select 1 from TREND_WindowsCompliance_ByComputer t  where collectionguid = '{0}' group by t._Exec_id having MAX(_exec_id) > 1", CollectionGuid));
+            bool inactive_computer_trend = TestSql(String.Format("select top 1 1 from TREND_InactiveComputerCounts where collectionguid = '{0}'", CollectionGuid));
 
             if (compliance_by_update) {
 
@@ -207,7 +206,7 @@ namespace Symantec.CWoC.PatchTrending {
 								d = line.Split(',');
 
 								pagename = d[0];
-								Console.WriteLine(pagename.ToUpper());
+								Altiris.NS.Logging.EventLog.ReportInfo(pagename.ToUpper());
 								if (d.Length > 1) {
 									filter.Append("'" + d[1].Trim() + "'");
 								}
@@ -227,7 +226,7 @@ namespace Symantec.CWoC.PatchTrending {
 
                 GenerateIndex(ref index, compliance_by_computer, inactive_computer_trend);
                 GenerateGlobalPage();
-                Console.WriteLine("Generating updates pages...");
+                Altiris.NS.Logging.EventLog.ReportInfo("Generating updates pages...");
                 GenerateUpdatePages();
 
                 SaveToFile("sitemap.html", SiteMap.ToString());
@@ -237,7 +236,7 @@ namespace Symantec.CWoC.PatchTrending {
                 string summary = string.Format("SiteBuilder took {0} ms to generate {1} pages ({2} html and {3} javascript) with {4} sql queries executed (returning {5} rows).", Timer.duration(), Counters.Pages, Counters.HtmlPages, Counters.JsPages, Counters.SqlQueries, Counters.SqlRows);
                 Altiris.NS.Logging.EventLog.ReportInfo(summary);
             } else {
-                Console.WriteLine("We cannot execute anything as the prerequisite table TREND_WindowsCompliance_ByUpdate is missing.");
+                Altiris.NS.Logging.EventLog.ReportError("We cannot execute anything as the prerequisite table TREND_WindowsCompliance_ByUpdate is missing or no data exists for the given collection guid.");
             }
             return 0;
         }
@@ -636,6 +635,7 @@ namespace Symantec.CWoC.PatchTrending {
                  Altiris.NS.Logging.EventLog.ReportInfo("All Done!");
             } catch (Exception e){
                 Console.WriteLine(e.Message);
+				Altiris.NS.Logging.EventLog.ReportError(e.Message);
                 return -1;
             }
             return 0;

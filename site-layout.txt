@@ -1,3 +1,98 @@
-ms13-jul, ms13-052, ms13-053, ms13-054, ms13-055, ms13-056, ms13-057, ms13-058
-ms13-jun, ms13-047, ms13-048, ms13-049, ms13-050, ms13-051
-ms13-may, ms13-037, ms13-038, ms13-039, ms13-040, ms13-041, ms13-042, ms13-043, ms13-044, ms13-045
+microsoft-2015-future, ms15-043, ms15-044, ms15-045, ms15-046, ms15-047, ms15-048, ms15-049, ms15-050, ms15-051, ms15-052, ms15-053, ms15-054, ms15-055, ms15-056, ms15-057, ms15-058, ms15-059, ms15-060, ms15-061, ms15-062, ms15-063, ms15-064, ms15-065, ms15-066, ms15-067, ms15-068, ms15-069, ms15-070, ms15-071, ms15-072, ms15-073, ms15-074, ms15-075, ms15-076, ms16-077m ms15-078, ms15-079, ms15-080, ms15-081, ms15-082, ms15-083, ms15-084, ms15-085, ms15-086, ms15-087, ms15-088, ms15-089, ms15-090, ms15-091, ms15-092, ms15-093, ms15-094, ms15-095, ms15-096, ms15-097, ms15-098, ms15-099
+microsoft-2015-april, ms15-031, ms15-032, ms15-033, ms15-034, ms15-035, ms15-036, ms15-037, ms15-038, ms15-039, ms15-040, ms15-041, ms15-042
+microsoft-2015-march, ms15-018, ms15-019, ms15-020, ms15-021, ms15-022, ms15-023, ms15-024, ms15-025, ms15-026, ms15-027, ms15-028, ms15-029, ms15-030
+microsoft-2015-february, ms15-009, ms15-010, ms15-011, ms15-012, ms15-013, ms15-014, ms15-015, ms15-016, ms15-017
+microsoft-2015-january, ms15-001, ms15-002, ms15-003, ms15-004, ms15-006, ms15-007, ms15-008
+microsoft-2014-december, ms14-080, ms14-081, ms14-082, ms14-083, ms14-084, ms14-085, ms14-086, ms14-087, ms14-088, ms14-089, ms14-090, ms14-091, ms14-092, ms14-093, ms14-094, ms14-095, ms14-096, ms14-097, ms14-098, ms14-099
+microsoft-2014-november, ms14-064, ms14-065, ms14-066, ms14-067, ms14-068, ms14-069, ms14-070, ms14-071, ms14-072, ms14-073, ms14-074, ms14-075, ms14-078, ms14-079
+microsoft-2014-october, ms14-056, ms14-057, ms14-058, ms14-059, ms14-060, ms14-061, ms14-062, ms14-063
+microsoft-2014-september, ms14-052, ms14-053, ms14-054, ms14-055
+microsoft-2014-august, ms14-043, ms14-044, ms14-045, ms14-046, ms14-047, ms14-048, ms14-049, ms14-050, ms14-051
+microsoft-2014-july, ms14-037, ms14-038, ms14-039, ms14-040, ms14-041, ms14-042
+microsoft-2014-june, ms14-030, ms14-031, ms14-032, ms14-033, ms14-034, ms14-035, ms14-036
+microsoft-2014-may, ms14-021, ms14-022, ms14-023, ms14-024, ms14-025, ms14-026, ms14-027, ms14-028, ms14-029
+microsoft-2014-april, ms14-017, ms14-018, ms14-019, ms14-020
+microsoft-2014-march, ms14-012, ms14-013, ms14-014, ms14-015, ms14-016
+microsoft-2014-february, ms14-005, ms14-006, ms14-007, ms14-008, ms14-009, ms14-010, ms14-011
+microsoft-2014-january, ms14-001, ms14-002, ms14-003, ms14-004
+microsoft-2013-december, ms13-096, ms13-097, ms13-098, ms13-099, ms13-100, ms13-101, ms13-102, ms13-103, ms13-104, ms13-105, ms13-106
+microsoft-2013-special, msrc-001, msrc-002, mswu-612, mswu-634, mswu-671, mswu-673, mswu-801
+microsoft-2013-november, ms13-088, ms13-089, ms13-090, ms13-091, ms13-092, ms13-093, ms13-094, ms13-095
+microsoft-2013-october, ms13-080, ms13-081, ms13-082, ms13-083, ms13-084, ms13-085, ms13-086, ms13-087
+microsoft-2013-september, ms13-066, ms13-067, ms13-068, ms13-069, ms13-070, ms13-071, ms13-072, ms13-073, ms13-074, ms13-075, ms13-076, ms13-077, ms13-078, ms13-079
+microsoft-2013-august, ms13-059, ms13-060, ms13-061, ms13-062, ms13-063, ms13-064, ms13-065, ms13-066
+microsoft-2013-july, ms13-052, ms13-053, ms13-054, ms13-055, ms13-056, ms13-057, ms13-058
+microsoft-2013-june, ms13-047, ms13-048, ms13-049, ms13-050, ms13-051
+microsoft-2013-may, ms13-037, ms13-038, ms13-039, ms13-040, ms13-041, ms13-042, ms13-043, ms13-044, ms13-045
+microsoft-2013-april, ms13-028, ms13-029, ms13-030, ms13-031, ms13-032, ms13-033, ms13-034, ms13-035, ms13-036
+microsoft-2013-march, ms13-021, ms13-022, ms13-023, ms13-024, ms13-025, ms13-026, ms13-027
+microsoft-2013-february, ms13-009, ms13-010, ms13-011, ms13-012, ms13-013, ms13-014, ms13-015, ms13-016, ms13-017, ms13-018, ms13-019, ms13-20
+microsoft-2013-january, ms13-001, ms13-002, ms13-003, ms13-004, ms13-005, ms13-006, ms13-007, ms13-008
+microsoft-2012-december, ms12-077, ms12-078, ms12-79, ms12-080, ms12-081, ms12-082, ms12-083
+microsoft-2012-november, ms12-071, ms12-072, ms12-073, ms12-074, ms12-075, ms12-076
+microsoft-2012-october, ms12-064, ms12-065, ms12-066, ms12-067, ms12-068, ms12-069, ms12-070
+microsoft-2012-september, ms12-061, ms12-062, ms12-063
+microsoft-2012-august, ms12-052, ms12-053, ms12-054, ms12-055, ms12-056, ms12-057, ms12-058, ms12-059, ms12-060
+microsoft-2012-july, ms12-043, ms12-044, ms12-045, ms12-047, ms12-048, ms12-049, ms12-050, ms12-051
+microsoft-2012-june, ms12-036, ms12-037, ms12-038, ms12-039, ms12-040, ms12-041, ms12-042
+microsoft-2012-may, ms12-029, ms12-030, ms12-031, ms12-032, ms12-033, ms12-034, ms12-035
+microsoft-2012-april, ms12-023, ms12-024, ms12-025, ms12-026, ms12-027, ms12-028
+microsoft-2012-march, ms12-017, ms12-018, ms12-019, ms12-20, ms12-021, ms12-022
+microsoft-2012-february, ms12-008, ms12-009, ms12-010, ms12-011, ms12-012, ms12-013, ms12-014, ms12-015, ms12-016
+microsoft-2012-january, ms12-001, ms12-002, ms12-003, ms12-004, ms12-005, ms12-006, ms12-007
+microsoft-2011-december, ms11-087, ms11-088, ms11-089, ms11-090, ms11-091, ms11-092, ms11-093, ms11-094, ms11-095, ms11-096, ms11-097, ms11-098, ms11-099, ms11-100
+microsoft-2011-november, ms11-082, ms11-083, ms11-084, ms11-085, ms11-086
+microsoft-2011-october, ms11-075, ms11-076, ms11-077, ms11-078, ms11-79, ms11-080, ms11-081
+microsoft-2011-september, ms11-070, ms11-071, ms11-072, ms11-073, ms11-074
+microsoft-2011-august, ms11-057, ms11-058, ms11-059, ms11-060, ms11-061, ms11-062, ms11-063, ms11-064, ms11-065, ms11-066, ms11-067, ms11-068, ms11-069
+microsoft-2011-july, ms11-053, ms11-054, ms11-055, ms11-056
+microsoft-2011-june, ms11-037, ms11-038, ms11-039, ms11-040, ms11-041, ms11-042, ms11-043, ms11-044, ms11-045, ms11-047, ms11-048, ms11-049, ms11-050, ms11-051, ms11-052
+microsoft-2011-may, ms11-035, ms11-036
+microsoft-2011-april, ms11-018, ms11-019, ms11-20, ms11-021, ms11-022, ms11-023, ms11-024, ms11-025, ms11-026, ms11-027, ms11-028, ms11-029, ms11-030, ms11-031, ms11-032, ms11-033, ms11-034
+microsoft-2011-march, ms11-015, ms11-016, ms11-017
+microsoft-2011-february, ms11-003, ms11-004, ms11-005, ms11-006, ms11-007, ms11-008, ms11-009, ms11-010, ms11-011, ms11-012, ms11-013, ms11-014
+microsoft-2011-january, ms11-001, ms11-002
+microsoft-2010-december, ms10-090, ms10-091, ms10-092, ms10-093, ms10-094, ms10-095, ms10-096, ms10-097, ms10-098, ms10-099, ms10-100, ms10-101, ms10-102, ms10-103, ms10-104, ms10-105, ms10-106
+microsoft-2010-november, ms10-087, ms10-088, ms10-089
+microsoft-2010-october, ms10-071, ms10-072, ms10-073, ms10-074, ms10-075, ms10-076, ms10-077, ms10-078, ms10-79, ms10-080, ms10-081, ms10-082, ms10-083, ms10-084, ms10-085, ms10-086
+microsoft-2010-september, ms10-061, ms10-062, ms10-063, ms10-064, ms10-065, ms10-066, ms10-067, ms10-068, ms10-069, ms10-070
+microsoft-2010-august, ms10-046, ms10-047, ms10-048, ms10-049, ms10-050, ms10-051, ms10-052, ms10-053, ms10-054, ms10-055, ms10-056, ms10-057, ms10-058, ms10-059, ms10-060
+microsoft-2010-july, ms10-042, ms10-043, ms10-044, ms10-045
+microsoft-2010-june, ms10-032, ms10-033, ms10-034, ms10-035, ms10-036, ms10-037, ms10-038, ms10-039, ms10-040, ms10-041
+microsoft-2010-may, ms10-030, ms10-031
+microsoft-2010-april, ms10-019, ms10-20, ms10-021, ms10-022, ms10-023, ms10-024, ms10-025, ms10-026, ms10-027, ms10-028, ms10-029
+microsoft-2010-march, ms10-016, ms10-017, ms10-018
+microsoft-2010-february, ms10-005, ms10-006, ms10-007, ms10-008, ms10-009, ms10-010, ms10-011, ms10-012, ms10-013, ms10-014, ms10-015
+microsoft-2010-january, ms10-001, ms10-002, ms10-003, ms10-004
+microsoft-2009-december, ms09-069, ms09-070, ms09-071, ms09-072, ms09-073, ms09-074
+microsoft-2009-november, ms09-063, ms09-064, ms09-065, ms09-066, ms09-067, ms09-068
+microsoft-2009-october, ms09-050, ms09-051, ms09-052, ms09-053, ms09-054, ms09-055, ms09-056, ms09-057, ms09-058, ms09-059, ms09-060, ms09-061, ms09-062
+microsoft-2009-september, ms09-045, ms09-047, ms09-048, ms09-049
+microsoft-2009-august, ms09-036, ms09-037, ms09-038, ms09-039, ms09-040, ms09-041, ms09-042, ms09-043, ms09-044
+microsoft-2009-july, ms09-029, ms09-030, ms09-031, ms09-032, ms09-033, ms09-034, ms09-035
+microsoft-2009-june, ms09-018, ms09-019, ms09-20, ms09-021, ms09-022, ms09-023, ms09-024, ms09-025, ms09-026, ms09-027, ms09-028
+microsoft-2009-may, ms09-017
+microsoft-2009-april, ms09-009, ms09-010, ms09-011, ms09-012, ms09-013, ms09-014, ms09-015, ms09-016
+microsoft-2009-march, ms09-006, ms09-007, ms09-008
+microsoft-2009-february, ms09-002, ms09-003, ms09-004, ms09-005
+microsoft-2009-january, ms09-001
+microsoft-2008-december, ms08-070, ms08-071, ms08-072, ms08-073, ms08-074, ms08-075, ms08-076, ms08-077, ms08-078
+microsoft-2008-november, ms08-068, ms08-069
+microsoft-2008-october, ms08-056, ms08-057, ms08-058, ms08-059, ms08-060, ms08-061, ms08-062, ms08-063, ms08-064, ms08-065, ms08-066, ms08-067
+microsoft-2008-september, ms08-052, ms08-053, ms08-054, ms08-055
+microsoft-2008-august, ms08-042, ms08-043, ms08-044, ms08-045, ms08-047, ms08-048, ms08-049, ms08-050, ms08-051
+microsoft-2008-july, ms08-037, ms08-038, ms08-039, ms08-040, ms08-041
+microsoft-2008-june, ms08-032, ms08-033, ms08-034, ms08-035, ms08-036
+microsoft-2008-may, ms08-026, ms08-027, ms08-028, ms08-029, ms08-030, ms08-031
+microsoft-2008-april, ms08-018, ms08-019, ms08-20, ms08-021, ms08-022, ms08-023, ms08-024, ms08-025
+microsoft-2008-march, ms08-014, ms08-015, ms08-016, ms08-017
+microsoft-2008-february, ms08-003, ms08-004, ms08-005, ms08-006, ms08-007, ms08-008, ms08-009, ms08-010, ms08-011, ms08-012, ms08-013
+microsoft-2008-january, ms08-001, ms08-002
+adobe-2013, APSB13-01,APSB13-02,APSB13-04,APSB13-05,APSB13-06,APSB13-08,APSB13-09,APSB13-11,APSB13-12,APSB13-14,APSB13-15,APSB13-16,APSB13-17,APSB13-18, APSB13-19, APSB13-20, APSB13-21, APSB13-22, APSB13-23, APSB13-24, APSB13-25, APSB13-26, APSB13-27, APSB13-28
+adobe-2012, APSB12-01,APSB12-02,APSB12-03,APSB12-05,APSB12-07,APSB12-08,APSB12-09,APSB12-13,APSB12-14,APSB12-16,APSB12-17,APSB12-18,APSB12-19,APSB12-22,APSB12-23,APSB12-24,APSB12-27
+adobe-2011, APSB11-01,APSB11-02,APSB11-03,APSB11-05,APSB11-06,APSB11-07,APSB11-08,APSB11-12,APSB11-13,APSB11-16,APSB11-17,APSB11-18,APSB11-19,APSB11-21,APSB11-24,APSB11-26,APSB11-27,APSB11-28,APSB11-30
+adobe-2010, APSB10-02,APSB10-03,APSB10-06,APSB10-07,APSB10-09,APSB10-12,APSB10-14,APSB10-15,APSB10-16,APSB10-17,APSB10-20,APSB10-21,APSB10-22,APSB10-24,APSB10-25,APSB10-26,APSB10-28
+adobe-2009, APSB09-01,APSB09-03,APSB09-04,APSB09-06,APSB09-07,APSB09-08,APSB09-10,APSB09-11,APSB09-15,APSB09-16,APSB09-19
+adobe-2008, APSB08-23
+adobe-2007, APSB07-12,APSB08-11,APSB08-15
+adobe-2006, APSB06-11,APSB06-18,APSB06-20

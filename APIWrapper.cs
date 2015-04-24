@@ -67,7 +67,7 @@ namespace Symantec.CWoC.APIWrappers
 				// Logger.Log(String.Format("SQL result set contained {0} rows.", t.Rows.Count.ToString()));
                 return t;
             } catch {
-                throw new Exception("Failed to execute SQL command...");
+                throw new Exception("Failed to execute SQL command \n'" + sqlStatement + "'.");
             }
         }
 
@@ -114,16 +114,4 @@ namespace Symantec.CWoC.APIWrappers
         }
     }
 
-    class Logger{
-        public static void LogEx(Exception e) {
-            string msg = string.Format("Caught exception {0}\nInnerException={1}\nStackTrace={2}", e.Message, e.InnerException, e.StackTrace);
-            Console.WriteLine(msg);
-            Altiris.NS.Logging.EventLog.ReportError(msg);
-        }
-
-        public static void Log(string msg) {
-            // Console.WriteLine(msg);
-            Altiris.NS.Logging.EventLog.ReportInfo(msg);
-        }
-    }
 }
