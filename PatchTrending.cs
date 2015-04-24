@@ -155,7 +155,6 @@ namespace Symantec.CWoC.PatchTrending {
                     SaveToFile("javascript\\helper.js", StaticStrings.js_Helper);
                     ++Counters.JsPages;
                 }
-
                 if (!File.Exists(SitePath + "getbulletin.html") || WriteAll) {
                     SaveToFile("getbulletin.html", StaticStrings.html_GetBulletin_page);
                     ++Counters.HtmlPages;
@@ -196,7 +195,7 @@ namespace Symantec.CWoC.PatchTrending {
                     AddToSiteMap("compliance-by-computer", "compliance-by-computer.html");
                 }
 
-                 Altiris.NS.Logging.EventLog.ReportInfo("Generating site pages from the layout file...");
+                Altiris.NS.Logging.EventLog.ReportInfo("Generating site pages from the layout file...");
 				if (File.Exists(filename)) {
 					try {
 						using (StreamReader reader = new StreamReader(filename)) {
@@ -213,7 +212,7 @@ namespace Symantec.CWoC.PatchTrending {
 								for (int i = 2; i < d.Length; i++) {
 									filter.Append(", '" + d[i].Trim() + "'");
 								}
-								int j= GeneratePage(pagename, filter.ToString(), String.Format(SQLStrings.sql_get_bulletins_in, CollectionGuid));
+								int j= GeneratePage(pagename, filter.ToString(), SQLStrings.sql_get_bulletins_in.Replace("{1}", CollectionGuid));
 								if (j > 0)
 									AddToIndex(ref index, pagename);
 							}
