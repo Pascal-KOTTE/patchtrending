@@ -333,7 +333,8 @@ namespace Symantec.CWoC.PatchTrending {
 		    var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
 		    g_global_1.draw(d_global_1, options2);
 
-            if (pccompl.length > 0) {
+			if (typeof(pccompl) != 'undefined' && pccompl != null) {
+//            if (pccompl.length > 0) {
 		        var d_pccompl = new google.visualization.DataTable();
                 d_pccompl.addColumn('number', 'Compliance in %');
 		        d_pccompl.addColumn('number');
@@ -347,7 +348,8 @@ namespace Symantec.CWoC.PatchTrending {
                 g_pccompl.draw(d_pccompl, { legend:'none', tooltip: {isHtml: true}} );
             }
 
-            if (inactive_computers_pc.length > 0) {
+			if (typeof(inactive_computers_pc) != 'undefined' && inactive_computers_pc != null) {
+//            if (inactive_computers_pc.length > 0) {
                 var d_inactive = google.visualization.arrayToDataTable(formatDateString(inactive_computers_pc, 0));
                 var g_inactive = new google.visualization.LineChart(document.getElementById('inactivepc_div'));
                 g_inactive.draw(d_inactive, {colors: ['orange', 'red', 'royalblue', 'forestgreen']});	
