@@ -642,41 +642,58 @@ namespace Symantec.CWoC.PatchTrending {
     }
 
 	class DataCollector {
-		private static readonly String CollectionGuid = "01024956-1000-4cdb-b452-7db0cff541b6";
+		private static string CollectionGuid = "01024956-1000-4cdb-b452-7db0cff541b6";
 		public static int CollectData() {
 			// Get the site configuration file
-			try {
-				using (StreamReader reader = new StreamReader("SiteConfig.txt")) {
-					while (!reader.EndOfStream) {
-						string line = reader.ReadLine();
-						if (line.StartsWith("#") || line.Length == 0) {
-							continue;
-						}
-						string [] d = line.Split(',');
-						
-						if (d[0] == "1") {
-							CollectData(d[1]);
-						}
-
-					}
-				}
-			} catch {
+			if (!File.Exists("SiteConfig.txt")) {
 				// If the file does not exist use the default collectionguid
 				CollectData(CollectionGuid);
+
+			} else {
+				try {
+					using (StreamReader reader = new StreamReader("SiteConfig.txt")) {
+						while (!reader.EndOfStream) {
+							string line = reader.ReadLine();
+							if (line.StartsWith("#") || line.Length == 0) {
+								continue;
+							}
+							string [] d = line.Split(',');
+							
+							if (d[0] == "1") {
+								CollectData(d[1]);
+							}
+
+						}
+					}
+				} catch {
+					
+				}
 			}
 			return 0;
 		}
 		
 		private static void CollectData(String CollectionGuid) {
-			 Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Inactive Computer data...");
-			DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendInactiveComputers, CollectionGuid));
-			 Altiris.NS.Logging.EventLog.ReportInfo("...collect Inactive Computer data done.");
-			 Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Compliance by Computer data...");
-			DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByComputer, CollectionGuid));
-			 Altiris.NS.Logging.EventLog.ReportInfo("...collect Compliance by Computer data done.");
-			 Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Compliance by Update data...");
-			DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByUpdate, CollectionGuid));
-			 Altiris.NS.Logging.EventLog.ReportInfo("...collect Compliance by Update data done.");
+			try {
+				Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Inactive Computer data...");
+				DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendInactiveComputers, CollectionGuid));
+				Altiris.NS.Logging.EventLog.ReportInfo("...collect Inactive Computer data done.");
+			} catch (Exception e1) {
+				Altiris.NS.Logging.EventLog.ReportError("Failed to collect Inactive Computer data", e1.Message);
+			}
+			try {
+				Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Compliance by Computer data...");
+				DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByComputer, CollectionGuid));
+				Altiris.NS.Logging.EventLog.ReportInfo("...collect Compliance by Computer data done.");
+			} catch (Exception e2) {
+				Altiris.NS.Logging.EventLog.ReportError("Failed to collect Compliance by Computer data", e2.Message);
+			}
+			try {
+				Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Compliance by Update data...");
+				DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByUpdate, CollectionGuid));
+				Altiris.NS.Logging.EventLog.ReportInfo("...collect Compliance by Update data done.");
+			} catch (Exception e3) {
+				Altiris.NS.Logging.EventLog.ReportError("Failed to collect Compliance by Update data", e3.Message);
+			}
 		}
 	}
 }
