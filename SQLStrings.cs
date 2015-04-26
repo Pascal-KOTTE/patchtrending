@@ -54,7 +54,7 @@ begin
 	-- STAGE 1: If we have current data, save it in the _previous table
 	if (select count (*) from TREND_InactiveComputer_Current) > 0
 		begin
-			delete from TREND_InactiveComputer_Previous where CollectionGuid = '{0}'
+			delete from TREND_InactiveComputer_Previous where CollectionGuid = @CollectionGuid
 			insert TREND_InactiveComputer_Previous (guid, collectionguid, _exec_time)
 			select * from TREND_InactiveComputer_Current where CollectionGuid = @CollectionGuid
 

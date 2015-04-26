@@ -660,7 +660,7 @@ namespace Symantec.CWoC.PatchTrending {
 							string [] d = line.Split(',');
 							
 							if (d[0] == "1") {
-								CollectData(d[1]);
+								CollectData(d[1].ToString().Trim());
 							}
 
 						}
@@ -673,22 +673,24 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 		
 		private static void CollectData(String CollectionGuid) {
+			string msg = String.Format("Running data collection for Collection Guid {0}", CollectionGuid);
+			Altiris.NS.Logging.EventLog.ReportInfo(msg);
 			try {
-				Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Inactive Computer data...");
+				Altiris.NS.Logging.EventLog.ReportInfo(String.Format(SQLStrings.sql_exec_spTrendInactiveComputers, CollectionGuid));
 				DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendInactiveComputers, CollectionGuid));
 				Altiris.NS.Logging.EventLog.ReportInfo("...collect Inactive Computer data done.");
 			} catch (Exception e1) {
 				Altiris.NS.Logging.EventLog.ReportError("Failed to collect Inactive Computer data", e1.Message);
 			}
 			try {
-				Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Compliance by Computer data...");
+				Altiris.NS.Logging.EventLog.ReportInfo(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByComputer, CollectionGuid));
 				DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByComputer, CollectionGuid));
 				Altiris.NS.Logging.EventLog.ReportInfo("...collect Compliance by Computer data done.");
 			} catch (Exception e2) {
 				Altiris.NS.Logging.EventLog.ReportError("Failed to collect Compliance by Computer data", e2.Message);
 			}
 			try {
-				Altiris.NS.Logging.EventLog.ReportInfo("Preparing to collect Compliance by Update data...");
+				Altiris.NS.Logging.EventLog.ReportInfo(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByUpdate, CollectionGuid));
 				DatabaseAPI.ExecuteNonQuery(String.Format(SQLStrings.sql_exec_spTrendPatchComplianceByUpdate, CollectionGuid));
 				Altiris.NS.Logging.EventLog.ReportInfo("...collect Compliance by Update data done.");
 			} catch (Exception e3) {

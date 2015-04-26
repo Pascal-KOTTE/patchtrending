@@ -63,8 +63,8 @@ namespace Symantec.CWoC.APIWrappers
                 ++Counters.SqlQueries;
 				Counters.SqlRows += t.Rows.Count;
 				
-				// Logger.Log(sqlStatement);
-				// Logger.Log(String.Format("SQL result set contained {0} rows.", t.Rows.Count.ToString()));
+				Altiris.NS.Logging.EventLog.ReportVerbose(sqlStatement);
+				Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("SQL result set contained {0} rows.", t.Rows.Count.ToString()));
                 return t;
             } catch {
                 throw new Exception("Failed to execute SQL command \n'" + sqlStatement + "'.");
