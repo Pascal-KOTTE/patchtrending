@@ -46,6 +46,7 @@ namespace Symantec.CWoC.PatchTrending {
 			} else {
 				try {
 					using (StreamReader reader = new StreamReader("SiteConfig.txt")) {
+						string meta_index = "<h2><ul>";
 						while (!reader.EndOfStream) {
 							string line = reader.ReadLine();
 							if (line.StartsWith("#") || line.Length == 0) {
@@ -66,14 +67,22 @@ namespace Symantec.CWoC.PatchTrending {
 							if (enabled == "1") {								
 								SiteBuilder builder = new SiteBuilder(write_all, collection_guid, site_name);
 								rc = builder.Build(filename);
+								
+								// Add to meta-index file
+								meta_index += String.Format("<li><a href='{0}'>{1}</a></li>", site_name, site_description);
 							}
+						}
+						meta_index += "</ul></h2>";
+						Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("Saving data to file {0}:\n{1}", ("meta-index.html").ToLower(), meta_index));
+						using (StreamWriter outfile = new StreamWriter("meta-index.html")) {
+							outfile.Write(meta_index);
 						}
 					}
 				} catch {
 				}
 			}
 			// Keep the process running for a few seconds to ensure all event logging is completed.
-			System.Threading.Thread.Sleep(5000);
+			System.Threading.Thread.Sleep(20000);
 			return rc;
         }
     }
@@ -313,7 +322,7 @@ namespace Symantec.CWoC.PatchTrending {
             }
         }
 
-        private void SaveToFile(string filepath, string data) {
+        public void SaveToFile(string filepath, string data) {
 			Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("Saving data to file {0}:\n{1}", (SitePath + filepath).ToLower(), data));
             using (StreamWriter outfile = new StreamWriter(SitePath + filepath.ToLower())) {
                 outfile.Write(data);
