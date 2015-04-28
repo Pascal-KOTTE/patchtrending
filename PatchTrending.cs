@@ -727,7 +727,9 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 		
 		public static int Upgrade (string collectionguid) {
-			UpgradeInactiveComputerTable(collectionguid);
+			UpgradeInactiveComputerTables(collectionguid);
+			UpgradeComplianceByComputerTable(collectionguid);
+			UpgradeComplianceByUpdateTable(collectionguid);
 			string site_config_file = "siteconfig.txt";
 			if (!File.Exists(site_config_file)) {
 				string siteconfig = "1, " + collectionguid + ", UpgradedSite, Patch trending site updated automatically, 1";
@@ -738,97 +740,62 @@ namespace Symantec.CWoC.PatchTrending {
 			}
 			return 0;
 		}
-
-		private static void UpgradeInactiveComputerTable(string collectionguid) {
-			string [] tables = new string [] {"TREND_InactiveComputerCounts", "TREND_InactiveComputer_Current", "TREND_InactiveComputer_Previous"};
 		
-			string table = tables[0];
+		public static int UpgradeTable(string table, string sql_procedure, string sql_restore) {
+			string sql_backup = String.Format(sql_sprename, table, table + backup_table_suffix);
+			Altiris.NS.Logging.EventLog.ReportVerbose(sql_backup);
+			//Console.WriteLine(sql_backup);
+			//DatabaseAPI.ExecuteNonquery(sql_backup);
+
+			Altiris.NS.Logging.EventLog.ReportVerbose(sql_procedure);
+			//Console.WriteLine(sql_procedure);
+			//DatabaseAPI.ExecuteNonquery(sql_procedure);
+
+			Altiris.NS.Logging.EventLog.ReportVerbose(sql_restore);
+			//Console.WriteLine(sql_restore);
+			//DatabaseAPI.ExecuteScalar(sql_restore);
+
+			return 0;
+		}
+
+		private static void UpgradeInactiveComputerTables(string collectionguid) {
+			string table = "TREND_InactiveComputerCounts";
 			if (NeedUpgrade(table)) {
-				string table_backup = table + "_old";
-				string sql_rename = String.Format("exec sp_rename @objname='{0}', @newname='{1}'", table, table_backup);
-				Altiris.NS.Logging.EventLog.ReportVerbose(sql_rename);
-//				DatabaseAPI.ExecuteNonQuery(sql_rename);
-
-				string sql_exec = String.Format("exec spTrendInactiveComputers @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'");
-				Altiris.NS.Logging.EventLog.ReportVerbose(sql_exec);
-//				DatabaseAPI.ExecuteNonquery(sql_exec);
-
-				string sql_restore = @"
-insert TREND_InactiveComputerCounts ([_exec_id],	[timestamp], [collectionguid], [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)])
-select [_exec_id],	[timestamp], '{0}' as CollectionGuid, [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)] from {1}
-";
-				Altiris.NS.Logging.EventLog.ReportVerbose(String.Format(sql_restore, collectionguid, table_backup));
-//				DatabaseAPI.ExecuteScalar(sql_restore);
+				string sql_restore = String.Format(sql_restore_inactivecount, collectionguid, table + backup_table_suffix);
+				UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
 			}
 			
-			table = tables[1];
+			table = "TREND_InactiveComputer_Current";
 			if (NeedUpgrade(table)) {
-				string table_backup = table + "_old";
-				string sql_rename = String.Format("exec sp_rename @objname='{0}', @newname='{1}'", table, table_backup);
-				Altiris.NS.Logging.EventLog.ReportVerbose(sql_rename);
-//				DatabaseAPI.ExecuteNonQuery(sql_rename);
-
-				string sql_exec = String.Format("exec spTrendInactiveComputers @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'");
-				Altiris.NS.Logging.EventLog.ReportVerbose(sql_exec);
-//				DatabaseAPI.ExecuteNonquery(sql_exec);
-
-				string sql_restore = @"
-insert TREND_InactiveComputer_current (guid, collectionguid, _exectime) select guid, '{0}' as CollectionGuid, [_exectime]from {1}
-";
-				Altiris.NS.Logging.EventLog.ReportVerbose(String.Format(sql_restore, collectionguid, table_backup));
-//				DatabaseAPI.ExecuteScalar(sql_restore);
+				string sql_restore = String.Format(sql_restore_inactivecurrent, collectionguid, table + backup_table_suffix);
+				UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
 			}
-			table = tables[2];
+			table = "TREND_InactiveComputer_Previous";
 			if (NeedUpgrade(table)) {
-				string table_backup = table + "_old";
-				string sql_rename = String.Format("exec sp_rename @objname='{0}', @newname='{1}'", table, table_backup);
-				Altiris.NS.Logging.EventLog.ReportVerbose(sql_rename);
-//				DatabaseAPI.ExecuteNonQuery(sql_rename);
-
-				string sql_exec = String.Format("exec spTrendInactiveComputers @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'");
-				Altiris.NS.Logging.EventLog.ReportVerbose(sql_exec);
-//				DatabaseAPI.ExecuteNonquery(sql_exec);
-
-				string sql_restore = @"insert TREND_InactiveComputer_old (guid, collectionguid, _exectime) select guid, '{0}' as CollectionGuid, [_exectime]from {1}
-";
-				Altiris.NS.Logging.EventLog.ReportVerbose(String.Format(sql_restore, collectionguid, table_backup));
-//				DatabaseAPI.ExecuteScalar(sql_restore);
+				string sql_restore = String.Format(sql_restore_inactiveprevious, collectionguid, table + backup_table_suffix);
+				UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
 			}
 		}
 		
 		private static void UpgradeComplianceByComputerTable(string collectionguid) {
-		
-		}
-		
-		private static void UpgradeComplianceByUpdateTable(string collection){
-		
-		}
-		
-		
-		private static string GetProcedureFromTableName(string table) {
-			switch (table) {
-				case "TREND_InactiveComputerCounts":
-					return "spTrendInactiveComputers";
-				case "TREND_InactiveComputer_Current": 
-					return "spTrendInactiveComputers";
-				case "TREND_InactiveComputer_Previous":
-					return "spTrendInactiveComputers";
-				case "TREND_WindowsCompliance_ByComputer":
-					return "spTrendPatchComplianceByComputer";
-				case "TREND_WindowsCompliance_ByUpdate":
-					return "spTrendPatchComplianceByUpdate";
+			string table = "TREND_WindowsCompliance_ByComputer";
+			if (NeedUpgrade(table)) {
+				string sql_restore = String.Format(sql_restore_computercompliance, collectionguid, table + backup_table_suffix);
+				UpgradeTable(table, sql_exec_computercompliance, sql_restore);
 			}
-			return "";
 		}
 		
-		private static string [] tables = new string [] {
-			  "TREND_InactiveComputerCounts"
-			, "TREND_InactiveComputer_Current"
-			, "TREND_InactiveComputer_Previous"
-			, "TREND_WindowsCompliance_ByComputer"
-			, "TREND_WindowsCompliance_ByUpdate"
-		};
+		private static void UpgradeComplianceByUpdateTable(string collectionguid){
+			string table = "TREND_WindowsCompliance_ByUpdate";
+			if (NeedUpgrade(table)) {
+				string sql_restore = String.Format(sql_restore_updatecompliance, collectionguid, table + backup_table_suffix);
+				UpgradeTable(table, sql_exec_updatecompliance, sql_restore);
+			}
 
+		}
+
+		#region SQL queries
+		private static readonly string backup_table_suffix = "_old";
 		private static string sql_base = @"
 	select 0
 	  from sys.objects so
@@ -837,13 +804,24 @@ insert TREND_InactiveComputer_current (guid, collectionguid, _exectime) select g
 	 where so.name = '{0}'
 	   and sc.name = 'CollectionGuid'
 		";
+		
+		private static string sql_sprename = "exec sp_rename @objname='{0}', @newname='{1}'";
+
+		private static string sql_restore_inactivecurrent = @"insert TREND_InactiveComputer_current (guid, collectionguid, _exec_time) select guid, '{0}' as CollectionGuid, [_exectime] from {1}";
+		private static string sql_restore_inactiveprevious = @"insert TREND_InactiveComputer_previous (guid, collectionguid, _exec_time) select guid, '{0}' as CollectionGuid, [_exectime] from {1}";
+		private static string sql_restore_inactivecount = @"
+insert TREND_InactiveComputerCounts ([_exec_id], [timestamp], [collectionguid], [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)])
+select [_exec_id], [timestamp], '{0}' as CollectionGuid, [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)] from {1}";
+		private static string sql_restore_computercompliance =@"
+insert TREND_WindowsCompliance_ByComputer ([_Exec_id], [CollectionGuid], [_Exec_time], [Percent], [Computer #], [% of Total])
+select [_Exec_id], '{0}' as 'CollectionGuid', [_Exec_time], [Percent], [Computer #], [% of Total] from {1}";
+		private static string sql_restore_updatecompliance = @"
+insert TREND_WindowsCompliance_ByUpdate ([_Exec_id], [CollectionGuid], [_Exec_time], [Bulletin], [UPDATE], [Severity], [Installed], [Applicable], [DistributionStatus])
+select [_Exec_id], '{0}' as 'CollectionGuid', [_Exec_time], [Bulletin], [UPDATE], [Severity], [Installed], [Applicable], [DistributionStatus] from {1}";
+
+		private static string sql_exec_inactivecomputers = "exec spTrendInactiveComputers @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'";
+		private static string sql_exec_computercompliance = "exec spTrendPatchComplianceByComputer @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'";
+		private static string sql_exec_updatecompliance = "exec spTrendPatchComplianceByUpdate @CollectionGuid = '6410074B-FFFF-FFFF-FFFF-0C8803328385'";
+		#endregion
 	}
 }
-
-/*
-
-exec sp_rename @objname='TREND_InactiveComputerCounts', @newname='TREND_InactiveComputerCounts_old'
-exec spTrendInactiveComputers @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'
-insert TREND_InactiveComputerCounts ([_exec_id],	[timestamp], [collectionguid], [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)])
-select [_exec_id],	[timestamp], '01024956-1000-4cdb-b452-7db0cff541b6' as CollectionGuid, [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)] from  TREND_InactiveComputerCounts
-*/
