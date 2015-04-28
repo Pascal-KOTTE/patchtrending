@@ -76,6 +76,8 @@ namespace Symantec.CWoC.APIWrappers
                 SqlCommand sql_cmd = context.CreateCommand() as SqlCommand;
                 sql_cmd.CommandText = sqlStatement;
 
+				Altiris.NS.Logging.EventLog.ReportVerbose(sqlStatement);
+
                 return sql_cmd.ExecuteNonQuery();
             }
         }
@@ -86,6 +88,8 @@ namespace Symantec.CWoC.APIWrappers
 
                 cmd.CommandText = sqlStatement;
                 Object result = cmd.ExecuteScalar();
+
+				Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("SQL Query = \n{0}\nResults = {1}.", sqlStatement, Convert.ToInt32(result).ToString()));
 
                 return Convert.ToInt32(result);
             }
