@@ -35,14 +35,19 @@ namespace Symantec.CWoC.PatchTrending {
 						upgrade_guid = args[0].Substring("/upgrade=".Length);
 					}
 					return Upgrader.Upgrade(upgrade_guid);
-                } else if (args[0] == "/?" || args[0].ToLower() == "--help") {
+				} else if (args[0].StartsWith("/version")) {
+					Console.WriteLine("PatchTrending version 16");
+					return 0;
+				} else if (args[0].ToLower() == "/buildsite") {
+					// Continue to build.
+                } else if (args[0].ToLower() == "/?" || args[0].ToLower() == "/help"){
                     Console.WriteLine(StaticStrings.CLIHelp);
                     return 0;
-                } else {
-                    filename = args[0];
-                    Altiris.NS.Logging.EventLog.ReportInfo("The custom site-layout file " + filename + " will be used.");
-                }
-            }
+				}
+            } else {
+                    Console.WriteLine(StaticStrings.CLIHelp);
+                    return 0;				
+			}
 
 			int rc = 0;
 			if (!Upgrader.NeedUpgrade()) {
