@@ -29,7 +29,7 @@ begin
 		[_Exec_time] [datetime] NOT NULL,
 		[Percent] int NOT NULL,
 		[Computer #] int NOT NULL,
-		[% of Total] money NOT NULL,
+		[% of Total] money NOT NULL
 	) ON [PRIMARY]
 
 	CREATE UNIQUE CLUSTERED INDEX [IX_TREND_WindowsCompliance_ByComputer] ON [dbo].[TREND_WindowsCompliance_ByComputer] 

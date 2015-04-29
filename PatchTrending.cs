@@ -40,52 +40,59 @@ namespace Symantec.CWoC.PatchTrending {
                     return 0;
                 } else {
                     filename = args[0];
-                     Altiris.NS.Logging.EventLog.ReportInfo("The custom site-layout file " + filename + " will be used.");
+                    Altiris.NS.Logging.EventLog.ReportInfo("The custom site-layout file " + filename + " will be used.");
                 }
             }
 
 			int rc = 0;
-			if (!File.Exists("SiteConfig.txt") || runforcollection) {
-				Altiris.NS.Logging.EventLog.ReportInfo("SiteConfig.txt file does not exist or PatchTrending invoke with /collectionguid.");
-				SiteBuilder builder = new SiteBuilder(write_all, collectionguid);
-				rc = builder.Build(filename);
-			} else {
-				try {
-					using (StreamReader reader = new StreamReader("SiteConfig.txt")) {
-						string meta_index = "<h2><ul>";
-						while (!reader.EndOfStream) {
-							string line = reader.ReadLine();
-							if (line.StartsWith("#") || line.Length == 0) {
-								continue;
-							}
-							Altiris.NS.Logging.EventLog.ReportInfo(String.Format("Processing SiteConfig.txt line '{0}'.", line));
-							string [] d = line.Split(',');
-							string enabled = d[0].Trim();
-							string collection_guid = d[1].Trim();
-							string site_name = d[2].Trim();
-							string site_description = d[3].Trim();
-							string default_site = d[4].Trim();
-							
-							if (default_site == "1") {
-								site_name = "."; // Write the default site to root
-							}
-							
-							if (enabled == "1") {								
-								SiteBuilder builder = new SiteBuilder(write_all, collection_guid, site_name);
-								rc = builder.Build(filename);
+			if (!Upgrader.NeedUpgrade()) {
+				if (!File.Exists("SiteConfig.txt") || runforcollection) {
+					Altiris.NS.Logging.EventLog.ReportInfo("SiteConfig.txt file does not exist or PatchTrending invoke with /collectionguid.");
+					SiteBuilder builder = new SiteBuilder(write_all, collectionguid);
+					rc = builder.Build(filename);
+				} else {
+					try {
+						using (StreamReader reader = new StreamReader("SiteConfig.txt")) {
+							string meta_index = "<h2><ul>";
+							while (!reader.EndOfStream) {
+								string line = reader.ReadLine();
+								if (line.StartsWith("#") || line.Length == 0) {
+									continue;
+								}
+								Altiris.NS.Logging.EventLog.ReportInfo(String.Format("Processing SiteConfig.txt line '{0}'.", line));
+								string [] d = line.Split(',');
+								string enabled = d[0].Trim();
+								string collection_guid = d[1].Trim();
+								string site_name = d[2].Trim();
+								string site_description = d[3].Trim();
+								string default_site = d[4].Trim();
 								
-								// Add to meta-index file
-								meta_index += String.Format("<li><a href='{0}'>{1}</a></li>", site_name, site_description);
+								if (default_site == "1") {
+									site_name = "."; // Write the default site to root
+								}
+								
+								if (enabled == "1") {								
+									SiteBuilder builder = new SiteBuilder(write_all, collection_guid, site_name);
+									rc = builder.Build(filename);
+									
+									// Add to meta-index file
+									meta_index += String.Format("<li><a href='{0}'>{1}</a></li>", site_name, site_description);
+								}
+							}
+							meta_index += "</ul></h2>";
+							Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("Saving data to file {0}:\n{1}", ("meta-index.html").ToLower(), meta_index));
+							using (StreamWriter outfile = new StreamWriter("meta-index.html")) {
+								outfile.Write(meta_index);
 							}
 						}
-						meta_index += "</ul></h2>";
-						Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("Saving data to file {0}:\n{1}", ("meta-index.html").ToLower(), meta_index));
-						using (StreamWriter outfile = new StreamWriter("meta-index.html")) {
-							outfile.Write(meta_index);
-						}
+					} catch {
 					}
-				} catch {
 				}
+			} else {
+				string n = "The database is not ready to run PatchTrending version 16. Please run the tool with the /upgrade command line first.";
+				Console.WriteLine(n);
+				Altiris.NS.Logging.EventLog.ReportInfo(n);
+				return -1;
 			}
 			// Keep the process running for a few seconds to ensure all event logging is completed.
 			System.Threading.Thread.Sleep(20000);
@@ -715,13 +722,21 @@ namespace Symantec.CWoC.PatchTrending {
 	}
 
 	class Upgrader {
+		public static bool NeedUpgrade() {
+			foreach (string table in tables) {
+				if (NeedUpgrade(table))
+					return true;
+			}
+			return false;
+		}
 		public static bool NeedUpgrade (string table_name){
 			// Check whether we need to upgrade the DB Table
-			if (DatabaseAPI.ExecuteScalar(String.Format(sql_base, table_name)) == 0){
+			object o = DatabaseAPI.ExecuteScalar(String.Format(sql_base, table_name));
+			if (o.ToString() != "1"){
 				Altiris.NS.Logging.EventLog.ReportInfo(String.Format("Table {0} needs to be upgraded.", table_name));
 				return true;
 			} else {
-				Altiris.NS.Logging.EventLog.ReportVerbose(String.Format("Table {0} does not need to be upgraded.", table_name));
+				Altiris.NS.Logging.EventLog.ReportInfo(String.Format("Table {0} does not need to be upgraded.", table_name));
 				return false;
 			}
 		}
@@ -745,15 +760,15 @@ namespace Symantec.CWoC.PatchTrending {
 			string sql_backup = String.Format(sql_sprename, table, table + backup_table_suffix);
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_backup);
 			//Console.WriteLine(sql_backup);
-			//DatabaseAPI.ExecuteNonquery(sql_backup);
+			DatabaseAPI.ExecuteNonQuery(sql_backup);
 
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_procedure);
 			//Console.WriteLine(sql_procedure);
-			//DatabaseAPI.ExecuteNonquery(sql_procedure);
+			DatabaseAPI.ExecuteNonQuery(sql_procedure);
 
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_restore);
 			//Console.WriteLine(sql_restore);
-			//DatabaseAPI.ExecuteScalar(sql_restore);
+			DatabaseAPI.ExecuteNonQuery(sql_restore);
 
 			return 0;
 		}
@@ -797,7 +812,7 @@ namespace Symantec.CWoC.PatchTrending {
 		#region SQL queries
 		private static readonly string backup_table_suffix = "_old";
 		private static string sql_base = @"
-	select 0
+	select 1
 	  from sys.objects so
 	  join sys.columns sc
 		on so.object_id = sc.object_id
@@ -823,5 +838,13 @@ select [_Exec_id], '{0}' as 'CollectionGuid', [_Exec_time], [Bulletin], [UPDATE]
 		private static string sql_exec_computercompliance = "exec spTrendPatchComplianceByComputer @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'";
 		private static string sql_exec_updatecompliance = "exec spTrendPatchComplianceByUpdate @CollectionGuid = '6410074B-FFFF-FFFF-FFFF-0C8803328385'";
 		#endregion
+		
+		private static string [] tables = new string [] {
+			  "TREND_InactiveComputerCounts"
+			, "TREND_InactiveComputer_Current"
+			, "TREND_InactiveComputer_Previous"
+			, "TREND_WindowsCompliance_ByComputer"
+			, "TREND_WindowsCompliance_ByUpdate"
+		};
 	}
 }
