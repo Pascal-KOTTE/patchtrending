@@ -12,7 +12,7 @@ namespace Symantec.CWoC.PatchTrending {
 
         static int Main(string[] args) {
 
-            string filename = "site-layout.txt";
+            string filename = "SiteLayout.txt";
             bool write_all = false;
 			bool runforcollection = false;
 			string collectionguid = "01024956-1000-4cdb-b452-7db0cff541b6";
