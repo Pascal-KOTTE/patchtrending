@@ -935,10 +935,19 @@ Welcome to the Patch Trending SiteBuilder. Here are the currently supported
 command line arguments:
 
 	/buildsite
+	
+		This option is required if you want the tool to output the Patch 
+		Trending site, based on the SiteConfig.txt file.
 
 	/collectdata
 	
+		Run the trending procedure for each site that is enabled on the
+		siteconfig.txt.
+	
 	/collectionguid=<guid>
+	
+		When this option is used the Patch Trending site will be generated for
+		the provided collection guid.
 
     /install
 
@@ -946,6 +955,9 @@ command line arguments:
         Symantec CMDB and terminates.
 
 	/upgrade
+
+		Upgrade the database objects and _data_ from the previous schema to the
+		latest version which adds a CollectionGuid in various location.
 
     /write-all
 
