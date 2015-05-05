@@ -796,40 +796,48 @@ namespace Symantec.CWoC.PatchTrending {
 			return 0;
 		}
 
-		private static void UpgradeInactiveComputerTables(string collectionguid) {
+		private static int UpgradeInactiveComputerTables(string collectionguid) {
 			string table = "TREND_InactiveComputerCounts";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_inactivecount, collectionguid, table + backup_table_suffix);
-				UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				int rc = UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				if (rc!= 0)
+					return rc;
 			}
 			
 			table = "TREND_InactiveComputer_Current";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_inactivecurrent, collectionguid, table + backup_table_suffix);
-				UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				int rc = UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				if (rc!= 0)
+					return rc;
 			}
 			table = "TREND_InactiveComputer_Previous";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_inactiveprevious, collectionguid, table + backup_table_suffix);
-				UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				int rc = UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				if (rc!= 0)
+					return rc;
 			}
+			return 0;
 		}
 		
-		private static void UpgradeComplianceByComputerTable(string collectionguid) {
+		private static int UpgradeComplianceByComputerTable(string collectionguid) {
 			string table = "TREND_WindowsCompliance_ByComputer";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_computercompliance, collectionguid, table + backup_table_suffix);
-				UpgradeTable(table, sql_exec_computercompliance, sql_restore);
+				return UpgradeTable(table, sql_exec_computercompliance, sql_restore);
 			}
+			return 0;
 		}
 		
-		private static void UpgradeComplianceByUpdateTable(string collectionguid){
+		private static int UpgradeComplianceByUpdateTable(string collectionguid){
 			string table = "TREND_WindowsCompliance_ByUpdate";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_updatecompliance, collectionguid, table + backup_table_suffix);
-				UpgradeTable(table, sql_exec_updatecompliance, sql_restore);
+				return UpgradeTable(table, sql_exec_updatecompliance, sql_restore);
 			}
-
+			return 0;
 		}
 
 		#region SQL queries
