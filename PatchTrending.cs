@@ -747,9 +747,12 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 		
 		public static int Upgrade (string collectionguid) {
-			UpgradeInactiveComputerTables(collectionguid);
-			UpgradeComplianceByComputerTable(collectionguid);
-			UpgradeComplianceByUpdateTable(collectionguid);
+			if (UpgradeInactiveComputerTables(collectionguid) != 0)
+				return -1;
+			if (UpgradeComplianceByComputerTable(collectionguid) != 0)
+				return -1;
+			if (UpgradeComplianceByUpdateTable(collectionguid) != 0)
+				return -1;
 			string site_config_file = "siteconfig.txt";
 			if (!File.Exists(site_config_file)) {
 				string siteconfig = "1, " + collectionguid + ", UpgradedSite, Patch trending site updated automatically, 1";
@@ -764,16 +767,31 @@ namespace Symantec.CWoC.PatchTrending {
 		public static int UpgradeTable(string table, string sql_procedure, string sql_restore) {
 			string sql_backup = String.Format(sql_sprename, table, table + backup_table_suffix);
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_backup);
-			//Console.WriteLine(sql_backup);
-			DatabaseAPI.ExecuteNonQuery(sql_backup);
+			try {
+				DatabaseAPI.ExecuteNonQuery(sql_backup);
+			} catch (Exception e){
+				Altiris.NS.Logging.EventLog.ReportError("Failed running SQL backup procedure:\n" + sql_backup );
+				Altiris.NS.Logging.EventLog.ReportError(e.Message);
+				return -1;
+			}
 
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_procedure);
-			//Console.WriteLine(sql_procedure);
-			DatabaseAPI.ExecuteNonQuery(sql_procedure);
+			try {
+				DatabaseAPI.ExecuteNonQuery(sql_procedure);
+			} catch (Exception e){
+				Altiris.NS.Logging.EventLog.ReportError("Failed running SQL upgrade procedure:\n" + sql_procedure );
+				Altiris.NS.Logging.EventLog.ReportError(e.Message);
+				return -1;
+			}
 
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_restore);
-			//Console.WriteLine(sql_restore);
-			DatabaseAPI.ExecuteNonQuery(sql_restore);
+			try {
+				DatabaseAPI.ExecuteNonQuery(sql_restore);
+			} catch (Exception e){
+				Altiris.NS.Logging.EventLog.ReportError("Failed running SQL data restore procedure:\n" + sql_restore );
+				Altiris.NS.Logging.EventLog.ReportError(e.Message);
+				return -1;
+			}
 
 			return 0;
 		}
