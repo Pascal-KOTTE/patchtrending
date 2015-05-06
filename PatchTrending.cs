@@ -43,6 +43,9 @@ namespace Symantec.CWoC.PatchTrending {
                 } else if (args[0].ToLower() == "/?" || args[0].ToLower() == "/help"){
                     Console.WriteLine(StaticStrings.CLIHelp);
                     return 0;
+				} else {
+					Console.WriteLine(StaticStrings.CLIHelp);
+                    return -1;
 				}
             } else {
                     Console.WriteLine(StaticStrings.CLIHelp);
