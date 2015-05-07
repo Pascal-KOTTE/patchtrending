@@ -647,21 +647,20 @@ namespace Symantec.CWoC.PatchTrending {
 
     class Installer {
         public static int install() {
-
             try {
-                 Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendPatchComplianceByUpdate...\t");
-                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByUpdate);
-                 Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendPatchComplianceByUpdate...\t");
-                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByUpdate);
-                 Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendPatchComplianceByComputer...\t");
-                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByComputer);
-                 Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendPatchComplianceByComputer...\t");
-                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByComputer);
-                 Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendInactiveComputers...\t\t");
-                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendInactiveComputers);
-                 Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendInactiveComputers...\t\t");
-                DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendInactiveComputers);
-                 Altiris.NS.Logging.EventLog.ReportInfo("All Done!");
+				Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendPatchComplianceByUpdate...\t");
+				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByUpdate);
+				Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendPatchComplianceByUpdate...\t");
+				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByUpdate);
+				Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendPatchComplianceByComputer...\t");
+				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByComputer);
+				Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendPatchComplianceByComputer...\t");
+				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByComputer);
+				Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendInactiveComputers...\t\t");
+				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendInactiveComputers);
+				Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendInactiveComputers...\t\t");
+				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendInactiveComputers);
+				Altiris.NS.Logging.EventLog.ReportInfo("All Done!");
             } catch (Exception e){
                 Console.WriteLine(e.Message);
 				Altiris.NS.Logging.EventLog.ReportError(e.Message);
@@ -767,13 +766,22 @@ namespace Symantec.CWoC.PatchTrending {
 			return 0;
 		}
 		
-		public static int UpgradeTable(string table, string sql_procedure, string sql_restore) {
+		public static int UpgradeTable(string table, string sql_installsp, string sql_procedure, string sql_restore) {
 			string sql_backup = String.Format(sql_sprename, table, table + backup_table_suffix);
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_backup);
 			try {
 				DatabaseAPI.ExecuteNonQuery(sql_backup);
 			} catch (Exception e){
 				Altiris.NS.Logging.EventLog.ReportError("Failed running SQL backup procedure:\n" + sql_backup );
+				Altiris.NS.Logging.EventLog.ReportError(e.Message);
+				return -1;
+			}
+
+			Altiris.NS.Logging.EventLog.ReportVerbose(sql_installsp);
+			try {
+				DatabaseAPI.ExecuteNonQuery(sql_installsp);
+			} catch (Exception e){
+				Altiris.NS.Logging.EventLog.ReportError("Failed running stored procedure install:\n" + sql_installsp );
 				Altiris.NS.Logging.EventLog.ReportError(e.Message);
 				return -1;
 			}
@@ -803,7 +811,8 @@ namespace Symantec.CWoC.PatchTrending {
 			string table = "TREND_InactiveComputerCounts";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_inactivecount, collectionguid, table + backup_table_suffix);
-				int rc = UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				string sp_install = SQLStrings.sql_drop_spTrendInactiveComputers + ";\nGO\n" + SQLStrings.sql_spTrendInactiveComputers;
+				int rc = UpgradeTable(table, sp_install, sql_exec_inactivecomputers, sql_restore);
 				if (rc!= 0)
 					return rc;
 			}
@@ -811,14 +820,16 @@ namespace Symantec.CWoC.PatchTrending {
 			table = "TREND_InactiveComputer_Current";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_inactivecurrent, collectionguid, table + backup_table_suffix);
-				int rc = UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				string sp_install = SQLStrings.sql_drop_spTrendInactiveComputers + ";\nGO\n" + SQLStrings.sql_spTrendInactiveComputers;
+				int rc = UpgradeTable(table, sp_install, sql_exec_inactivecomputers, sql_restore);
 				if (rc!= 0)
 					return rc;
 			}
 			table = "TREND_InactiveComputer_Previous";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_inactiveprevious, collectionguid, table + backup_table_suffix);
-				int rc = UpgradeTable(table, sql_exec_inactivecomputers, sql_restore);
+				string sp_install = SQLStrings.sql_drop_spTrendInactiveComputers + ";\nGO\n" + SQLStrings.sql_spTrendInactiveComputers;
+				int rc = UpgradeTable(table, sp_install, sql_exec_inactivecomputers, sql_restore);
 				if (rc!= 0)
 					return rc;
 			}
@@ -829,7 +840,8 @@ namespace Symantec.CWoC.PatchTrending {
 			string table = "TREND_WindowsCompliance_ByComputer";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_computercompliance, collectionguid, table + backup_table_suffix);
-				return UpgradeTable(table, sql_exec_computercompliance, sql_restore);
+				string sp_install = SQLStrings.sql_drop_spTrendPatchComplianceByComputer + ";\nGO\n" + SQLStrings.sql_spTrendPatchComplianceByComputer;
+				return UpgradeTable(table, sp_install, sql_exec_computercompliance, sql_restore);
 			}
 			return 0;
 		}
@@ -838,7 +850,8 @@ namespace Symantec.CWoC.PatchTrending {
 			string table = "TREND_WindowsCompliance_ByUpdate";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_updatecompliance, collectionguid, table + backup_table_suffix);
-				return UpgradeTable(table, sql_exec_updatecompliance, sql_restore);
+				string sp_install = SQLStrings.sql_drop_spTrendPatchComplianceByUpdate + ";\nGO\n" + SQLStrings.sql_spTrendPatchComplianceByUpdate;
+				return UpgradeTable(table, sp_install, sql_exec_updatecompliance, sql_restore);
 			}
 			return 0;
 		}

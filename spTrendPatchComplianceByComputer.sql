@@ -1,4 +1,16 @@
-exec spTrendPatchComplianceByComputer
+BEGIN TRAN
+
+GO
+-- Rename the table to backup the data
+exec sp_rename 'TREND_WindowsCompliance_ByComputer', 'TREND_WindowsCompliance_ByComputer_old'
+
+GO
+
+-- Drop the procedure and execute it to create the tables
+drop procedure spTrendPatchComplianceByComputer
+
+GO
+
 create procedure spTrendPatchComplianceByComputer
 	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6',
 	@force as int = 0
@@ -78,3 +90,14 @@ end
    from TREND_WindowsCompliance_ByComputer
   where _exec_id = (select max(_exec_id) from TREND_WindowsCompliance_ByComputer where collectionguid = @collectionguid)
     and collectionguid = @collectionguid
+
+GO
+
+exec spTrendPatchComplianceByComputer @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'
+
+GO
+
+insert TREND_WindowsCompliance_ByComputer ([_Exec_id], [CollectionGuid], [_Exec_time], [Percent], [Computer #], [% of Total])
+select [_Exec_id], '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as 'CollectionGuid', [_Exec_time], [Percent], [Computer #], [% of Total] from TREND_WindowsCompliance_ByComputer_old
+
+

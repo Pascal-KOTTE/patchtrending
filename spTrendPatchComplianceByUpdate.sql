@@ -1,3 +1,15 @@
+BEGIN TRAN
+
+GO
+
+exec sp_rename 'TREND_WindowsCompliance_ByUpdate', 'TREND_WindowsCompliance_ByUpdate_old'
+
+GO
+
+drop procedure spTrendPatchComplianceByUpdate
+
+GO
+
 create procedure spTrendPatchComplianceByUpdate
 
 	@collectionguid as uniqueidentifier = '01024956-1000-4cdb-b452-7db0cff541b6',
@@ -108,3 +120,14 @@ select max(_exec_id), @CollectionGuid, max(_exec_time), Bulletin, '-- ALL --' as
 --having sum(applicable) >%ApplicableThreshold%
 --   and cast(cast(sum(installed) as float) / cast(sum(applicable) as float) * 100 as money) < %ComplianceThreshold%
  order by Bulletin,[update]
+
+GO
+
+exec spTrendPatchComplianceByUpdate '01024956-1000-4cdb-bbbb-7db0cff541b6'
+
+GO
+
+insert TREND_WindowsCompliance_ByUpdate ([_Exec_id], [CollectionGuid], [_Exec_time], [Bulletin], [UPDATE], [Severity], [Installed], [Applicable], [DistributionStatus])
+select [_Exec_id], '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as 'CollectionGuid', [_Exec_time], [Bulletin], [UPDATE], [Severity], [Installed], [Applicable], [DistributionStatus] from TREND_WindowsCompliance_ByUpdate_old
+
+commit

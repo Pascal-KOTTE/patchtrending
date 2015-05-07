@@ -1,0 +1,5 @@
+select * into zBackup_TREND_InactiveComputer_Current from TREND_InactiveComputer_Current
+select * into zBackup_TREND_InactiveComputer_Previous from TREND_InactiveComputer_Previous
+select * into zBackup_TREND_InactiveComputerCounts from TREND_InactiveComputerCounts
+select * into zBackup_TREND_WindowsCompliance_ByComputer from TREND_WindowsCompliance_ByComputer
+select * into zBackup_TREND_WindowsCompliance_ByUpdate from TREND_WindowsCompliance_ByUpdate

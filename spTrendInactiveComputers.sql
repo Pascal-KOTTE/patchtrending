@@ -1,4 +1,19 @@
-alter procedure spTrendInactiveComputers
+begin tran
+
+GO
+
+exec sp_rename 'TREND_InactiveComputerCounts', 'TREND_InactiveComputerCounts_old'
+exec sp_rename 'TREND_InactiveComputer_Current', 'TREND_InactiveComputer_Current_old'
+exec sp_rename 'TREND_InactiveComputer_Previous', 'TREND_InactiveComputer_Previous_old'
+
+
+GO
+
+drop procedure spTrendInactiveComputers
+
+GO
+
+create procedure spTrendInactiveComputers
 	@force as int = 0,
 	@collectionguid as uniqueidentifier = '01024956-1000-4CDB-B452-7DB0CFF541B6'
 as
@@ -137,3 +152,18 @@ end
 
 select * from TREND_InactiveComputerCounts where CollectionGuid = @collectionguid  order by _exec_id desc
 
+GO
+
+exec spTrendInactiveComputers @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'
+
+GO
+
+insert TREND_InactiveComputer_current (guid, collectionguid, _exec_time) select guid, '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as CollectionGuid, [_exec_time] from TREND_InactiveComputer_current_old
+insert TREND_InactiveComputer_previous (guid, collectionguid, _exec_time) select guid, '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as CollectionGuid, [_exec_time] from TREND_InactiveComputer_previous_old
+
+insert TREND_InactiveComputerCounts ([_exec_id], [timestamp], [collectionguid], [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)])
+select [_exec_id], [timestamp], '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as CollectionGuid, [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)] from TREND_InactiveComputerCounts_old
+
+GO
+
+commit tran
