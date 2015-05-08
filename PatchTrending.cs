@@ -16,7 +16,7 @@ namespace Symantec.CWoC.PatchTrending {
 			bool write_all = false;
 			bool runforcollection = false;
 			string collectionguid = "01024956-1000-4cdb-b452-7db0cff541b6";
-			
+
 			 Altiris.NS.Logging.EventLog.ReportInfo("PatchTrending is starting...");
 
 			if (args.Length > 0) {
@@ -49,7 +49,7 @@ namespace Symantec.CWoC.PatchTrending {
 				}
 			} else {
 					Console.WriteLine(StaticStrings.CLIHelp);
-					return 0;				
+					return 0;
 			}
 
 			int rc = 0;
@@ -74,15 +74,15 @@ namespace Symantec.CWoC.PatchTrending {
 								string site_name = d[2].Trim();
 								string site_description = d[3].Trim();
 								string default_site = d[4].Trim();
-								
+
 								if (default_site == "1") {
 									site_name = "."; // Write the default site to root
 								}
-								
-								if (enabled == "1") {								
+
+								if (enabled == "1") {
 									SiteBuilder builder = new SiteBuilder(write_all, collection_guid, site_name);
 									rc = builder.Build(filename);
-									
+
 									// Add to meta-index file
 									meta_index += String.Format("<li><a href='{0}'>{1}</a></li>", site_name, site_description);
 								}
@@ -275,12 +275,12 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 
 		private void GenerateIndex(ref StringBuilder b, bool byComputer, bool inactive) {
-			
+
 			StringBuilder p = new StringBuilder();
 			p.Append(StaticStrings.html_Landing);
 
 			GeneratePcComplPages(byComputer, inactive);
-			
+
 			if (byComputer == true && inactive == false) {
 				p.Append(StaticStrings.html_PcCompl_div);
 			} else if (byComputer == false && inactive == true) {
@@ -466,15 +466,15 @@ namespace Symantec.CWoC.PatchTrending {
 					string bulletin_stats = "";
 
 					GetBulletinData(ref bulletin_compliance, ref bulletin_stats, entry);
-					
+
 					SaveToFile("javascript\\" + curr_bulletin + "_0.js", bulletin_compliance);
 					SaveToFile("javascript\\" + curr_bulletin + "_1.js", bulletin_stats);
 				} else {
 					string update_compliance = "";
 					string update_stats = "";
-					
+
 					GetUpdateData(ref update_compliance, ref update_stats, entry, bulletin);
-					
+
 					SaveToFile("javascript\\" + curr_bulletin + "_0.js", update_compliance);
 					SaveToFile("javascript\\" + curr_bulletin + "_1.js", update_stats);
 				}
@@ -687,7 +687,7 @@ namespace Symantec.CWoC.PatchTrending {
 								continue;
 							}
 							string [] d = line.Split(',');
-							
+
 							if (d[0] == "1") {
 								CollectData(d[1].ToString().Trim());
 							}
@@ -695,12 +695,12 @@ namespace Symantec.CWoC.PatchTrending {
 						}
 					}
 				} catch {
-					
+
 				}
 			}
 			return 0;
 		}
-		
+
 		private static void CollectData(String CollectionGuid) {
 			string msg = String.Format("Running data collection for Collection Guid {0}", CollectionGuid);
 			Altiris.NS.Logging.EventLog.ReportInfo(msg);
@@ -747,7 +747,7 @@ namespace Symantec.CWoC.PatchTrending {
 				return false;
 			}
 		}
-		
+
 		public static int Upgrade (string collectionguid) {
 			Altiris.NS.Logging.EventLog.ReportInfo("Beginning upgrade transaction");
 			DatabaseAPI.ExecuteNonQuery("begin tran");
@@ -769,13 +769,13 @@ namespace Symantec.CWoC.PatchTrending {
 				}
 			}
 			return 0;
-			
+
 rollback:
 			Altiris.NS.Logging.EventLog.ReportError("Upgrade failed... rolling back trnasaction now.");
 			DatabaseAPI.ExecuteNonQuery("rollback");
 			return -1;
 		}
-		
+
 		public static int UpgradeTable(string table, string sql_installsp, string sql_procedure, string sql_restore) {
 			string sql_backup = String.Format(sql_sprename, table, table + backup_table_suffix);
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_backup);
@@ -826,7 +826,7 @@ rollback:
 				if (rc!= 0)
 					return rc;
 			}
-			
+
 			table = "TREND_InactiveComputer_Current";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_inactivecurrent, collectionguid, table + backup_table_suffix);
@@ -845,7 +845,7 @@ rollback:
 			}
 			return 0;
 		}
-		
+
 		private static int UpgradeComplianceByComputerTable(string collectionguid) {
 			string table = "TREND_WindowsCompliance_ByComputer";
 			if (NeedUpgrade(table)) {
@@ -855,7 +855,7 @@ rollback:
 			}
 			return 0;
 		}
-		
+
 		private static int UpgradeComplianceByUpdateTable(string collectionguid){
 			string table = "TREND_WindowsCompliance_ByUpdate";
 			if (NeedUpgrade(table)) {
@@ -876,7 +876,7 @@ rollback:
 	 where so.name = '{0}'
 	   and sc.name = 'CollectionGuid'
 		";
-		
+
 		private static string sql_sprename = "exec sp_rename @objname='{0}', @newname='{1}'";
 
 		private static string sql_restore_inactivecurrent = @"insert TREND_InactiveComputer_current (guid, collectionguid, _exec_time) select guid, '{0}' as CollectionGuid, [_exectime] from {1}";
@@ -895,7 +895,7 @@ select [_Exec_id], '{0}' as 'CollectionGuid', [_Exec_time], [Bulletin], [UPDATE]
 		private static string sql_exec_computercompliance = "exec spTrendPatchComplianceByComputer @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'";
 		private static string sql_exec_updatecompliance = "exec spTrendPatchComplianceByUpdate @CollectionGuid = '6410074B-FFFF-FFFF-FFFF-0C8803328385'";
 		#endregion
-		
+
 		private static string [] tables = new string [] {
 			  "TREND_InactiveComputerCounts"
 			, "TREND_InactiveComputer_Current"
