@@ -934,57 +934,57 @@ Note: <b><i>Notes!</i></b>
 Welcome to the Patch Trending SiteBuilder. Here are the currently supported
 command line arguments:
 
-	/buildsite
-	
-		This option is required if you want the tool to output the Patch 
-		Trending site, based on the SiteConfig.txt file.
+    /buildsite
+    
+        This option is required if you want the tool to output the Patch 
+        Trending site, based on the SiteConfig.txt file.
 
-	/collectdata
-	
-		Run the trending procedure for each site that is enabled on the
-		siteconfig.txt.
-	
-	/collectionguid=<guid>
-	
-		When this option is used the Patch Trending site will be generated for
-		the provided collection guid.
+    /collectdata
+    
+        Run the trending procedure for each site that is enabled on the
+        siteconfig.txt.
+    
+    /collectionguid=<guid>
+    
+        When this option is used the Patch Trending site will be generated for
+        the provided collection guid.
 
     /install
 
         This command line installs the pre-requisite stored procedures to the
         Symantec CMDB and terminates.
 
-	/upgrade
+    /upgrade
 
-		Upgrade the database objects and _data_ from the previous schema to the
-		latest version which adds a CollectionGuid in various location.
+        Upgrade the database objects and _data_ from the previous schema to the
+        latest version which adds a CollectionGuid in various location.
 
     /write-all
 
         This command line will prevent static html and css  files from being 
         written to disk. This allows you to customise the site look and feel
         to better suit your needs.
-		
+        
 
     /? || /help
 
         This command line prints out this help message and terminates.
 
-	/version
+    /version
 
 Configuration files names and content:
 
-	SiteConfig.txt:
-	
-		The site config file contains a a list of line seperated sites that
-		should be built upon /buildsite invocations, or for which data will be 
-		collected upon /collectdata invocations.
-		
-		The root site is created under the working directory, whilst other
-		sites will be created in a directory named using the site-name field.
-		
-		Here's a sample file with explanation of each fields:
-		
+    SiteConfig.txt:
+    
+        The site config file contains a a list of line seperated sites that
+        should be built upon /buildsite invocations, or for which data will be 
+        collected upon /collectdata invocations.
+        
+        The root site is created under the working directory, whilst other
+        sites will be created in a directory named using the site-name field.
+        
+        Here's a sample file with explanation of each fields:
+        
 # Lines started with # are not process
 #
 # Fields descripitions:
@@ -997,8 +997,8 @@ Configuration files names and content:
 1, 66167acf-2484-4244-92fb-a2ffaa5aebd2, Windows-Desktops, All Windows Desktops, 0
 0, 3faa8b67-250b-42ad-8186-fe2f49a9e707, Windows-64-bit, All Windows 64-bit systems, 0
 1, 8afb27a1-5dc7-43ca-a88c-8391252f5b7b, Windows-32-bit, All Windows 32-bit systems, 0
-	
-	SiteLayout.txt:
+    
+    SiteLayout.txt:
 
 microsoft-2015-april, ms15-031, ms15-032, ms15-033, ms15-034, ms15-035, ms15-036, ms15-037, ms15-038, ms15-039, ms15-040, ms15-041, ms15-042
 microsoft-2015-march, ms15-018, ms15-019, ms15-020, ms15-021, ms15-022, ms15-023, ms15-024, ms15-025, ms15-026, ms15-027, ms15-028, ms15-029, ms15-030
