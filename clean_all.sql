@@ -4,6 +4,18 @@ drop table TREND_InactiveComputer_Previous
 drop table TREND_WindowsCompliance_ByComputer
 drop table TREND_WindowsCompliance_ByUpdate
 
+drop table TREND_InactiveComputerCounts_old
+drop table TREND_InactiveComputer_Current_old
+drop table TREND_InactiveComputer_Previous_old
+drop table TREND_WindowsCompliance_ByComputer_old
+drop table TREND_WindowsCompliance_ByUpdate_old
+
+
 drop procedure spTrendInactiveComputers
 drop procedure spTrendPatchComplianceByComputer
 drop procedure spTrendPatchComplianceByUpdate
+
+
+exec spTrendInactiveComputers @force = 1
+exec spTrendPatchComplianceByComputer @force = 1
+exec spTrendPatchComplianceByUpdate @force = 1
