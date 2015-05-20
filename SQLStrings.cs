@@ -223,7 +223,7 @@ exec spPMWindows_ComplianceByComputer
 							@pCulture = 'en-gb',
 							@TrusteeScope = '{2e1f478a-4986-4223-9d1e-b5920a63ab41}',
 							@VendorGuid	= '00000000-0000-0000-0000-000000000000',
-							@CategoryGuid = '-0000-0000-0000-000000000000'
+							@CategoryGuid = '00000000-0000-0000-0000-000000000000'
 
 declare @id as int
 	set @id = (select MAX(_exec_id) from TREND_WindowsCompliance_ByComputer where collectionguid = @collectionguid)
