@@ -21,7 +21,7 @@ namespace Symantec.CWoC.PatchTrending {
 
 			if (args.Length > 0) {
 				if (args[0].ToLower() == "/install") {
-					return Installer.install();
+					return Installer.install("ALL");
 				} else if (args[0].ToLower() == "/write-all") {
 					write_all = true;
 				} else if (args[0].ToLower().StartsWith("/collectionguid=")) {
@@ -646,21 +646,27 @@ namespace Symantec.CWoC.PatchTrending {
 	}
 
 	class Installer {
-		public static int install() {
+		public static int install(string spname) {
 			try {
-				Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendPatchComplianceByUpdate...\t");
-				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByUpdate);
-				Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendPatchComplianceByUpdate...\t");
-				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByUpdate);
-				Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendPatchComplianceByComputer...\t");
-				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByComputer);
-				Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendPatchComplianceByComputer...\t");
-				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByComputer);
-				Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendInactiveComputers...\t\t");
-				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendInactiveComputers);
-				Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendInactiveComputers...\t\t");
-				DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendInactiveComputers);
-				Altiris.NS.Logging.EventLog.ReportInfo("All Done!");
+				if (spname == "spTrendPatchComplianceByUpdate" || spname == "ALL") {
+					Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendPatchComplianceByUpdate...\t");
+					DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByUpdate);
+					Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendPatchComplianceByUpdate...\t");
+					DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByUpdate);
+				}
+				if (spname == "spTrendPatchComplianceByComputer" || spname == "ALL") {
+					Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendPatchComplianceByComputer...\t");
+					DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendPatchComplianceByComputer);
+					Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendPatchComplianceByComputer...\t");
+					DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendPatchComplianceByComputer);
+				}
+				if (spname == "spTrendInactiveComputers" || spname == "ALL") {
+					Altiris.NS.Logging.EventLog.ReportInfo("Dropping spTrendInactiveComputers...\t\t");
+					DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_drop_spTrendInactiveComputers);
+					Altiris.NS.Logging.EventLog.ReportInfo("Installing spTrendInactiveComputers...\t\t");
+					DatabaseAPI.ExecuteNonQuery(SQLStrings.sql_spTrendInactiveComputers);
+					Altiris.NS.Logging.EventLog.ReportInfo("All Done!");
+				}
 			} catch (Exception e){
 				Console.WriteLine(e.Message);
 				Altiris.NS.Logging.EventLog.ReportError(e.Message);
@@ -736,6 +742,7 @@ namespace Symantec.CWoC.PatchTrending {
 			}
 			return false;
 		}
+
 		public static bool NeedUpgrade (string table_name){
 			// Check whether we need to upgrade the DB Table
 			object o = DatabaseAPI.ExecuteScalar(String.Format(sql_base, table_name));
@@ -749,17 +756,13 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 
 		public static int Upgrade (string collectionguid) {
-			Altiris.NS.Logging.EventLog.ReportInfo("Beginning upgrade transaction");
-			DatabaseAPI.ExecuteNonQuery("begin tran");
-			if (UpgradeInactiveComputerTables(collectionguid) != 0) 
-				goto rollback;
 			if (UpgradeComplianceByComputerTable(collectionguid) != 0)
 				goto rollback;
 			if (UpgradeComplianceByUpdateTable(collectionguid) != 0)
 				goto rollback;
+			if (UpgradeInactiveComputerTables(collectionguid) != 0) 
+				goto rollback;
 
-			Altiris.NS.Logging.EventLog.ReportInfo("Upgrade completed succesfully. Committing transaction now.");
-			DatabaseAPI.ExecuteNonQuery("commit");
 			string site_config_file = "siteconfig.txt";
 			if (!File.Exists(site_config_file)) {
 				string siteconfig = "1, " + collectionguid + ", UpgradedSite, Patch trending site updated automatically, 1";
@@ -771,30 +774,35 @@ namespace Symantec.CWoC.PatchTrending {
 			return 0;
 
 rollback:
-			Altiris.NS.Logging.EventLog.ReportError("Upgrade failed... rolling back trnasaction now.");
-			DatabaseAPI.ExecuteNonQuery("rollback");
+			Altiris.NS.Logging.EventLog.ReportError("Upgrade failed...");
 			return -1;
 		}
 
-		public static int UpgradeTable(string table, string sql_installsp, string sql_procedure, string sql_restore) {
+		public static int UpgradeTable(string table, string install_spname, string sql_procedure, string sql_restore) {
 			string sql_backup = String.Format(sql_sprename, table, table + backup_table_suffix);
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_backup);
 			try {
 				DatabaseAPI.ExecuteNonQuery(sql_backup);
-			} catch (Exception e){
-				Altiris.NS.Logging.EventLog.ReportError("Failed running SQL backup procedure:\n" + sql_backup );
+			} catch {
+			}
+			
+			// The previous SQL may return an exception and work properly - let's handle this
+			try {
+				string sql = String.Format("select 1 from sys.objects where type = 'u' and name = '{0}'", table + backup_table_suffix);
+				int result = (int)DatabaseAPI.ExecuteScalar(sql);
+				if (result != 1)
+					return -1;
+			} catch (Exception e) {
+				Altiris.NS.Logging.EventLog.ReportError("Failed to sp_rename stored procedure...");
 				Altiris.NS.Logging.EventLog.ReportError(e.Message);
-				return -1;
+				return -1;				
 			}
 
-			Altiris.NS.Logging.EventLog.ReportVerbose(sql_installsp);
-			try {
-				DatabaseAPI.ExecuteNonQuery(sql_installsp);
-			} catch (Exception e){
-				Altiris.NS.Logging.EventLog.ReportError("Failed running stored procedure install:\n" + sql_installsp );
-				Altiris.NS.Logging.EventLog.ReportError(e.Message);
+			Altiris.NS.Logging.EventLog.ReportVerbose(install_spname);
+			int done = Installer.install(install_spname);
+			
+			if (done != 0)
 				return -1;
-			}
 
 			Altiris.NS.Logging.EventLog.ReportVerbose(sql_procedure);
 			try {
@@ -818,30 +826,71 @@ rollback:
 		}
 
 		private static int UpgradeInactiveComputerTables(string collectionguid) {
-			string table = "TREND_InactiveComputerCounts";
-			if (NeedUpgrade(table)) {
-				string sql_restore = String.Format(sql_restore_inactivecount, collectionguid, table + backup_table_suffix);
-				string sp_install = SQLStrings.sql_drop_spTrendInactiveComputers + ";\nGO\n" + SQLStrings.sql_spTrendInactiveComputers;
-				int rc = UpgradeTable(table, sp_install, sql_exec_inactivecomputers, sql_restore);
-				if (rc!= 0)
-					return rc;
-			}
+			string [] tables = { "TREND_InactiveComputerCounts", "TREND_InactiveComputer_Current", "TREND_InactiveComputer_Previous" };
 
-			table = "TREND_InactiveComputer_Current";
-			if (NeedUpgrade(table)) {
-				string sql_restore = String.Format(sql_restore_inactivecurrent, collectionguid, table + backup_table_suffix);
-				string sp_install = SQLStrings.sql_drop_spTrendInactiveComputers + ";\nGO\n" + SQLStrings.sql_spTrendInactiveComputers;
-				int rc = UpgradeTable(table, sp_install, sql_exec_inactivecomputers, sql_restore);
-				if (rc!= 0)
-					return rc;
-			}
-			table = "TREND_InactiveComputer_Previous";
-			if (NeedUpgrade(table)) {
-				string sql_restore = String.Format(sql_restore_inactiveprevious, collectionguid, table + backup_table_suffix);
-				string sp_install = SQLStrings.sql_drop_spTrendInactiveComputers + ";\nGO\n" + SQLStrings.sql_spTrendInactiveComputers;
-				int rc = UpgradeTable(table, sp_install, sql_exec_inactivecomputers, sql_restore);
-				if (rc!= 0)
-					return rc;
+			// All 3 tables have to be backed up at once
+			if (NeedUpgrade(tables[0]) && NeedUpgrade(tables[1]) && NeedUpgrade(tables[2])) {	
+				foreach (string table in tables) {
+					string sql_backup = String.Format(sql_sprename, table, table + backup_table_suffix);
+					Altiris.NS.Logging.EventLog.ReportVerbose(sql_backup);
+					try {
+						DatabaseAPI.ExecuteNonQuery(sql_backup);
+					} catch {
+					}
+					
+					// The previous SQL may return an exception and work properly - let's handle this
+					try {
+						string sql = String.Format("select 1 from sys.objects where type = 'u' and name = '{0}'", table + backup_table_suffix);
+						int result = (int)DatabaseAPI.ExecuteScalar(sql);
+						if (result != 1)
+							return -1;
+					} catch (Exception e) {
+						Altiris.NS.Logging.EventLog.ReportError("Failed to sp_rename stored procedure...");
+						Altiris.NS.Logging.EventLog.ReportError(e.Message);
+						return -1;				
+					}
+				}
+				int sp_install = Installer.install("spTrendInactiveComputers");
+				if (sp_install != 0)
+					return sp_install;
+				
+				try {
+				DatabaseAPI.ExecuteNonQuery(sql_exec_inactivecomputers);
+				} catch (Exception e) {
+						Altiris.NS.Logging.EventLog.ReportError("Failed to run spTrendInactiveComputers...");
+						Altiris.NS.Logging.EventLog.ReportError(e.Message);
+
+				}
+				
+				string sql_restore = String.Format(sql_restore_inactivecount, collectionguid, "TREND_InactiveComputerCounts" + backup_table_suffix);
+
+				Altiris.NS.Logging.EventLog.ReportVerbose(sql_restore);
+				try {
+					DatabaseAPI.ExecuteNonQuery(sql_restore);
+				} catch (Exception e){
+					Altiris.NS.Logging.EventLog.ReportError("Failed running SQL data restore procedure:\n" + sql_restore );
+					Altiris.NS.Logging.EventLog.ReportError(e.Message);
+					return -1;
+				}
+				sql_restore = String.Format(sql_restore_inactiveprevious, collectionguid, "TREND_InactiveComputer_previous" + backup_table_suffix);
+				Altiris.NS.Logging.EventLog.ReportVerbose(sql_restore);
+				try {
+					DatabaseAPI.ExecuteNonQuery(sql_restore);
+				} catch (Exception e){
+					Altiris.NS.Logging.EventLog.ReportError("Failed running SQL data restore procedure:\n" + sql_restore );
+					Altiris.NS.Logging.EventLog.ReportError(e.Message);
+					return -1;
+				}
+				sql_restore = String.Format(sql_restore_inactivecurrent, collectionguid, "TREND_InactiveComputer_current" + backup_table_suffix);
+				Altiris.NS.Logging.EventLog.ReportVerbose(sql_restore);
+				try {
+					DatabaseAPI.ExecuteNonQuery(sql_restore);
+				} catch (Exception e){
+					Altiris.NS.Logging.EventLog.ReportError("Failed running SQL data restore procedure:\n" + sql_restore );
+					Altiris.NS.Logging.EventLog.ReportError(e.Message);
+					return -1;
+				}
+
 			}
 			return 0;
 		}
@@ -850,8 +899,7 @@ rollback:
 			string table = "TREND_WindowsCompliance_ByComputer";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_computercompliance, collectionguid, table + backup_table_suffix);
-				string sp_install = SQLStrings.sql_drop_spTrendPatchComplianceByComputer + ";\nGO\n" + SQLStrings.sql_spTrendPatchComplianceByComputer;
-				return UpgradeTable(table, sp_install, sql_exec_computercompliance, sql_restore);
+				return UpgradeTable(table, "spTrendPatchComplianceByComputer", sql_exec_computercompliance, sql_restore);
 			}
 			return 0;
 		}
@@ -860,8 +908,7 @@ rollback:
 			string table = "TREND_WindowsCompliance_ByUpdate";
 			if (NeedUpgrade(table)) {
 				string sql_restore = String.Format(sql_restore_updatecompliance, collectionguid, table + backup_table_suffix);
-				string sp_install = SQLStrings.sql_drop_spTrendPatchComplianceByUpdate + ";\nGO\n" + SQLStrings.sql_spTrendPatchComplianceByUpdate;
-				return UpgradeTable(table, sp_install, sql_exec_updatecompliance, sql_restore);
+				return UpgradeTable(table, "spTrendPatchComplianceByUpdate", sql_exec_updatecompliance, sql_restore);
 			}
 			return 0;
 		}
@@ -879,8 +926,8 @@ rollback:
 
 		private static string sql_sprename = "exec sp_rename @objname='{0}', @newname='{1}'";
 
-		private static string sql_restore_inactivecurrent = @"insert TREND_InactiveComputer_current (guid, collectionguid, _exec_time) select guid, '{0}' as CollectionGuid, [_exectime] from {1}";
-		private static string sql_restore_inactiveprevious = @"insert TREND_InactiveComputer_previous (guid, collectionguid, _exec_time) select guid, '{0}' as CollectionGuid, [_exectime] from {1}";
+		private static string sql_restore_inactivecurrent = @"insert TREND_InactiveComputer_current (guid, collectionguid, _exec_time) select guid, '{0}' as CollectionGuid, [_exec_time] from {1}";
+		private static string sql_restore_inactiveprevious = @"insert TREND_InactiveComputer_previous (guid, collectionguid, _exec_time) select guid, '{0}' as CollectionGuid, [_exec_time] from {1}";
 		private static string sql_restore_inactivecount = @"
 insert TREND_InactiveComputerCounts ([_exec_id], [timestamp], [collectionguid], [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)])
 select [_exec_id], [timestamp], '{0}' as CollectionGuid, [Managed machines], [Inactive computers (7 days)], [New Inactive computers], [New Active computers], [Inactive computers (17 days)] from {1}";
