@@ -20,32 +20,46 @@ namespace Symantec.CWoC.PatchTrending {
 			 Altiris.NS.Logging.EventLog.ReportInfo("PatchTrending is starting...");
 
 			if (args.Length > 0) {
-				if (args[0].ToLower() == "/install") {
-					return Installer.install("ALL");
-				} else if (args[0].ToLower() == "/write-all") {
-					write_all = true;
-				} else if (args[0].ToLower().StartsWith("/collectionguid=")) {
-					collectionguid = args[0].Substring("/collectionguid=".Length);
-					runforcollection = true;
-				} else if (args[0].ToLower() == "/collectdata") {
-					return DataCollector.CollectData();
-				} else if (args[0].StartsWith("/upgrade")) {
-					string upgrade_guid = collectionguid;
-					if (args[0].Contains("=")) {
-						upgrade_guid = args[0].Substring("/upgrade=".Length);
+				bool build = false;
+				foreach (string arg in args) {
+					string _arg = arg.ToLower();
+					if (_arg.ToLower() == "/install") {
+						return Installer.install("ALL");
+					} 
+					if (_arg.ToLower() == "/write-all") {
+						write_all = true;
+						continue;
 					}
-					return Upgrader.Upgrade(upgrade_guid);
-				} else if (args[0].StartsWith("/version")) {
-					Console.WriteLine("PatchTrending version 16");
-					return 0;
-				} else if (args[0].ToLower() == "/buildsite") {
-					// Continue to build.
-				} else if (args[0].ToLower() == "/?" || args[0].ToLower() == "/help"){
-					Console.WriteLine(StaticStrings.CLIHelp);
-					return 0;
-				} else {
-					Console.WriteLine(StaticStrings.CLIHelp);
-					return -1;
+					if (_arg.ToLower().StartsWith("/collectionguid=")) {
+						collectionguid = _arg.Substring("/collectionguid=".Length);
+						runforcollection = true;
+					}
+					if (_arg.ToLower() == "/collectdata") {
+						return DataCollector.CollectData();
+					} 
+					if (_arg.StartsWith("/upgrade")) {
+						string upgrade_guid = collectionguid;
+						if (_arg.Contains("=")) {
+							upgrade_guid = _arg.Substring("/upgrade=".Length);
+						}
+						return Upgrader.Upgrade(upgrade_guid);
+					} 
+					if (_arg.StartsWith("/version")) {
+						Console.WriteLine("PatchTrending version 16");
+						return 0;
+					} 
+					if (_arg.ToLower() == "/buildsite") {
+						build = true;
+						continue;
+					} 
+					if (_arg.ToLower() == "/?" || _arg.ToLower() == "/help"){
+						Console.WriteLine(StaticStrings.CLIHelp);
+						return 0;
+					}
+				}
+				if (!build) {
+						Console.WriteLine(StaticStrings.CLIHelp);
+						return -1;
 				}
 			} else {
 					Console.WriteLine(StaticStrings.CLIHelp);
@@ -103,7 +117,7 @@ namespace Symantec.CWoC.PatchTrending {
 				return -1;
 			}
 			// Keep the process running for a few seconds to ensure all event logging is completed.
-			System.Threading.Thread.Sleep(20000);
+			System.Threading.Thread.Sleep(5000);
 			return rc;
 		}
 	}

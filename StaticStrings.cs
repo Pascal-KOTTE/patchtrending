@@ -82,6 +82,19 @@ namespace Symantec.CWoC.PatchTrending {
     <h2 style='text-align: center;'>Global Compliance view</h2>
     <hr/>
     <table style='width: 80%'>
+		<tr>
+			<td>
+				Filter by severity:
+				<select id='severity_selector' onchange='reload_charts()'>
+					<option value='global'>-- All --</option>
+					<option value='critical'>Critical</option>
+					<option value='important'>Important</option>
+					<option value='moderate'>Moderate</option>
+					<option value='unclassified'>Unclassified</option>
+				</select>
+			</td>
+			<td> </td>
+		</tr>
         <tr>
             <td style='text-align: center'><b>Installed versus Applicable</b></td> 
             <td style='text-align: center'><b>Compliance status in %</b></td>
@@ -98,6 +111,14 @@ namespace Symantec.CWoC.PatchTrending {
 	<script type='text/javascript' src='javascript/helper.js'></script>
 	<script type='text/javascript' src='javascript/global_0.js'></script>
 	<script type='text/javascript' src='javascript/global_1.js'></script>
+	<script type='text/javascript' src='javascript/critical_0.js'></script>
+	<script type='text/javascript' src='javascript/critical_1.js'></script>
+	<script type='text/javascript' src='javascript/important_0.js'></script>
+	<script type='text/javascript' src='javascript/important_1.js'></script>
+	<script type='text/javascript' src='javascript/moderate_0.js'></script>
+	<script type='text/javascript' src='javascript/moderate_1.js'></script>
+	<script type='text/javascript' src='javascript/unclassified_0.js'></script>
+	<script type='text/javascript' src='javascript/unclassified_1.js'></script>
     <script type='text/javascript' src='javascript/pccompl.js'></script>
     <script type='text/javascript' src='javascript/pccompl_full.js'></script>
     <script type='text/javascript' src='javascript/inactive_computers.js'></script>
@@ -126,6 +147,12 @@ namespace Symantec.CWoC.PatchTrending {
 				}
 
 			});	
+		}
+
+		var severity = 'global';
+		function reload_charts() {
+			severity = document.getElementById('severity_selector').value;
+			drawComplianceCharts();
 		}
     </script>
     <script type='text/javascript'>
@@ -366,7 +393,21 @@ namespace Symantec.CWoC.PatchTrending {
                 var g_inactive = new google.visualization.LineChart(document.getElementById('inactivepc_div'));
                 g_inactive.draw(d_inactive, {colors: ['orange', 'red', 'royalblue', 'forestgreen']});	
             }
-        }";
+        }
+        function drawComplianceCharts() {
+	        var options1 = { title: '', vAxis: { maxValue : 100, minValue : 0 }};
+	        var options2 = { title: '', vAxis: { minValue : 0 }};
+
+			global_0 = formatDateString(global_0, 0);
+		    var d_global_0 = google.visualization.arrayToDataTable(window[severity + '_0']);
+		    var g_global_0 = new google.visualization.LineChart(document.getElementById('global_div_0'));
+		    g_global_0.draw(d_global_0, options1);
+
+			global_1 = formatDateString(global_1, 0);
+		    var d_global_1 = google.visualization.arrayToDataTable(window[severity + '_1']);
+		    var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
+		    g_global_1.draw(d_global_1, options2);
+        }		";
         #endregion
 
         #region Get Bulletin (html + js page)
