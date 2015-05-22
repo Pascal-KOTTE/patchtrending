@@ -398,10 +398,25 @@ select max(_exec_id), @CollectionGuid, max(_exec_time), Bulletin, '-- ALL --' as
                 having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate where collectionguid = '{0}')
                  order by MIN(_exec_time) desc, Bulletin desc
 		";
+        public static string sql_get_all_bulletins_bysev = @"
+               -- Get all tracked bulletins
+                select bulletin, severity
+                  from TREND_WindowsCompliance_ByUpdate
+				 where collectionguid = '{0}' and severity = '{1}'
+                 group by bulletin
+                having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate where collectionguid = '{0}')
+                 order by MIN(_exec_time) desc, Bulletin desc
+		";
         public static string sql_get_global_compliance_data = @"
                          select Convert(varchar, max(_Exec_time), 127) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
                            from TREND_WindowsCompliance_ByUpdate
 						  where collectionguid = '{0}'
+                          group by _Exec_id order by date
+		";
+        public static string sql_get_global_compliance_data_bysev = @"
+                         select Convert(varchar, max(_Exec_time), 127) as 'Date', SUM(installed) as 'Installed', SUM(Applicable) as 'Applicable'
+                           from TREND_WindowsCompliance_ByUpdate
+						  where collectionguid = '{0}' and severity = '{1}'
                           group by _Exec_id order by date
 		";
         public static string sql_get_topn_vulnerable = @"
@@ -470,6 +485,15 @@ select max(_exec_id), @CollectionGuid, max(_exec_time), Bulletin, '-- ALL --' as
                    from TREND_WindowsCompliance_ByUpdate
                   where bulletin = '{0}'
 				    and collectionguid = '{1}'
+				  group by [update]
+				 having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate where CollectionGuid = '{1}')
+        ";
+        public static string sql_get_updates_bybulletin_bysev = @"
+                 select distinct([UPDATE])
+                   from TREND_WindowsCompliance_ByUpdate
+                  where bulletin = '{0}'
+				    and collectionguid = '{1}'
+					and severity = '{2}'
 				  group by [update]
 				 having MAX(_exec_id) = (select MAX(_exec_id) from TREND_WindowsCompliance_ByUpdate where CollectionGuid = '{1}')
         ";

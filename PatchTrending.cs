@@ -110,7 +110,7 @@ namespace Symantec.CWoC.PatchTrending {
 
 	class SiteBuilder {
 
-		public string version = "version 16";
+		public string version = "version 17";
 		private StringBuilder SiteMap;
 		private bool WriteAll;
 		private string CollectionGuid;
@@ -128,8 +128,9 @@ namespace Symantec.CWoC.PatchTrending {
 			SiteMap = new StringBuilder();
 
 			// Make sure we have the required sub-folder for javascript files
-			if (!Directory.Exists("javascript")) {
-				Directory.CreateDirectory("javascript");
+			string js_folder = SitePath + "javascript";
+			if (!Directory.Exists(js_folder)) {
+				Directory.CreateDirectory(js_folder);
 			}
 		}
 
@@ -145,8 +146,9 @@ namespace Symantec.CWoC.PatchTrending {
 			SiteMap = new StringBuilder();
 
 			// Make sure we have the required sub-folder for javascript files
-			if (!Directory.Exists(SitePath + "javascript")) {
-				Directory.CreateDirectory(SitePath + "javascript");
+			string js_folder = SitePath + "javascript";
+			if (!Directory.Exists(js_folder)) {
+				Directory.CreateDirectory(js_folder);
 			}
 		}
 
@@ -180,6 +182,10 @@ namespace Symantec.CWoC.PatchTrending {
 				AddToSiteMap("Home page", "./");
 				AddToSiteMap("Help center", "help.html");
 				AddToSiteMap("Global compliance", "getbulletin.html?global");
+				AddToSiteMap("Critical Severity updates compliance", "getbulletin.html?critical");
+				AddToSiteMap("Important Severity updates compliance", "getbulletin.html?important");
+				AddToSiteMap("Moderate Severity updates compliance", "getbulletin.html?moderate");
+				AddToSiteMap("Unclassified Severity updates compliance", "getbulletin.html?unclassified");
 
 				if (!File.Exists(SitePath + "javascript\\helper.js") || WriteAll) {
 					SaveToFile("javascript\\helper.js", StaticStrings.js_Helper);
@@ -255,6 +261,7 @@ namespace Symantec.CWoC.PatchTrending {
 
 				GenerateIndex(ref index, compliance_by_computer, inactive_computer_trend);
 				GenerateGlobalPage();
+				GenerateSeverityDataPages();
 				Altiris.NS.Logging.EventLog.ReportInfo("Generating updates pages...");
 				GenerateUpdatePages();
 
@@ -266,6 +273,11 @@ namespace Symantec.CWoC.PatchTrending {
 				Altiris.NS.Logging.EventLog.ReportInfo(summary);
 			} else {
 				Altiris.NS.Logging.EventLog.ReportError("We cannot execute anything as the prerequisite table TREND_WindowsCompliance_ByUpdate is missing or no data exists for the given collection guid.");
+			}
+			// Make sure we have an index file - no matter what
+			string index_file = SitePath + "index.html";
+			if(!File.Exists(index_file)) {
+				SaveToFile(index_file, "<h2>No data currently exist for this collection...</h2>");
 			}
 			return 0;
 		}
@@ -507,6 +519,22 @@ namespace Symantec.CWoC.PatchTrending {
 			SaveToFile("javascript\\global_1.js", globalstats);
 
 			Counters.JsPages += 3;
+			
+		}
+
+		private void GenerateSeverityDataPages() {
+			string [] severities = new string [4] {"Critical", "Important", "Moderate", "Unclassified"};
+			foreach (string severity in severities) {
+				string globalcompliance = "";
+				string globalstats = "";
+
+				GetGlobalData_bysev(ref globalcompliance, ref globalstats, severity);
+
+				SaveToFile("javascript\\" + severity + "_0.js", globalcompliance);
+				SaveToFile("javascript\\" + severity + "_1.js", globalstats);
+
+				Counters.JsPages += 2;
+			}
 		}
 
 		private void GenerateBulletinHtml(ref StringBuilder divs, ref StringBuilder jsfiles, string pagename) {
@@ -544,6 +572,14 @@ namespace Symantec.CWoC.PatchTrending {
 
 			string[,] _compliance = GetComplianceFromTable(t);
 			compliance = GetComplianceJSONFromArray(_compliance, "global");
+		}
+
+		private void GetGlobalData_bysev(ref string compliance, ref string data, string severity) {
+			DataTable t = DatabaseAPI.GetTable(String.Format(SQLStrings.sql_get_global_compliance_data_bysev, CollectionGuid, severity));
+			data = GetJSONFromTable(t, severity);
+
+			string[,] _compliance = GetComplianceFromTable(t);
+			compliance = GetComplianceJSONFromArray(_compliance, severity);
 		}
 
 		private string GetComplianceJSONFromArray(string[,] t, string bulletin) {

@@ -139,12 +139,22 @@ namespace Symantec.CWoC.PatchTrending {
 		var msg_c = analyse_pccompl();
 
 		var box = document.getElementById('daily_summary');
-		box.innerHTML += '<hr/><h3>Daily summary</h3>';
-		box.innerHTML += '<p>' + msg_a + '</p>';
-		box.innerHTML += '<p>' + msg_b + '</p>';
-		box.innerHTML += '<p>' + msg_c + '</p>';
+		
+		if (msg_a == '' && msg_b == '' & msg_c == '') {
+			// Cannot generate daily summary data - skip
+		} else {
+			box.innerHTML += '<hr/><h3>Daily summary</h3>';
+			if (msg_a !== '')
+				box.innerHTML += '<p>' + msg_a + '</p>';
+			if (msg_b !== '')
+				box.innerHTML += '<p>' + msg_b + '</p>';
+			if (msg_c != '')
+				box.innerHTML += '<p>' + msg_c + '</p>';
+		}
 
 		function analyse_compliance () {
+			if (typeof global_0 === 'undefined' && global_0.length > 0)
+				return '';
 			var length = global_0.length;
 			var low_point = ['', 100];
 			var high_point = ['', 0];
@@ -192,6 +202,8 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 
 		function analyse_vulnerability () {
+			if (typeof global_1 === 'undefined'&& global_1.length > 0)
+				return '';
 			var length = global_1.length;
 			var low_point = ['', 0, 0, 999999999];
 			var high_point = ['', 0, 0, 0];
@@ -241,6 +253,8 @@ namespace Symantec.CWoC.PatchTrending {
 		}
 
 		function analyse_pccompl () {
+			if (typeof pccompl_full === 'undefined' && pccompl_full.length > 0)
+				return '';
 			var length = pccompl_full.length;
             var compl_all = 0;
 			var compl_top = 0;
@@ -333,8 +347,7 @@ namespace Symantec.CWoC.PatchTrending {
 		    var g_global_1 = new google.visualization.LineChart(document.getElementById('global_div_1'));
 		    g_global_1.draw(d_global_1, options2);
 
-			if (typeof(pccompl) != 'undefined' && pccompl != null) {
-//            if (pccompl.length > 0) {
+			if (typeof(pccompl) !== 'undefined' && pccompl.length > 0) {
 		        var d_pccompl = new google.visualization.DataTable();
                 d_pccompl.addColumn('number', 'Compliance in %');
 		        d_pccompl.addColumn('number');
@@ -348,8 +361,7 @@ namespace Symantec.CWoC.PatchTrending {
                 g_pccompl.draw(d_pccompl, { legend:'none', tooltip: {isHtml: true}} );
             }
 
-			if (typeof(inactive_computers_pc) != 'undefined' && inactive_computers_pc != null) {
-//            if (inactive_computers_pc.length > 0) {
+			if (typeof(inactive_computers_pc) !== 'undefined' && inactive_computers_pc.length > 0) {
                 var d_inactive = google.visualization.arrayToDataTable(formatDateString(inactive_computers_pc, 0));
                 var g_inactive = new google.visualization.LineChart(document.getElementById('inactivepc_div'));
                 g_inactive.draw(d_inactive, {colors: ['orange', 'red', 'royalblue', 'forestgreen']});	
@@ -491,7 +503,17 @@ namespace Symantec.CWoC.PatchTrending {
         //google.setOnLoadCallback(drawVisualization);
 
         var head_link;
-		if (bulletin == 'global'  || bulletin.search(/KB/i) > 1 || bulletin.search(/\.exe/i) > 1 || bulletin.search(/\.msi/i) > 1 || bulletin.search(/\.msp/i) > 1) {
+		if (	
+				   bulletin == 'global'  
+				|| bulletin.search(/KB/i) > 1
+				|| bulletin.search(/\.exe/i) > 1
+				|| bulletin.search(/\.msi/i) > 1
+				|| bulletin.search(/\.msp/i) > 1
+				|| bulletin == 'critical'
+				|| bulletin == 'important'
+				|| bulletin == 'moderate'
+				|| bulletin == 'unclassified'				
+			) {
 			head_link =  bulletin.toUpperCase();
 		} else {
 			head_link =  '<a href=""' + bulletin + '.html"">' + bulletin.toUpperCase() + '</a>';
