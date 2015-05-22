@@ -4,11 +4,11 @@ insert TREND_InactiveComputerCounts ([_exec_id], [timestamp], [collectionguid], 
 
 exec sp_rename @objname='TREND_InactiveComputer_Current', @newname='TREND_InactiveComputer_Current_old'
 exec spTrendInactiveComputers @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'
-insert TREND_InactiveComputer_current (guid, collectionguid, _exec_time) select guid, '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as CollectionGuid, [_exectime] from TREND_InactiveComputer_Current_old
+insert TREND_InactiveComputer_current (guid, collectionguid, _exec_time) select guid, '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as CollectionGuid, [_exec_time] from TREND_InactiveComputer_Current_old
 
 exec sp_rename @objname='TREND_InactiveComputer_Previous', @newname='TREND_InactiveComputer_Previous_old'
 exec spTrendInactiveComputers @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'
-insert TREND_InactiveComputer_previous (guid, collectionguid, _exec_time) select guid, '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as CollectionGuid, [_exectime] from TREND_InactiveComputer_Previous_old
+insert TREND_InactiveComputer_previous (guid, collectionguid, _exec_time) select guid, '311E8DAE-2294-4FF2-B9EF-B3D6A84183CB' as CollectionGuid, [_exec_time] from TREND_InactiveComputer_Previous_old
 
 exec sp_rename @objname='TREND_WindowsCompliance_ByComputer', @newname='TREND_WindowsCompliance_ByComputer_old'
 exec spTrendPatchComplianceByComputer @CollectionGuid='6410074B-FFFF-FFFF-FFFF-0C8803328385'
