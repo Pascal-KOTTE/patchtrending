@@ -45,7 +45,7 @@ namespace Symantec.CWoC.PatchTrending {
 						return Upgrader.Upgrade(upgrade_guid);
 					} 
 					if (_arg.StartsWith("/version")) {
-						Console.WriteLine("PatchTrending version 16");
+						Console.WriteLine("PatchTrending {0}", SiteBuilder.version);
 						return 0;
 					} 
 					if (_arg.ToLower() == "/buildsite") {
@@ -124,7 +124,7 @@ namespace Symantec.CWoC.PatchTrending {
 
 	class SiteBuilder {
 
-		public string version = "version 17";
+		public static string version = "version 17";
 		private StringBuilder SiteMap;
 		private bool WriteAll;
 		private string CollectionGuid;
