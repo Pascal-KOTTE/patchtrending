@@ -745,6 +745,7 @@ namespace Symantec.CWoC.PatchTrending {
 							string [] d = line.Split(',');
 
 							if (d[0] == "1") {
+								Console.WriteLine("Collecting data for site {0}...", d[1].ToString().Trim());
 								CollectData(d[1].ToString().Trim());
 							}
 

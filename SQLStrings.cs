@@ -52,7 +52,7 @@ end
 if ((select MAX(_exec_time) from TREND_InactiveComputer_Current where _exec_time >  dateadd(hour, -23, getdate())) is null) or (@force = 1)
 begin
 	-- STAGE 1: If we have current data, save it in the _previous table
-	if (select count (*) from TREND_InactiveComputer_Current) > 0
+	if (select count (*) from TREND_InactiveComputer_Current where CollectionGuid = @CollectionGuid) > 0
 		begin
 			delete from TREND_InactiveComputer_Previous where CollectionGuid = @CollectionGuid
 			insert TREND_InactiveComputer_Previous (guid, collectionguid, _exec_time)
