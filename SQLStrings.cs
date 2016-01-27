@@ -550,12 +550,14 @@ end
 select Convert(varchar, timestamp, 127), [Inactive computers (7 days)], [Inactive computers (17 days)], [New inactive computers], [New Active Computers]
   from TREND_InactiveComputerCounts
  where CollectionGuid = '{0}'
+   and [Managed machines] > 0 order by _exec_id
  order by _exec_id
 ";
         public static string sql_get_inactive_computer_percent = @"
 select Convert(varchar, timestamp, 127), cast([Inactive computers (7 days)] as money) /  cast([Managed machines] as money) * 100 as '7-days inactive (% of managed)', cast([Inactive computers (17 days)] as money) /  cast([Managed machines] as money) * 100 as '17-days inactive (% of managed)', CAST([New inactive computers] as money) / CAST([Managed machines] AS money) * 100 as '++ (% of managed)', CAST([New active computers] as money) / CAST([Managed machines] as money) * 100 as '-- (% of managed)'
   from TREND_InactiveComputerCounts
  where CollectionGuid = '{0}'
+   and [Managed machines] > 0 order by _exec_id
  order by _exec_id
      ";
 	 
