@@ -724,8 +724,8 @@ function loadJs(filename){
 
 function escapeString(b) {
 	var t = b.replace(/-/g, '_');
-	t = b.replace(/\(/g, '_');
-	t = b.replace(/\)/g, '_');
+	t = t.replace(/\(/g, '_');
+	t = t.replace(/\)/g, '_');
 	return t.replace(/\./g, '_');
 }
 
