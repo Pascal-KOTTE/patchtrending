@@ -490,7 +490,7 @@ namespace Symantec.CWoC.PatchTrending {
 				'hAxis': {'slantedText': false},
 				'vAxis': {'viewWindow': {'min': 0, 'max': 101}},
 				'legend': {'position': 'none'}
-				},
+				}
 			});
 
 			var d_compl = new google.visualization.arrayToDataTable(formatToDate(data_compl, 0));
@@ -530,7 +530,7 @@ namespace Symantec.CWoC.PatchTrending {
 				'hAxis': {'slantedText': false},
 				'vAxis': {'viewWindow': {'min': 0}},
 				'legend': {'position': 'none'}
-				},
+				}
 			});
 
 			var d_vuln = new google.visualization.arrayToDataTable(formatToDate(data_vuln, 0));
